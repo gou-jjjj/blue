@@ -1,0 +1,18 @@
+
+- SET key value [EX seconds] [PX milliseconds] [NX|XX]
+- GET key
+- GETRANGE key start end
+- GETSET key value
+- STRLEN key
+- MGET key [key ...]
+- SETEX key seconds value
+- SETNX key value
+- SETRANGE key offset value
+- INCR key
+- INCRBY key increment
+- INCRBYFLOAT key increment
+- DECR key
+- DECRBY key decrement
+- APPEND key value
+- MSET key value [key value ...]
+- MSETNX key value [key value ...]
