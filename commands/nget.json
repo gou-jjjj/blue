@@ -1,0 +1,8 @@
+{
+  "name": "nget",
+  "summary": "Returns the number value of a key.",
+  "group": "number",
+  "key": "string",
+  "arity": 1,
+  "arguments": []
+}

@@ -1,27 +1,28 @@
 package bsp
 
-import "bytes"
+func NewReq(handle Header) []byte {
+	return AppendDone(NewHeader(handle, 1).Bytes())
+}
 
-func NewBspDataReq(handle Header, key string, value ...[]byte) []byte {
-	buf := bytes.Buffer{}
+func NewReqK(handle Header, key string) []byte {
+	b := NewHeader(handle, 2).Bytes()
+	b = append(AppendSplit(b), []byte(key)...)
+	return AppendDone(b)
 
-	header := NewHeader(handle, int8(len(value))+1)
-	buf.Write(header.Bytes())
-	buf.WriteString(key)
-	buf.WriteByte(Split)
+}
 
+func NewReqKV(handle Header, key string, value string) []byte {
+	b := AppendSplit(NewHeader(handle, 3).Bytes())
+	b = AppendSplit(append(b, []byte(key)...))
+	return AppendDone(append(b, []byte(value)...))
+}
+
+func NewReqKVs(handle Header, key string, value ...string) []byte {
+	b := AppendSplit(NewHeader(handle, uint8(2+len(value))).Bytes())
+	b = AppendSplit(append(b, []byte(key)...))
 	for i := range value {
-		buf.Write(value[i])
-		buf.WriteByte(Split)
+		b = AppendSplit(append(b, []byte(value[i])...))
 	}
 
-	return buf.Bytes()
-}
-
-func NewBspDbReq() {
-
-}
-
-func NewBspSysReq(handle Header) []byte {
-	return NewHeader(handle, 1).Bytes()
+	return AppendDone(b[:len(b)-1])
 }

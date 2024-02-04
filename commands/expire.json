@@ -1,0 +1,9 @@
+{
+  "name": "expire",
+  "summary": "Set a key's time to live in seconds",
+  "group": "db",
+  "arity": 2,
+  "key": "string",
+  "value": "number",
+  "arguments": []
+}

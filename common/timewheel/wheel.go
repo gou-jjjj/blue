@@ -10,11 +10,8 @@ func init() {
 
 // Delay executes job after waiting the given duration
 func Delay(duration time.Duration, key string, job func()) {
-	tw.AddJob(duration, key, job)
-}
-
-func Delete(key string) {
 	tw.RemoveJob(key)
+	tw.AddJob(duration, key, job)
 }
 
 // At executes job at given time

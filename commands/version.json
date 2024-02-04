@@ -1,0 +1,6 @@
+{
+  "name": "version",
+  "summary": "Get the version of the system.",
+  "group": "system",
+  "arguments": []
+}

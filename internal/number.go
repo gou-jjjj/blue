@@ -1,15 +1,15 @@
 package internal
 
 import (
+	"blue/bsp"
 	"blue/datastruct/number"
-	"bsp"
 )
 
 func ExecNumberFunc(db *DB, cmd bsp.BspProto) bsp.Reply {
 	switch cmd.Handle() {
-	case bsp.NumSet:
+	case bsp.NSET:
 		return Set(db, cmd)
-	case bsp.NumGet:
+	case bsp.NGET:
 		return Get(db, cmd)
 	default:
 		return bsp.NewErr(bsp.ErrCommand)

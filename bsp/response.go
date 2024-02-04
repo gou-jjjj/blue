@@ -1,7 +1,7 @@
 package bsp
 
 import (
-	"bsp/common"
+	"blue/common/strbytes"
 )
 
 type Reply interface {
@@ -50,12 +50,12 @@ func NewNum(num any) *NumResp {
 	case uint64:
 		return &NumResp{
 			n:   ReplyNumber,
-			num: common.Uint64ToBytes(num.(uint64)),
+			num: strbytes.Uint64ToBytes(num.(uint64)),
 		}
 	case int64:
 		return &NumResp{
 			n:   ReplyNumber,
-			num: common.Uint64ToBytes(uint64(num.(int64))),
+			num: strbytes.Uint64ToBytes(uint64(num.(int64))),
 		}
 	case []byte:
 		return &NumResp{

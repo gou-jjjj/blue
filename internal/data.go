@@ -1,6 +1,7 @@
 package internal
 
 type DataEntity struct {
-	Val    any
+	Val    []byte
 	Expire uint64
 }
+

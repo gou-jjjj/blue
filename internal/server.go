@@ -22,7 +22,8 @@ const (
 	TimeOut        = 10 * time.Second
 )
 
-type HandlerFunc func(net.Conn)
+
+
 type ConfigFunc func(*Config)
 
 type Config struct {
@@ -31,7 +32,7 @@ type Config struct {
 	Log         *logs.Logger
 	Port        uint16
 	ClientLimit int32
-	HandlerFunc HandlerInter
+	HandlerFunc ServerInter
 }
 
 func (c Config) Addr() string {

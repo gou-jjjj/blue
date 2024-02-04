@@ -2,12 +2,11 @@ package rand
 
 import (
 	"bytes"
-	"math/rand"
 )
 
 const (
 	randStr    = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	randStrLen = len(randStr)
+	randStrLen = uint32(len(randStr))
 )
 
 func RandString(l int) string {
@@ -17,7 +16,7 @@ func RandString(l int) string {
 
 	buf := bytes.Buffer{}
 	for i := 0; i < l; i++ {
-		buf.WriteByte(randStr[rand.Intn(randStrLen)])
+		buf.WriteByte(randStr[Randu32()%randStrLen])
 	}
 	return buf.String()
 }

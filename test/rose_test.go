@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/rosedblabs/rosedb/v2"
+	"math/rand"
 	"testing"
 )
 
@@ -23,4 +24,13 @@ func TestQWQName(t *testing.T) {
 	fmt.Println(open.TTL([]byte("name")))
 	fmt.Println(open.TTL([]byte("aaa")))
 
+}
+
+// BenchmarkName-24        1000000000               0.6006 ns/op
+// BenchmarkName-24        1000000000               0.5981 ns/op
+// BenchmarkName-24        478247127                2.584 ns/op
+func BenchmarkName(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = rand.Uint64()
+	}
 }

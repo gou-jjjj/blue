@@ -1,0 +1,8 @@
+{
+  "name": "del",
+  "summary": "Remove the specified keys",
+  "group": "db",
+  "arity": -1,
+  "key": "list",
+  "arguments": []
+}

@@ -1,0 +1,11 @@
+{
+  "name": "nset",
+  "summary": "Set the value of a number",
+  "group": "number",
+  "arity": 2,
+  "key": "string",
+  "value": "number",
+  "arguments": [
+    "expire"
+  ]
+}

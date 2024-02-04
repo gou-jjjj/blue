@@ -18,3 +18,11 @@ func BytesToUint64(n []byte) uint64 {
 
 	return b
 }
+
+func BytesToUint8(n []byte) uint8 {
+	if len(n) != 1 {
+		return 0
+	}
+
+	return n[0]
+}

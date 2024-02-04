@@ -1,19 +1,34 @@
 package internal
 
 import (
+	"blue/bsp"
 	"blue/datastruct/dict"
-	"bsp"
-	"fmt"
+	"blue/datastruct/number"
+	"errors"
 	"github.com/rosedblabs/rosedb/v2"
 	"os"
 	"sync"
 	"time"
 )
 
-const (
-	dataDictSize = 1 << 16
-	ttlDictSize  = 1 << 10
+var (
+	ErrKeyNotFound = errors.New("key not found")
 )
+
+type DBConfig struct {
+	rosedb.Options
+
+	DataDictSize int
+	index        int
+}
+
+type DbOption func(*DBConfig)
+
+var defaultDBConfig = DBConfig{
+	Options:      rosedb.DefaultOptions,
+	DataDictSize: 1024,
+	index:        0,
+}
 
 type DB struct {
 	index int
@@ -23,25 +38,27 @@ type DB struct {
 	rw      *sync.RWMutex
 }
 
-type ExecFunc func(*DB, bsp.BspProto) bsp.Reply
-
-func NewDB(index int) *DB {
+func NewDB(opts ...DbOption) *DB {
 	// 指定选项
-	options := rosedb.DefaultOptions
-	stoPath := fmt.Sprintf("./storage/data/%d", index)
-	err := os.Mkdir(stoPath, 777)
+	config := defaultDBConfig
+	for _, opt := range opts {
+		opt(&config)
+	}
+
+	options := config.Options
+	err := os.Mkdir(config.DirPath, 777)
 	if err != nil {
 		panic(err)
 	}
 
-	options.DirPath = stoPath
 	storage, err := rosedb.Open(options)
 	if err != nil {
 		panic(err)
 	}
 
 	db := &DB{
-		data:    dict.MakeConcurrent(dataDictSize),
+		index:   config.index,
+		data:    dict.MakeConcurrent(config.DataDictSize),
 		storage: storage,
 		rw:      &sync.RWMutex{},
 	}
@@ -66,20 +83,39 @@ func NewDB(index int) *DB {
 	return db
 }
 
-func (db *DB) Exec(c *BConn, cmd *bsp.BspProto) error {
-	var resp bsp.Reply
-	switch cmd.Type() {
+func (db *DB) ExecChain(ctx *Context) bool {
+	switch ctx.request.Type() {
 	case bsp.TypeNumber:
-		resp = ExecNumberFunc(db, *cmd)
+		db.ExecChainNumber(ctx)
 	case bsp.TypeString:
-		//resp = ExecStringFunc(db, *cmd)
+		db.ExecChainString(ctx)
+	case bsp.TypeList:
+
+	case bsp.TypeSet:
+
+	case bsp.TypeJson:
+
 	default:
-		resp = bsp.NewErr(bsp.ErrCommand)
+		ctx.response = bsp.NewErr(bsp.ErrCommand)
+		return true
 	}
 
-	_, err := c.Write(resp.Bytes())
-	return err
+	return true
 }
+
+func (db *DB) ExecChainNumber(ctx *Context) {
+	switch ctx.request.Handle() {
+	case bsp.NSET:
+		ctx.response = db.nset(ctx.request)
+	case bsp.NGET:
+		ctx.response = db.nget(ctx.request)
+	default:
+		ctx.response = bsp.NewErr(bsp.ErrCommand)
+	}
+
+}
+
+func (db *DB) ExecChainString(ctx *Context) {}
 
 func (db *DB) Put(key string, val []byte) error {
 	db.data.Put(key, DataEntity{
@@ -98,5 +134,55 @@ func (db *DB) PutWithExpire(key string, val []byte, expire uint64) error {
 }
 
 func (db *DB) Get(key string) ([]byte, error) {
-	return nil, nil
+	entity, ok := db.data.Get(key)
+	if !ok {
+		return nil, ErrKeyNotFound
+	}
+
+	data, ok := entity.(DataEntity)
+	if !ok {
+		return nil, ErrKeyNotFound
+	}
+
+	if data.Expire != 0 && data.Expire < uint64(time.Now().Second()) {
+		db.del(key)
+		return nil, ErrKeyNotFound
+	}
+	return data.Val, nil
+}
+
+func (db *DB) del(key string) error {
+	db.data.Remove(key)
+	return db.storage.Delete([]byte(key))
+}
+
+func (db *DB) nset(cmd *bsp.BspProto) bsp.Reply {
+	db.data.RemoveWithLock(cmd.ValueStr())
+
+	newNumber, err := number.NewNumber(cmd.ValueBytes())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrWrongType, cmd.ValueStr())
+	}
+
+	db.data.Put(cmd.Key(), newNumber)
+	err = db.storage.Put(cmd.KeyBytes(), cmd.ValueBytes())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
+	}
+
+	return bsp.NewInfo(bsp.OK)
+}
+
+func (db *DB) nget(cmd *bsp.BspProto) bsp.Reply {
+	v, ok := db.data.Get(cmd.Key())
+	if !ok {
+		return bsp.NewInfo(bsp.NULL)
+	}
+
+	n, ok := v.(number.Number)
+	if !ok {
+		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
+	}
+
+	return bsp.NewNum(n.Get())
 }
