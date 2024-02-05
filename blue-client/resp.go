@@ -1,8 +1,7 @@
 package main
 
 import (
-	"bsp"
-	"bsp/common"
+	"blue/bsp"
 	"strconv"
 )
 
