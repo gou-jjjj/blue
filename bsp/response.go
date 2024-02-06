@@ -2,10 +2,12 @@ package bsp
 
 import (
 	"blue/common/strbytes"
+	"fmt"
 )
 
 type Reply interface {
 	Bytes() []byte
+	String() string
 }
 
 // InfoReply ----------------------------------
@@ -20,6 +22,14 @@ func (i InfoReply) Bytes() []byte {
 	}
 
 	return SufSplit([]byte{byte(i.i)})
+}
+
+func (i InfoReply) String() string {
+	if i.info == nil || len(i.info) == 0 {
+		return ReplyTypeMap[i.i]
+	} else {
+		return fmt.Sprintf("%s:%s", ReplyTypeMap[i.i], i.info)
+	}
 }
 
 func NewInfo(i ReplyType, info ...[]byte) *InfoReply {
@@ -45,17 +55,21 @@ func (n NumResp) Bytes() []byte {
 	return SufSplit(append([]byte{byte(ReplyNumber)}, n.num...))
 }
 
+func (n NumResp) String() string {
+	return strbytes.Bytes2Str(n.num)
+}
+
 func NewNum(num any) *NumResp {
 	switch num.(type) {
 	case uint64:
 		return &NumResp{
 			n:   ReplyNumber,
-			num: strbytes.Uint64ToBytes(num.(uint64)),
+			num: strbytes.Uint642Bytes(num.(uint64)),
 		}
 	case int64:
 		return &NumResp{
 			n:   ReplyNumber,
-			num: strbytes.Uint64ToBytes(uint64(num.(int64))),
+			num: strbytes.Uint642Bytes(uint64(num.(int64))),
 		}
 	case []byte:
 		return &NumResp{
@@ -85,6 +99,10 @@ func (s StrResp) Bytes() []byte {
 	return SufSplit(append([]byte{byte(ReplyString)}, s.msg...))
 }
 
+func (s StrResp) String() string {
+	return string(s.msg)
+}
+
 func NewStr(msg []byte) *StrResp {
 	return &StrResp{
 		s:   ReplyString,
@@ -105,6 +123,10 @@ func (l ListResp) Bytes() []byte {
 	}
 
 	return append(append([]byte{byte(l.l)}, byte(len(l.list))), b...)
+}
+
+func (l ListResp) String() string {
+	return fmt.Sprintf("%s", l.list)
 }
 
 func NewList(list ...[]byte) *ListResp {

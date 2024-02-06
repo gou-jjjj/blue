@@ -19,7 +19,7 @@ func NewReplyMessage(reply []byte) (string, error) {
 
 	switch s {
 	case "number":
-		return strconv.FormatUint(common.BytesToUint64(reply[1:]), 10), nil
+		return strconv.FormatUint(common.Bytes2Uint64(reply[1:]), 10), nil
 	case "string", "list":
 		return string(reply[1:]), nil
 	}

@@ -113,7 +113,7 @@ func (svr *BlueServer) selected(ctx *Context) {
 }
 
 func (svr *BlueServer) selectdb(ctx *Context) {
-	ctx.SetDB(strbytes.BytesToUint8(ctx.request.ValueBytes()))
+	ctx.SetDB(strbytes.Bytes2Uint8(ctx.request.ValueBytes()))
 	ctx.response = bsp.NewInfo(bsp.OK)
 }
 
