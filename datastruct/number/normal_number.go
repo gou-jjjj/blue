@@ -1,9 +1,9 @@
 package number
 
 import (
+	"blue/bsp"
+	"blue/common/strbytes"
 	iter "blue/datastruct"
-	"bsp"
-	"bsp/common"
 	"strconv"
 	"sync/atomic"
 )
@@ -27,7 +27,7 @@ func NewNumber(number ...any) (*NorNum, error) {
 	if len(number) > 0 {
 		switch number[0].(type) {
 		case []byte:
-			parseInt := common.BytesToUint64(number[0].([]byte))
+			parseInt := strbytes.Bytes2Uint64(number[0].([]byte))
 			n.Set(int64(parseInt))
 		case string:
 			parseInt, err := strconv.ParseInt(number[0].(string), 10, 64)

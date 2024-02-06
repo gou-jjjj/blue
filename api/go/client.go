@@ -8,7 +8,6 @@ import (
 	"io"
 	"net"
 	"strconv"
-	"sync"
 )
 
 var (
@@ -67,7 +66,9 @@ func (c *Client) SetAddr(ip string, port int) {
 }
 
 func (c *Client) Version() string {
-	return c.Addr()
+	c.WriteBuf = append(c.WriteBuf, bsp.NewReq(bsp.VERSION))
+
+	return string(c.ReadBuf[0])
 }
 
 func (c *Client) exec() (err error) {
@@ -75,9 +76,9 @@ func (c *Client) exec() (err error) {
 
 	for i := range c.WriteBuf {
 		req := c.WriteBuf[i]
-		_, err := c.conn.Write(req)
+		_, err = c.conn.Write(req)
 		if err != nil {
-			return err
+			return
 		}
 		sends++
 	}
@@ -86,25 +87,23 @@ func (c *Client) exec() (err error) {
 		err = ErrSend(sends)
 	}
 
-	wg := sync.WaitGroup{}
 	read := bufio.NewReader(c.conn)
 	for i := 0; i < sends; i++ {
-		bytes, err := read.ReadBytes(bsp.Done)
-		if err != nil {
-			if !errors.Is(err, io.EOF) {
-				err = errors.New("read error")
+		bytes, err1 := read.ReadBytes(bsp.Done)
+		if err1 != nil {
+			if !errors.Is(err1, io.EOF) {
+				err1 = errors.New("read error")
 			}
 			break
 		}
 
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			res := bsp.NewReplyMessage(bytes)
-			c.ReadBuf = append(c.ReadBuf, []byte(res))
-		}()
+		res, err1 := bsp.NewReplyMessage(bytes)
+		if err1 != nil {
+			return err1
+		}
+		c.ReadBuf = append(c.ReadBuf, []byte(res))
 	}
-	wg.Wait()
+
 	return
 }
 

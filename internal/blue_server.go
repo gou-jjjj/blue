@@ -18,7 +18,7 @@ type Exec interface {
 type ServerInter interface {
 	Exec
 	Handle(context.Context, net.Conn)
-	Close() error
+	Close()
 }
 
 // BlueServer implements tcp.Handler and serves as a redis server

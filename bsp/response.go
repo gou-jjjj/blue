@@ -126,7 +126,7 @@ func (l ListResp) Bytes() []byte {
 }
 
 func (l ListResp) String() string {
-	return fmt.Sprintf("%s", l.list)
+	return fmt.Sprintf("%v", l.list)
 }
 
 func NewList(list ...[]byte) *ListResp {
@@ -148,6 +148,14 @@ func (r ErrResp) Error() string {
 
 func (r ErrResp) Bytes() []byte {
 	return SufSplit(append([]byte{byte(r.e)}, r.msg...))
+}
+
+func (r ErrResp) String() string {
+	if r.msg == nil || len(r.msg) == 0 {
+		return fmt.Sprintf("%s:%s", MessageMap[r.e], r.msg)
+	}
+
+	return MessageMap[r.e]
 }
 
 func NewErr(e ReplyType, msg ...any) *ErrResp {

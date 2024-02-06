@@ -4,9 +4,7 @@ import (
 	"blue/common/rand"
 	"blue/config"
 	"context"
-	"fmt"
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/rs/zerolog"
@@ -16,31 +14,29 @@ var (
 	Blog *BlueLog
 )
 
-func InitLog() {
-	Blog = newLog()
+var LogLevel = map[string]zerolog.Level{
+	"Error": zerolog.ErrorLevel,
+	"Warn":  zerolog.WarnLevel,
+	"Info":  zerolog.InfoLevel,
 }
 
-func newLog() *BlueLog {
-	filePath := config.BC.LogConfig.LogOut
-
-	// 获取文件所在的目录路径
-	dir := filepath.Dir(filePath)
-
-	// 检查目录是否存在
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		// 目录不存在，创建目录
-		err = os.MkdirAll(dir, 0777) // 使用0755权限创建目录
-		if err != nil {
-			panic(fmt.Sprintf("Failed to create directory: %v", err))
-		}
+func logLevel() zerolog.Level {
+	l, ok := LogLevel[config.BC.LogConfig.LogLevel]
+	if !ok {
+		return zerolog.InfoLevel
 	}
 
-	open, err := os.Open(filePath)
-	if err != nil {
-		panic(err)
-	}
+	return l
+}
 
-	log := NewZeroLog(zerolog.InfoLevel, 5, open)
+func InitSyncLog() {
+	Blog = newSyncLog()
+}
+
+func newSyncLog() *BlueLog {
+	dir := config.BC.LogConfig.LogOut
+
+	log := NewZeroLog(logLevel(), 1, dir)
 	log.Info("log init success ...")
 	return log
 }
@@ -57,6 +53,10 @@ type BlueLog struct {
 }
 
 func NewZeroLog(level zerolog.Level, count int, outPath string) *BlueLog {
+	if count <= 0 {
+		count = 1
+	}
+
 	zerolog.TimestampFieldName = "T"
 	zerolog.MessageFieldName = "M"
 	zerolog.LevelFieldName = "L"

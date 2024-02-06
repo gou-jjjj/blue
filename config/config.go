@@ -3,7 +3,6 @@ package config
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/rs/zerolog"
 	"io"
 	"log"
 	"os"
@@ -11,18 +10,11 @@ import (
 
 var BC BlueConf
 
-var LogLevel = map[string]zerolog.Level{
-	"Error": zerolog.ErrorLevel,
-	"Warn":  zerolog.WarnLevel,
-	"Info":  zerolog.InfoLevel,
-}
-
 type serverConfig struct {
 	Ip      string `json:"ip,omitempty"`
 	Port    int    `json:"port,omitempty"`
-	TimeOut uint16 `json:"time_out"`
-
-	DBSum int `json:"db_sum"`
+	TimeOut int    `json:"time_out"`
+	DBSum   int    `json:"db_sum"`
 }
 
 type logConfig struct {
@@ -31,19 +23,19 @@ type logConfig struct {
 }
 
 type clientConfig struct {
-	ClientLive  int `json:"client_live,omitempty"`
-	ClientLimit int `json:"client_limit,omitempty"`
+	ClientLive  int   `json:"client_live,omitempty"`
+	ClientLimit int32 `json:"client_limit,omitempty"`
 }
 
 type storageConfig struct {
-	StoragePath string `json:"path,omitempty"`
+	Path string `json:"path,omitempty"`
 }
 
 type BlueConf struct {
 	ServerConfig serverConfig  `json:"server_config"`
 	LogConfig    logConfig     `json:"log_config"`
 	ClientConfig clientConfig  `json:"client_config"`
-	Storage      storageConfig `json:"storage"`
+	Storage      storageConfig `json:"storage_config"`
 }
 
 var defaultConfig = BlueConf{
@@ -53,7 +45,7 @@ var defaultConfig = BlueConf{
 		TimeOut: 10,
 	},
 	LogConfig: logConfig{
-		LogOut:   "./log/log.log",
+		LogOut:   "./logfile/log.log",
 		LogLevel: "Info",
 	},
 	ClientConfig: clientConfig{
@@ -61,7 +53,7 @@ var defaultConfig = BlueConf{
 		ClientLimit: 10,
 	},
 	Storage: storageConfig{
-		StoragePath: "./storage/data",
+		Path: "./storage/data",
 	},
 }
 
@@ -89,5 +81,5 @@ func InitConfig() {
 		panic(err)
 	}
 
-	log.Printf("%+v", BC)
+	log.Printf("log init success ...")
 }

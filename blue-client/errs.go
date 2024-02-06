@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func ErrArgu(s ...string) error {
 	return fmt.Errorf("(error)  wrong number of arguments for '%s' command", RedMessage(s[0]))

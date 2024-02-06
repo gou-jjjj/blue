@@ -52,27 +52,17 @@ const (
 	ErrStorage
 )
 
-var MessageMap = map[ReplyType]string{
-	ReplyNumber: "number",
-	ReplyString: "string",
-	ReplyList:   "list",
+var MessageMap = [...]string{
+	OK:    "ok",
+	NULL:  "null",
+	True:  "true",
+	False: "false",
 
-	OK:                 "ok",
-	NULL:               "null",
 	ErrCommand:         "ERR unknown command",
 	ErrSyntax:          "ERR syntax error",
 	ErrWrongType:       "WRONGTYPE Operation against a key holding the wrong kind of value",
 	ErrHeaderType:      "ERR header type error",
 	ErrValueOutOfRange: "ERR value is out of range",
 	ErrNumberArguments: "ERR wrong number of arguments",
-}
-
-var MessageMap2 = map[string]ReplyType{
-	"number": ReplyNumber,
-	"string": ReplyString,
-	"list":   ReplyList,
-
-	"ok":   OK,
-	"null": NULL,
-	"WRONGTYPE Operation against a key holding the wrong kind of value": ErrWrongType,
+	ErrReplication:     "ERR replication error",
 }

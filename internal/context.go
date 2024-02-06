@@ -22,13 +22,7 @@ type Context struct {
 	nextExec Exec
 }
 
-var bconnPool = sync.Pool{
-	New: func() any {
-		return &Context{
-			session: rand.RandString(sessionLen),
-		}
-	},
-}
+var bconnPool = sync.Pool{}
 
 func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn, ok := bconnPool.Get().(*Context)
