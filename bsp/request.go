@@ -1,28 +1,40 @@
 package bsp
 
-func NewReq(handle Header) []byte {
-	return AppendDone(NewHeader(handle, 1).Bytes())
+import "blue/common/strbytes"
+
+type RequestBuilder struct {
+	data []byte
 }
 
-func NewReqK(handle Header, key string) []byte {
-	b := NewHeader(handle, 2).Bytes()
-	b = append(AppendSplit(b), []byte(key)...)
-	return AppendDone(b)
-
-}
-
-func NewReqKV(handle Header, key string, value string) []byte {
-	b := AppendSplit(NewHeader(handle, 3).Bytes())
-	b = AppendSplit(append(b, []byte(key)...))
-	return AppendDone(append(b, []byte(value)...))
-}
-
-func NewReqKVs(handle Header, key string, value ...string) []byte {
-	b := AppendSplit(NewHeader(handle, uint8(2+len(value))).Bytes())
-	b = AppendSplit(append(b, []byte(key)...))
-	for i := range value {
-		b = AppendSplit(append(b, []byte(value[i])...))
+func NewRequestBuilder(handle Header) *RequestBuilder {
+	return &RequestBuilder{
+		data: NewHeader(handle).Bytes(),
 	}
+}
 
-	return AppendDone(b[:len(b)-1])
+func (rb *RequestBuilder) WithKey(key string) *RequestBuilder {
+	rb.data = append(rb.data, []byte(key)...)
+	return rb
+}
+
+func (rb *RequestBuilder) WithValueStr(value string) *RequestBuilder {
+	rb.data = append(AppendSplit(rb.data), []byte(value)...)
+	return rb
+}
+
+func (rb *RequestBuilder) WithValueNum(value string) *RequestBuilder {
+	by := strbytes.Str2Bytes(value)
+	rb.data = append(AppendSplit(rb.data), by...)
+	return rb
+}
+
+func (rb *RequestBuilder) WithValues( values ...string) *RequestBuilder {
+	for _, value := range values {
+		rb.data = append(AppendSplit(rb.data), []byte(value)...)
+	}
+	return rb
+}
+
+func (rb *RequestBuilder) Build() []byte {
+	return AppendDone(rb.data)
 }

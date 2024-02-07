@@ -62,7 +62,7 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 		svr.closeClient(client)
 	}()
 
-	canCtx, cancelFunc := context.WithCancel(client)
+	canCtx, cancelFunc := context.WithCancel(*client)
 	bch, errch := bsp.BspProtos(canCtx, conn)
 	defer func() {
 		cancelFunc()
@@ -87,6 +87,8 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 			}
 
 			client.Reply()
+
+			bsp.BspPool.Put(req)
 			continue
 		case err := <-errch:
 			client.response = err

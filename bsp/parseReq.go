@@ -4,88 +4,69 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 )
 
-func parse0(r io.Reader, bp chan *BspProto, err1 chan *ErrResp) {
+func parse0(r io.Reader) (*BspProto, *ErrResp) {
 	reader := bufio.NewReader(r)
 	for {
 		bs, err := reader.ReadBytes(Done)
-		if err != nil || len(bs) < 3 {
+		if err != nil || len(bs) < 2 {
 			if err != io.EOF {
-				err1 <- NewErr(ErrSyntax)
-				return
+				return nil, NewErr(ErrSyntax)
 			}
-			break
+			return nil, nil
 		}
 
-		res := bspPool.Get().(*BspProto)
-		res.Header = NewHeader(Header(bs[0]), bs[1])
+		res := BspPool.Get().(*BspProto)
+		res.Header = NewHeader(Header(bs[0]))
 		if res.Header == HandleErr {
-			err1 <- NewErr(ErrHeaderType)
-			return
+			return nil, NewErr(ErrHeaderType)
 		}
 
 		arity := res.Header.HandleInfo().Arity
 		if arity == 0 {
-			if bs[2] != Done {
-				err1 <- NewErr(ErrSyntax)
-				return
+			if bs[1] != Done {
+				return nil, NewErr(ErrSyntax)
 			}
-			bp <- res
-			break
+			return res, nil
 		}
 
-		if arity > 0 && bs[2] != Split {
-			err1 <- NewErr(ErrSyntax)
-			return
-		}
-
-		split := bytes.Split(bs[3:], []byte{Split})
+		split := bytes.Split(bs[1:len(bs)-1], []byte{Split})
 
 		switch arity {
 		case 1:
-			if len(split) != 1 || split[0][len(split[0])-1] != Done {
-				err1 <- NewErr(ErrSyntax)
-				return
+			if len(split) != 1 {
+				return nil, NewErr(ErrSyntax)
 			}
 
-			res.key = string(split[0][:len(split[0])-1])
-			bp <- res
-			break
-		case 2:
-			if len(split) != 2 || split[1][len(split[1])-1] != Done {
-				err1 <- NewErr(ErrSyntax)
-				return
-			}
 			res.key = string(split[0])
-			res.value = [][]byte{split[1][:len(split[1])-1]}
-			bp <- res
-			break
+			return res, nil
+		case 2:
+
 		case -1:
 
 		default:
-			err1 <- NewErr(ErrSyntax)
-			return
+
 		}
 
 	}
 }
 
 func parseReq(ctx context.Context, reader io.Reader, bp chan *BspProto, err chan *ErrResp) {
-	defer func() {
-		if err1 := recover(); err1 != nil {
-			fmt.Printf("parseReq err:[%v]\n", err1)
-		}
-	}()
-
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			parse0(reader, bp, err)
+			proto, errResp := parse0(reader)
+			if proto != nil {
+				bp <- proto
+				break
+			}
+
+			err <- errResp
+			return
 		}
 	}
 }

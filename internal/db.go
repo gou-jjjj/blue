@@ -46,9 +46,12 @@ func NewDB(opts ...DbOption) *DB {
 	}
 
 	options := config.Options
-	err := os.Mkdir(config.DirPath, 777)
-	if err != nil {
-		panic(err)
+
+	if _, err := os.Stat(config.DirPath); err != nil {
+		err = os.Mkdir(config.DirPath, 777)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	storage, err := rosedb.Open(options)

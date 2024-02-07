@@ -3,17 +3,15 @@ package main
 import (
 	"blue/bsp"
 	"bufio"
+	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"strconv"
 )
 
 var (
-	ErrSend = func(i int) error {
-		return errors.New(fmt.Sprintf("Error, just send: %d ", i))
-	}
+	ErrPip = errors.New("pipeline error")
 )
 
 type Option func(*Config)
@@ -26,9 +24,6 @@ type Config struct {
 type Client struct {
 	Config
 	conn net.Conn
-
-	ReadBuf  [][]byte
-	WriteBuf [][]byte
 }
 
 func WithDefaultOpt() Option {
@@ -65,31 +60,42 @@ func (c *Client) SetAddr(ip string, port int) {
 	c.port = port
 }
 
-func (c *Client) Version() string {
-	c.WriteBuf = append(c.WriteBuf, bsp.NewReq(bsp.VERSION))
+func (c *Client) Version() (string, error) {
+	build := bsp.NewRequestBuilder(bsp.VERSION).Build()
 
-	return string(c.ReadBuf[0])
+	return c.exec(build)
 }
 
-func (c *Client) exec() (err error) {
-	sends := 0
-
-	for i := range c.WriteBuf {
-		req := c.WriteBuf[i]
-		_, err = c.conn.Write(req)
-		if err != nil {
-			return
-		}
-		sends++
-	}
-
-	if sends != len(c.WriteBuf) {
-		err = ErrSend(sends)
+func (c *Client) exec(buf []byte) (string, error) {
+	_, err := c.conn.Write(buf)
+	if err != nil {
+		return "", err
 	}
 
 	read := bufio.NewReader(c.conn)
-	for i := 0; i < sends; i++ {
-		bytes, err1 := read.ReadBytes(bsp.Done)
+
+	bys, err1 := read.ReadBytes(bsp.Done)
+	if err1 != nil {
+		return "", err1
+	}
+	return bsp.NewReplyMessage(bys)
+}
+
+func (c *Client) execPipeline(buf [][]byte) (s []string, err error) {
+	b := bytes.Buffer{}
+
+	for _, v := range buf {
+		b.Write(v)
+	}
+
+	_, err = c.conn.Write(b.Bytes())
+	if err != nil {
+		return nil, err
+	}
+
+	read := bufio.NewReader(c.conn)
+	for {
+		bys, err1 := read.ReadBytes(bsp.Done)
 		if err1 != nil {
 			if !errors.Is(err1, io.EOF) {
 				err1 = errors.New("read error")
@@ -97,11 +103,16 @@ func (c *Client) exec() (err error) {
 			break
 		}
 
-		res, err1 := bsp.NewReplyMessage(bytes)
-		if err1 != nil {
-			return err1
+		res, err := bsp.NewReplyMessage(bys)
+		if err != nil {
+			return nil, err
 		}
-		c.ReadBuf = append(c.ReadBuf, []byte(res))
+
+		s = append(s, res)
+	}
+
+	if len(s) != len(buf) {
+		return nil, ErrPip
 	}
 
 	return
@@ -109,6 +120,4 @@ func (c *Client) exec() (err error) {
 
 func (c *Client) Close() {
 	c.conn.Close()
-	c.ReadBuf = nil
-	c.WriteBuf = nil
 }

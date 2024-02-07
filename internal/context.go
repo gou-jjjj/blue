@@ -4,6 +4,7 @@ import (
 	"blue/bsp"
 	"blue/common/rand"
 	"context"
+	"fmt"
 	"net"
 	"sync"
 )
@@ -53,7 +54,7 @@ func (c *Context) Reply() (int, error) {
 	if c.response == nil {
 		return c.conn.Write(bsp.NewErr(bsp.ErrReplication).Bytes())
 	}
-
+	fmt.Printf("req:[%v]\n", c.response.String())
 	return c.conn.Write(c.response.Bytes())
 }
 

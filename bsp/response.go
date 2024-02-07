@@ -17,11 +17,10 @@ type InfoReply struct {
 }
 
 func (i InfoReply) Bytes() []byte {
-	if i.info != nil {
-		return SufSplit(append([]byte{byte(i.i)}, i.info...))
-	}
-
-	return SufSplit([]byte{byte(i.i)})
+	res := make([]byte, 0, len(i.info)+2)
+	res = append(res, byte(i.i))
+	res = append(res, i.info...)
+	return AppendDone(res)
 }
 
 func (i InfoReply) String() string {
@@ -52,7 +51,10 @@ type NumResp struct {
 }
 
 func (n NumResp) Bytes() []byte {
-	return SufSplit(append([]byte{byte(ReplyNumber)}, n.num...))
+	res := make([]byte, 0, len(n.num)+2)
+	res = append(res, byte(n.n))
+	res = append(res, n.num...)
+	return AppendDone(res)
 }
 
 func (n NumResp) String() string {
@@ -96,7 +98,10 @@ type StrResp struct {
 }
 
 func (s StrResp) Bytes() []byte {
-	return SufSplit(append([]byte{byte(ReplyString)}, s.msg...))
+	res := make([]byte, 0, len(s.msg)+2)
+	res = append(res, byte(s.s))
+	res = append(res, s.msg...)
+	return AppendDone(res)
 }
 
 func (s StrResp) String() string {
@@ -118,11 +123,12 @@ type ListResp struct {
 
 func (l ListResp) Bytes() []byte {
 	b := make([]byte, 0, len(l.list))
+	b = append(b, byte(l.l))
 	for i := range l.list {
-		b = append(b, SufSplit(l.list[i])...)
+		b = append(b, AppendSplit(l.list[i])...)
 	}
 
-	return append(append([]byte{byte(l.l)}, byte(len(l.list))), b...)
+	return AppendDone(b)
 }
 
 func (l ListResp) String() string {
@@ -147,7 +153,10 @@ func (r ErrResp) Error() string {
 }
 
 func (r ErrResp) Bytes() []byte {
-	return SufSplit(append([]byte{byte(r.e)}, r.msg...))
+	res := make([]byte, 0, len(r.msg)+2)
+	res = append(res, byte(r.e))
+	res = append(res, r.msg...)
+	return AppendDone(res)
 }
 
 func (r ErrResp) String() string {
@@ -173,12 +182,4 @@ func NewErr(e ReplyType, msg ...any) *ErrResp {
 	}
 
 	return re
-}
-
-func SufSplit(b []byte) []byte {
-	return append(b, Split)
-}
-
-func PreSplit(b []byte) []byte {
-	return append([]byte{Split}, b...)
 }

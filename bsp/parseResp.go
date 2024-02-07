@@ -49,12 +49,6 @@ func NewReplyMessage(reply []byte) (string, error) {
 }
 
 func parseResp(ctx context.Context, reader io.Reader, bp chan string, err chan error) {
-	defer func() {
-		if err1 := recover(); err1 != nil {
-			fmt.Printf("parseResp err:[%v]\n", err1)
-		}
-	}()
-
 	for {
 		select {
 		case <-ctx.Done():

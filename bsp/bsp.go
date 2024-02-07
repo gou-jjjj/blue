@@ -7,23 +7,6 @@ import (
 	"sync"
 )
 
-const (
-	Split byte = 0b0
-	Done  byte = 0b1
-
-	Expire byte = 0b110
-	From   byte = 0b111
-	End    byte = 0b1000
-)
-
-func AppendSplit(d []byte) []byte {
-	return append(d, Split)
-}
-
-func AppendDone(d []byte) []byte {
-	return append(d, Done)
-}
-
 type BspProtoInter interface {
 	Key() string
 	KeyBytes() []byte
@@ -39,7 +22,7 @@ type BspProto struct {
 	value [][]byte
 }
 
-var bspPool = sync.Pool{
+var BspPool = sync.Pool{
 	New: func() interface{} {
 		return &BspProto{}
 	},

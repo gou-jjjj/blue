@@ -11,10 +11,10 @@ var numPool = &sync.Pool{
 	},
 }
 
-func Str2Bytes(s string) (ba []byte) {
+func Str2Bytes(s string) (by []byte) {
 	b := numPool.Get().(*big.Int)
 	b.SetString(s, 10)
-	ba = b.Bytes()
+	by = b.Bytes()
 	numPool.Put(b)
 	return
 }
