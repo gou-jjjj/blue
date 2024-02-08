@@ -61,7 +61,7 @@ func (c *Context) Reply() (int, error) {
 	if c.response == nil {
 		return c.conn.Write(bsp.NewErr(bsp.ErrReplication).Bytes())
 	}
-	fmt.Printf("replp:[%v]\n", c.response.String())
+	fmt.Printf("reply:[%v]\n", c.response.String())
 	return c.conn.Write(c.response.Bytes())
 }
 

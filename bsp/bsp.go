@@ -33,7 +33,7 @@ var BspPool = sync.Pool{
 }
 
 func (b *BspProto) String() string {
-	return fmt.Sprintf("Header: %v, Key: %s, Value: %s", b.Header.HandleInfo(), b.key, b.value)
+	return fmt.Sprintf("Header: %+v, Key: %s, Value: %s", b.Header.HandleInfo(), b.key, b.value)
 }
 
 func BspProtos(ctx context.Context, r io.Reader) (chan *BspProto, chan *ErrResp) {

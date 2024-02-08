@@ -3,7 +3,7 @@ package bsp
 type ReplyType byte
 
 const (
-	ReplyInfo ReplyType = iota * (1 << 5)
+	ReplyInfo ReplyType = (iota + 1) * (1 << 5)
 	ReplyNumber
 	ReplyString
 	ReplyList

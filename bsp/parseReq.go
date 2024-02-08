@@ -57,6 +57,11 @@ func parse0(r io.Reader) (*BspProto, *ErrResp) {
 			res.SetValue(split[1])
 
 		case -1:
+			if len(split) == 0 {
+				return nil, NewErr(ErrSyntax)
+			}
+
+			res.SetValues(split)
 
 		default:
 

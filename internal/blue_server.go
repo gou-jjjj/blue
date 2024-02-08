@@ -81,7 +81,7 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 		case <-ctx.Done():
 			return
 		case req := <-bch:
-			fmt.Printf("%+v\n", req.HandleInfo())
+			fmt.Printf("%s\n", req)
 			client.request = req
 			client.response = bsp.Reply(nil)
 			ok := svr.ExecChain(client)

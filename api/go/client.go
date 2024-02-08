@@ -67,13 +67,18 @@ func (c *Client) Version() (string, error) {
 	return c.exec(build)
 }
 
+func (c *Client) Del(key string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.DEL).WithKey(key).Build()
+
+	return c.exec(build)
+}
+
 func (c *Client) Nset(k, num string) (string, error) {
 	build := bsp.NewRequestBuilder(bsp.NSET).
 		WithKey(k).
 		WithValueNum(num).
 		Build()
-	fmt.Printf("%b\n", build)
-	fmt.Printf("%s\n", build)
+
 	return c.exec(build)
 }
 

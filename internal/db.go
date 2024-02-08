@@ -4,16 +4,11 @@ import (
 	"blue/bsp"
 	"blue/datastruct/dict"
 	"blue/datastruct/number"
-	"errors"
 	"fmt"
 	"github.com/rosedblabs/rosedb/v2"
 	"os"
 	"sync"
 	"time"
-)
-
-var (
-	ErrKeyNotFound = errors.New("key not found")
 )
 
 type DBConfig struct {
@@ -89,6 +84,8 @@ func NewDB(opts ...DbOption) *DB {
 
 func (db *DB) ExecChain(ctx *Context) bool {
 	switch ctx.request.Type() {
+	case bsp.TypeDB:
+		db.ExecChainDB(ctx)
 	case bsp.TypeNumber:
 		db.ExecChainNumber(ctx)
 	case bsp.TypeString:
@@ -107,6 +104,15 @@ func (db *DB) ExecChain(ctx *Context) bool {
 	return true
 }
 
+func (db *DB) ExecChainDB(ctx *Context) {
+	switch ctx.request.Handle() {
+	case bsp.DEL:
+		ctx.response = db.del(ctx.request.Values())
+	default:
+		ctx.response = bsp.NewErr(bsp.ErrCommand)
+	}
+}
+
 func (db *DB) ExecChainNumber(ctx *Context) {
 	switch ctx.request.Handle() {
 	case bsp.NSET:
@@ -114,7 +120,6 @@ func (db *DB) ExecChainNumber(ctx *Context) {
 	case bsp.NGET:
 		ctx.response = db.nget(ctx.request)
 	default:
-		fmt.Println("ExecChainNumber:", ctx.request.Handle())
 		ctx.response = bsp.NewErr(bsp.ErrCommand)
 	}
 
@@ -122,43 +127,15 @@ func (db *DB) ExecChainNumber(ctx *Context) {
 
 func (db *DB) ExecChainString(ctx *Context) {}
 
-func (db *DB) Put(key string, val []byte) error {
-	db.data.Put(key, DataEntity{
-		Val:    val,
-		Expire: 0,
-	})
-	return db.storage.Put([]byte(key), val)
-}
-
-func (db *DB) PutWithExpire(key string, val []byte, expire uint64) error {
-	db.data.Put(key, DataEntity{
-		Val:    val,
-		Expire: expire,
-	})
-	return db.storage.PutWithTTL([]byte(key), val, time.Duration(expire))
-}
-
-func (db *DB) Get(key string) ([]byte, error) {
-	entity, ok := db.data.Get(key)
-	if !ok {
-		return nil, ErrKeyNotFound
+func (db *DB) del(key [][]byte) bsp.Reply {
+	for i := range key {
+		db.data.Remove(string(key[i]))
+		err := db.storage.Delete(key[i])
+		if err != nil {
+			return bsp.NewErr(bsp.ErrStorage)
+		}
 	}
-
-	data, ok := entity.(DataEntity)
-	if !ok {
-		return nil, ErrKeyNotFound
-	}
-
-	if data.Expire != 0 && data.Expire < uint64(time.Now().Second()) {
-		db.del(key)
-		return nil, ErrKeyNotFound
-	}
-	return data.Val, nil
-}
-
-func (db *DB) del(key string) error {
-	db.data.Remove(key)
-	return db.storage.Delete([]byte(key))
+	return bsp.NewInfo(bsp.OK)
 }
 
 func (db *DB) nset(cmd *bsp.BspProto) bsp.Reply {
