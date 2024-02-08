@@ -121,8 +121,7 @@ func (svr *BlueServer) ExecChain(ctx *Context) bool {
 }
 
 func (svr *BlueServer) selected(ctx *Context) {
-	fmt.Printf("bsp.NewNum(ctx.GetDB()[%v]\n", bsp.NewNum(ctx.GetDB()).Bytes())
-	ctx.response = bsp.NewNum(ctx.GetDB())
+	ctx.response = bsp.NewStr(ctx.GetDB())
 }
 
 func (svr *BlueServer) selectdb(ctx *Context) {

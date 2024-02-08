@@ -3,6 +3,7 @@ package bsp
 import (
 	"blue/common/strbytes"
 	"fmt"
+	"strconv"
 )
 
 type Reply interface {
@@ -111,11 +112,22 @@ func (s StrResp) String() string {
 	return string(s.msg)
 }
 
-func NewStr(msg []byte) *StrResp {
-	return &StrResp{
-		s:   ReplyString,
-		msg: msg,
+func NewStr(msg any) *StrResp {
+	s := &StrResp{
+		s: ReplyString,
 	}
+	switch msg.(type) {
+	case string:
+		s.msg = []byte(msg.(string))
+	case []byte:
+		s.msg = msg.([]byte)
+	case uint8:
+		s.msg = []byte(strconv.Itoa(int(msg.(uint8))))
+	default:
+		panic("wrong type")
+	}
+
+	return s
 }
 
 // ListResp -------------------------------------
