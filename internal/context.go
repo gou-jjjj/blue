@@ -23,7 +23,13 @@ type Context struct {
 	nextExec Exec
 }
 
-var bconnPool = sync.Pool{}
+var bconnPool = sync.Pool{
+	New: func() interface{} {
+		return &Context{
+			session: rand.RandString(sessionLen),
+		}
+	},
+}
 
 func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn, ok := bconnPool.Get().(*Context)
@@ -34,7 +40,9 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 			session: rand.RandString(sessionLen),
 		}
 	}
+	bconn.Context = ctx
 	bconn.conn = conn
+	fmt.Printf("%#v\n", bconn)
 	return bconn
 }
 
@@ -59,10 +67,10 @@ func (c *Context) Reply() (int, error) {
 }
 
 func (c *Context) Close() {
-	if c.conn == nil {
-		return
+	fmt.Println("context close")
+	if c.conn != nil {
+		_ = c.conn.Close()
 	}
-	_ = c.conn.Close()
 	c.db = 0
 	c.Context = nil
 	c.nextExec = nil

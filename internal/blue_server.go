@@ -2,10 +2,12 @@ package internal
 
 import (
 	"blue/bsp"
-	"blue/common/strbytes"
 	"blue/common/timewheel"
 	"context"
+	"errors"
+	"fmt"
 	"net"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -87,12 +89,14 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 			}
 
 			client.Reply()
-
 			bsp.BspPool.Put(req)
 			continue
 		case err := <-errch:
-			client.response = err
-			client.Reply()
+			if !errors.Is(err, bsp.RequestEnd) {
+				client.response = err
+				client.Reply()
+			}
+
 			return
 		}
 	}
@@ -102,8 +106,14 @@ func (svr *BlueServer) ExecChain(ctx *Context) bool {
 	switch ctx.request.Handle() {
 	case bsp.VERSION:
 		svr.version(ctx)
-	case bsp.USE:
-		svr.selectdb(ctx)
+	case bsp.SELECT:
+		fmt.Printf("%#v\n", ctx.request)
+		if ctx.request.Key() != "" {
+			svr.selectdb(ctx)
+		} else {
+			svr.selected(ctx)
+		}
+
 	default:
 		return false
 	}
@@ -111,11 +121,17 @@ func (svr *BlueServer) ExecChain(ctx *Context) bool {
 }
 
 func (svr *BlueServer) selected(ctx *Context) {
+	fmt.Printf("bsp.NewNum(ctx.GetDB()[%v]\n", bsp.NewNum(ctx.GetDB()).Bytes())
 	ctx.response = bsp.NewNum(ctx.GetDB())
 }
 
 func (svr *BlueServer) selectdb(ctx *Context) {
-	ctx.SetDB(strbytes.Bytes2Uint8(ctx.request.ValueBytes()))
+	dbIndex, err := strconv.Atoi(ctx.request.Key())
+	if err != nil {
+		ctx.response = bsp.NewErr(bsp.ErrRequestParameter)
+		return
+	}
+	ctx.SetDB(uint8(dbIndex))
 	ctx.response = bsp.NewInfo(bsp.OK)
 }
 

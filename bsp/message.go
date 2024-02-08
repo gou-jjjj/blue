@@ -35,6 +35,8 @@ const (
 	ErrHeaderType
 	ErrValueOutOfRange
 	ErrNumberArguments
+	ErrRequestParameter
+	ErrEnd
 
 	// network
 	ErrClient
@@ -58,11 +60,13 @@ var MessageMap = [...]string{
 	True:  "true",
 	False: "false",
 
-	ErrCommand:         "ERR unknown command",
-	ErrSyntax:          "ERR syntax error",
-	ErrWrongType:       "WRONGTYPE Operation against a key holding the wrong kind of value",
-	ErrHeaderType:      "ERR header type error",
-	ErrValueOutOfRange: "ERR value is out of range",
-	ErrNumberArguments: "ERR wrong number of arguments",
-	ErrReplication:     "ERR replication error",
+	ErrCommand:          "ERR unknown command",
+	ErrSyntax:           "ERR syntax error",
+	ErrWrongType:        "WRONGTYPE Operation against a key holding the wrong kind of value",
+	ErrHeaderType:       "ERR header type error",
+	ErrValueOutOfRange:  "ERR value is out of range",
+	ErrNumberArguments:  "ERR wrong number of arguments",
+	ErrReplication:      "ERR replication error",
+	ErrRequestParameter: "Err request parameter",
+	ErrEnd:              "ERR end",
 }

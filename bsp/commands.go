@@ -17,7 +17,7 @@ const (
 const (
 	DEL Header = 1 + TypeDB
 	EXPIRE Header = 2 + TypeDB
-	USE Header = 3 + TypeDB
+	SELECT Header = 3 + TypeDB
 )
 
 // number -----------------------------
@@ -47,7 +47,7 @@ var HandleMap = [...]string{
 	EXPIRE: "EXPIRE",
 	NGET: "NGET",
 	NSET: "NSET",
-	USE: "USE",
+	SELECT: "SELECT",
 	VERSION: "VERSION",
 }
 
@@ -56,7 +56,7 @@ var HandleMap2 = map[string]Header{
 	"EXPIRE": EXPIRE,
 	"NGET": NGET,
 	"NSET": NSET,
-	"USE": USE,
+	"SELECT": SELECT,
 	"VERSION": VERSION,
 }
 
@@ -65,7 +65,7 @@ var CommandsMap = [...]commands.Cmd{
 	EXPIRE: {Name:"EXPIRE",Summary: "Set a key's time to live in seconds", Group: "db", Arity: 2, Key: "string", Value: "number", Arguments: []string{}},
 	NGET: {Name:"NGET",Summary: "Returns the number value of a key.", Group: "number", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	NSET: {Name:"NSET",Summary: "Set the value of a number", Group: "number", Arity: 2, Key: "string", Value: "number", Arguments: []string{"expire"}},
-	USE: {Name:"USE",Summary: "Uses a db.", Group: "db", Arity: 1, Key: "number", Value: "", Arguments: []string{}},
+	SELECT: {Name:"SELECT",Summary: "Select a db.", Group: "db", Arity: 1, Key: "number", Value: "", Arguments: []string{}},
 	VERSION: {Name:"VERSION",Summary: "Get the version of the system.", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
 }
 

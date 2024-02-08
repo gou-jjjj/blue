@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"strconv"
@@ -66,6 +67,23 @@ func (c *Client) Version() (string, error) {
 	return c.exec(build)
 }
 
+func (c *Client) Nset(k, num string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.NSET).
+		WithKey(k).
+		WithValueNum(num).
+		Build()
+
+	return c.exec(build)
+}
+
+func (c *Client) Select(num ...string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.SELECT)
+	if len(num) != 0 {
+		build.WithKey(num[0])
+	}
+	return c.exec(build.Build())
+}
+
 func (c *Client) exec(buf []byte) (string, error) {
 	_, err := c.conn.Write(buf)
 	if err != nil {
@@ -78,6 +96,7 @@ func (c *Client) exec(buf []byte) (string, error) {
 	if err1 != nil {
 		return "", err1
 	}
+	fmt.Printf("%+b\n", bys)
 	return bsp.NewReplyMessage(bys)
 }
 

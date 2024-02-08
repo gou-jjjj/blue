@@ -25,9 +25,9 @@ func (i InfoReply) Bytes() []byte {
 
 func (i InfoReply) String() string {
 	if i.info == nil || len(i.info) == 0 {
-		return ReplyTypeMap[i.i]
+		return MessageMap[i.i]
 	} else {
-		return fmt.Sprintf("%s:%s", ReplyTypeMap[i.i], i.info)
+		return fmt.Sprintf("%s:%s", MessageMap[i.i], i.info)
 	}
 }
 
@@ -63,6 +63,11 @@ func (n NumResp) String() string {
 
 func NewNum(num any) *NumResp {
 	switch num.(type) {
+	case uint8:
+		return &NumResp{
+			n:   ReplyNumber,
+			num: []byte{num.(uint8)},
+		}
 	case uint64:
 		return &NumResp{
 			n:   ReplyNumber,
@@ -84,10 +89,8 @@ func NewNum(num any) *NumResp {
 			num: []byte(num.(string)),
 		}
 	default:
-		return &NumResp{
-			n:   ReplyNumber,
-			num: []byte{byte(0)},
-		}
+		panic("wrong type")
+		return &NumResp{}
 	}
 }
 
@@ -149,7 +152,7 @@ type ErrResp struct {
 }
 
 func (r ErrResp) Error() string {
-	return string(r.msg)
+	return r.String()
 }
 
 func (r ErrResp) Bytes() []byte {
@@ -161,10 +164,9 @@ func (r ErrResp) Bytes() []byte {
 
 func (r ErrResp) String() string {
 	if r.msg == nil || len(r.msg) == 0 {
-		return fmt.Sprintf("%s:%s", MessageMap[r.e], r.msg)
+		return MessageMap[r.e]
 	}
-
-	return MessageMap[r.e]
+	return fmt.Sprintf("%s:%s", MessageMap[r.e], r.msg)
 }
 
 func NewErr(e ReplyType, msg ...any) *ErrResp {
@@ -183,3 +185,9 @@ func NewErr(e ReplyType, msg ...any) *ErrResp {
 
 	return re
 }
+
+var (
+	RequestEnd = NewErr(ErrEnd)
+	SyntaxErr  = NewErr(ErrSyntax)
+	HeaderType = NewErr(ErrHeaderType)
+)

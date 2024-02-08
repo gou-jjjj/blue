@@ -4,18 +4,25 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
+	"strings"
 )
 
 func parse0(r io.Reader) (*BspProto, *ErrResp) {
 	reader := bufio.NewReader(r)
 	for {
 		bs, err := reader.ReadBytes(Done)
-		if err != nil || len(bs) < 2 {
-			if err != io.EOF {
-				return nil, NewErr(ErrSyntax)
+		if err != nil {
+			if normalErr(err) {
+				return nil, RequestEnd
 			}
-			return nil, nil
+
+			return nil, SyntaxErr
+		}
+
+		if len(bs) < 2 {
+			return nil, SyntaxErr
 		}
 
 		res := BspPool.Get().(*BspProto)
@@ -54,6 +61,11 @@ func parse0(r io.Reader) (*BspProto, *ErrResp) {
 }
 
 func parseReq(ctx context.Context, reader io.Reader, bp chan *BspProto, err chan *ErrResp) {
+	defer func() {
+		er := recover()
+		fmt.Printf("reco [%v]\n", er)
+	}()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -64,9 +76,16 @@ func parseReq(ctx context.Context, reader io.Reader, bp chan *BspProto, err chan
 				bp <- proto
 				break
 			}
-
+			fmt.Printf("errResp [%v]\n", errResp)
 			err <- errResp
 			return
 		}
 	}
+}
+
+func normalErr(err error) bool {
+	if strings.Contains(err.Error(), "An existing connection was forcibly closed by the remote host.") {
+		return true
+	}
+	return false
 }

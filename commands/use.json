@@ -1,8 +1,0 @@
-{
-  "name": "use",
-  "summary": "Uses a db.",
-  "group": "db",
-  "arity": 1,
-  "key": "number",
-  "arguments": []
-}

@@ -17,6 +17,12 @@ func (rb *RequestBuilder) WithKey(key string) *RequestBuilder {
 	return rb
 }
 
+func (rb *RequestBuilder) WithKeyNum(key string) *RequestBuilder {
+	by := strbytes.Str2Bytes(key)
+	rb.data = append(rb.data, by...)
+	return rb
+}
+
 func (rb *RequestBuilder) WithValueStr(value string) *RequestBuilder {
 	rb.data = append(AppendSplit(rb.data), []byte(value)...)
 	return rb
@@ -28,7 +34,7 @@ func (rb *RequestBuilder) WithValueNum(value string) *RequestBuilder {
 	return rb
 }
 
-func (rb *RequestBuilder) WithValues( values ...string) *RequestBuilder {
+func (rb *RequestBuilder) WithValues(values ...string) *RequestBuilder {
 	for _, value := range values {
 		rb.data = append(AppendSplit(rb.data), []byte(value)...)
 	}
