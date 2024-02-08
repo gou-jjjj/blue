@@ -81,6 +81,7 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 		case <-ctx.Done():
 			return
 		case req := <-bch:
+			fmt.Printf("%+v\n", req.HandleInfo())
 			client.request = req
 			client.response = bsp.Reply(nil)
 			ok := svr.ExecChain(client)
@@ -107,7 +108,6 @@ func (svr *BlueServer) ExecChain(ctx *Context) bool {
 	case bsp.VERSION:
 		svr.version(ctx)
 	case bsp.SELECT:
-		fmt.Printf("%#v\n", ctx.request)
 		if ctx.request.Key() != "" {
 			svr.selectdb(ctx)
 		} else {

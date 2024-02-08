@@ -72,6 +72,15 @@ func (c *Client) Nset(k, num string) (string, error) {
 		WithKey(k).
 		WithValueNum(num).
 		Build()
+	fmt.Printf("%b\n", build)
+	fmt.Printf("%s\n", build)
+	return c.exec(build)
+}
+
+func (c *Client) Nget(k string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.NGET).
+		WithKey(k).
+		Build()
 
 	return c.exec(build)
 }

@@ -31,7 +31,7 @@ func NewHeader(handle Header) Header {
 }
 
 func (h Header) Type() Header {
-	return h | TypeMask
+	return h & TypeMask
 }
 
 func (h Header) Handle() Header {

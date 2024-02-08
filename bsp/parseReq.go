@@ -26,7 +26,7 @@ func parse0(r io.Reader) (*BspProto, *ErrResp) {
 		}
 
 		res := BspPool.Get().(*BspProto)
-		res.Header = NewHeader(Header(bs[0]))
+		res.SetHeader(NewHeader(Header(bs[0])))
 		if res.Header == HandleErr {
 			return nil, NewErr(ErrHeaderType)
 		}
@@ -47,23 +47,29 @@ func parse0(r io.Reader) (*BspProto, *ErrResp) {
 				return nil, NewErr(ErrSyntax)
 			}
 
-			res.key = string(split[0])
-			return res, nil
+			res.SetKey(string(split[0]))
+
 		case 2:
+			if len(split) != 2 {
+				return nil, NewErr(ErrSyntax)
+			}
+			res.SetKey(string(split[0]))
+			res.SetValue(split[1])
 
 		case -1:
 
 		default:
 
 		}
-
+		return res, nil
 	}
 }
 
 func parseReq(ctx context.Context, reader io.Reader, bp chan *BspProto, err chan *ErrResp) {
 	defer func() {
-		er := recover()
-		fmt.Printf("reco [%v]\n", er)
+		if er := recover(); er != nil {
+			fmt.Printf("reco [%v]\n", er)
+		}
 	}()
 
 	for {

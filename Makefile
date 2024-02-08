@@ -7,3 +7,9 @@ bin:
 commands:
 	@go generate ./scripts/generate_commands.go
 
+run:
+	@go run ./cmd/main.go
+
+
+req:run
+	@@go run ./api/go/main.go

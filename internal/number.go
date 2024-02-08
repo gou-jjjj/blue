@@ -5,18 +5,6 @@ import (
 	"blue/datastruct/number"
 )
 
-func ExecNumberFunc(db *DB, cmd bsp.BspProto) bsp.Reply {
-	switch cmd.Handle() {
-	case bsp.NSET:
-		return Set(db, cmd)
-	case bsp.NGET:
-		return Get(db, cmd)
-	default:
-		return bsp.NewErr(bsp.ErrCommand)
-	}
-
-}
-
 func Set(db *DB, cmd bsp.BspProto) bsp.Reply {
 	db.data.RemoveWithLock(cmd.ValueStr())
 

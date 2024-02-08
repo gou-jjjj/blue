@@ -8,12 +8,16 @@ import (
 )
 
 type BspProtoInter interface {
+	SetHeader(Header)
 	Key() string
 	KeyBytes() []byte
+	SetKey(string)
 
 	Values() [][]byte
 	ValueBytes() []byte
 	ValueStr() string
+	SetValue([]byte)
+	SetValues([][]byte)
 }
 
 type BspProto struct {
@@ -28,9 +32,8 @@ var BspPool = sync.Pool{
 	},
 }
 
-// todo: 添加handle
-func (b BspProto) String() string {
-	return fmt.Sprintf("%d %s %s", b.Header, b.key, b.value)
+func (b *BspProto) String() string {
+	return fmt.Sprintf("Header: %v, Key: %s, Value: %s", b.Header.HandleInfo(), b.key, b.value)
 }
 
 func BspProtos(ctx context.Context, r io.Reader) (chan *BspProto, chan *ErrResp) {
@@ -40,22 +43,38 @@ func BspProtos(ctx context.Context, r io.Reader) (chan *BspProto, chan *ErrResp)
 	return protos, errs
 }
 
-func (b BspProto) ValueBytes() []byte {
+func (b *BspProto) ValueBytes() []byte {
 	return b.value[0]
 }
 
-func (b BspProto) ValueStr() string {
+func (b *BspProto) ValueStr() string {
 	return string(b.value[0])
 }
 
-func (b BspProto) Key() string {
+func (b *BspProto) SetHeader(h Header) {
+	b.Header = h
+}
+
+func (b *BspProto) Key() string {
 	return b.key
 }
 
-func (b BspProto) KeyBytes() []byte {
+func (b *BspProto) SetKey(key string) {
+	b.key = key
+}
+
+func (b *BspProto) KeyBytes() []byte {
 	return []byte(b.key)
 }
 
-func (b BspProto) Values() [][]byte {
+func (b *BspProto) Values() [][]byte {
 	return b.value
+}
+
+func (b *BspProto) SetValue(value []byte) {
+	b.value = [][]byte{value}
+}
+
+func (b *BspProto) SetValues(values [][]byte) {
+	b.value = values
 }

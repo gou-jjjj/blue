@@ -42,7 +42,6 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 	}
 	bconn.Context = ctx
 	bconn.conn = conn
-	fmt.Printf("%#v\n", bconn)
 	return bconn
 }
 
@@ -62,12 +61,11 @@ func (c *Context) Reply() (int, error) {
 	if c.response == nil {
 		return c.conn.Write(bsp.NewErr(bsp.ErrReplication).Bytes())
 	}
-	fmt.Printf("req:[%v]\n", c.response.String())
+	fmt.Printf("replp:[%v]\n", c.response.String())
 	return c.conn.Write(c.response.Bytes())
 }
 
 func (c *Context) Close() {
-	fmt.Println("context close")
 	if c.conn != nil {
 		_ = c.conn.Close()
 	}

@@ -5,6 +5,7 @@ import (
 	"blue/datastruct/dict"
 	"blue/datastruct/number"
 	"errors"
+	"fmt"
 	"github.com/rosedblabs/rosedb/v2"
 	"os"
 	"sync"
@@ -99,8 +100,8 @@ func (db *DB) ExecChain(ctx *Context) bool {
 	case bsp.TypeJson:
 
 	default:
+		fmt.Printf("db:[%+b]", ctx.request.Type())
 		ctx.response = bsp.NewErr(bsp.ErrCommand)
-		return true
 	}
 
 	return true
@@ -113,6 +114,7 @@ func (db *DB) ExecChainNumber(ctx *Context) {
 	case bsp.NGET:
 		ctx.response = db.nget(ctx.request)
 	default:
+		fmt.Println("ExecChainNumber:", ctx.request.Handle())
 		ctx.response = bsp.NewErr(bsp.ErrCommand)
 	}
 
