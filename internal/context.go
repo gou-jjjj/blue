@@ -1,12 +1,13 @@
 package internal
 
 import (
-	"blue/bsp"
-	"blue/common/rand"
 	"context"
 	"fmt"
 	"net"
 	"sync"
+
+	"blue/bsp"
+	"blue/common/rand"
 )
 
 const (
