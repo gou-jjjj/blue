@@ -28,7 +28,7 @@ type Consistent struct {
 	h        hashfunc
 }
 
-func New() *Consistent {
+func NewConsistent() *Consistent {
 	c := new(Consistent)
 	c.replicas = defalutReplicas
 	c.nodes = make([]Node, 0)
