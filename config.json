@@ -1,7 +1,18 @@
 {
   "server_config": {
     "ip": "127.0.0.1",
-    "port": 8080
+    "port": 8080,
+    "time_out": 10,
+    "db_sum": 8,
+    "guest_session": [
+      "1234567890", "0000000000"
+    ],
+    "admin_session": [
+      "1234567891"
+    ],
+    "root_session": [
+      "1234567892"
+    ]
   },
   "log_config": {
     "log_level": "info",
@@ -12,7 +23,7 @@
     "client_limit": 1000
   },
   "storage_config": {
-    "path": "./storage"
+    "storage_path": "./storage"
   }
 }
 

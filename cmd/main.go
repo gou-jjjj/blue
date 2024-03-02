@@ -8,14 +8,21 @@ import (
 )
 
 func main() {
-	config.InitConfig()
+	configDB := config.InitConfig()
 	log.InitSyncLog()
 
-	db := internal.NewDB(func(c *internal.DBConfig) {
-		c.DirPath = config.BC.Storage.Path
-	})
+	dbs := make([]*internal.DB, config.BC.ServerConfig.DBSum+1)
+	dbs[0] = configDB
 
-	handler := internal.NewBlueServer(db)
+	for i := 1; i <= config.BC.ServerConfig.DBSum; i++ {
+		dbs[i] = internal.NewDB(func(c *internal.DBConfig) {
+			c.SetStorage = false
+			c.DataDictSize = 1024
+			c.Index = i
+		})
+	}
+
+	handler := internal.NewBlueServer(dbs...)
 
 	server := internal.NewServer(
 		func(c *internal.Config) {

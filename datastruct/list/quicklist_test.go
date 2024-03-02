@@ -1,6 +1,7 @@
 package list
 
 import (
+	"fmt"
 	"github.com/hdt3213/godis/lib/utils"
 	"strconv"
 	"testing"
@@ -23,6 +24,7 @@ func TestQuickList_Add(t *testing.T) {
 		}
 		return true
 	})
+	fmt.Println(list.Value())
 }
 
 func BenchmarkQuickList_Add(b *testing.B) {

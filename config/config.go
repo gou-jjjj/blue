@@ -3,18 +3,28 @@ package config
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"reflect"
+
+	"blue/datastruct/list"
+	"blue/datastruct/number"
+	str "blue/datastruct/string"
+	"blue/internal"
 )
 
 var BC BlueConf
 
 type serverConfig struct {
-	Ip      string `json:"ip,omitempty"`
-	Port    int    `json:"port,omitempty"`
-	TimeOut int    `json:"time_out"`
-	DBSum   int    `json:"db_sum"`
+	Ip           string   `json:"ip,omitempty"`
+	Port         int      `json:"port,omitempty"`
+	TimeOut      int      `json:"time_out"`
+	DBSum        int      `json:"db_sum"`
+	GuestSession []string `json:"guest_session"`
+	AdminSession []string `json:"admin_session"`
+	RootSession  []string `json:"root_session"`
 }
 
 type logConfig struct {
@@ -23,12 +33,12 @@ type logConfig struct {
 }
 
 type clientConfig struct {
-	ClientLive  int   `json:"client_live,omitempty"`
-	ClientLimit int32 `json:"client_limit,omitempty"`
+	ClientLive  int `json:"client_live,omitempty"`
+	ClientLimit int `json:"client_limit,omitempty"`
 }
 
 type storageConfig struct {
-	Path string `json:"path,omitempty"`
+	StoragePath string `json:"storage_path,omitempty"`
 }
 
 type BlueConf struct {
@@ -38,11 +48,73 @@ type BlueConf struct {
 	Storage      storageConfig `json:"storage_config"`
 }
 
+func (c *BlueConf) Entries() map[string]interface{} {
+	v := reflect.ValueOf(c).Elem() // 确保c是指针类型，并获取所指向的值
+	t := v.Type()
+	entries := make(map[string]interface{})
+	for i := 0; i < t.NumField(); i++ {
+		fieldValue := v.Field(i) // 获取字段值
+		fieldType := fieldValue.Type()
+
+		if fieldValue.Kind() == reflect.Struct {
+			for j := 0; j < fieldType.NumField(); j++ {
+
+				if fieldValue.Field(j).CanInterface() { // 确保字段值可以被接口访问
+					switch fieldValue.Field(j).Type().String() {
+					case "string":
+						entries[fieldType.Field(j).Name] = str.NewString(fieldValue.Field(j).String())
+					case "[]string":
+						quickList := list.NewQuickList()
+						strings, ok := fieldValue.Field(j).Interface().([]string)
+						if !ok {
+							panic("type assertion failed")
+						}
+						for _, s := range strings {
+							quickList.Add(s)
+						}
+						entries[fieldType.Field(j).Name] = quickList
+					case "int":
+						newNumber, err := number.NewNumber(fieldValue.Field(j).Int())
+						if err != nil {
+							panic(err)
+						}
+						entries[fieldType.Field(j).Name] = newNumber
+					default:
+						panic(fieldValue.Field(j).Type().String())
+					}
+				}
+			}
+		}
+	}
+
+	return entries
+}
+
+func (c *BlueConf) String() string {
+	s := fmt.Sprintf(
+		`Ip: %v
+Port: %v
+TimeOut: %v
+DBSum: %v
+LogOut: %v
+LogLevel: %v
+ClientLive: %v
+ClientLimit: %v
+StoragePath: %v
+`,
+		c.ServerConfig.Ip, c.ServerConfig.Port, c.ServerConfig.TimeOut, c.ServerConfig.DBSum,
+		c.LogConfig.LogOut, c.LogConfig.LogLevel,
+		c.ClientConfig.ClientLive, c.ClientConfig.ClientLimit,
+		c.Storage.StoragePath)
+	return s
+}
+
 var defaultConfig = BlueConf{
 	ServerConfig: serverConfig{
 		Ip:      "127.0.0.1",
 		Port:    8080,
 		TimeOut: 10,
+		DBSum:   8,
 	},
 	LogConfig: logConfig{
 		LogOut:   "./logfile/log.log",
@@ -53,11 +125,11 @@ var defaultConfig = BlueConf{
 		ClientLimit: 10,
 	},
 	Storage: storageConfig{
-		Path: "./storage/data",
+		StoragePath: "./storage/data",
 	},
 }
 
-func InitConfig() {
+func InitConfig() *internal.DB {
 	configFile, err := os.Open("./config.json")
 	if err != nil {
 		panic(err)
@@ -82,4 +154,11 @@ func InitConfig() {
 	}
 
 	log.Printf("log init success ...")
+
+	return internal.NewDB(func(c *internal.DBConfig) {
+		c.SetStorage = false
+		c.DataDictSize = 1024
+		c.Index = 0
+		c.InitData = BC.Entries()
+	})
 }

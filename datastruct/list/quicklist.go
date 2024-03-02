@@ -1,6 +1,11 @@
 package list
 
-import "container/list"
+import (
+	iter "blue/datastruct"
+	"container/list"
+	"fmt"
+	"strings"
+)
 
 // pageSize must be even
 const pageSize = 1024
@@ -8,6 +13,7 @@ const pageSize = 1024
 // QuickList is a linked list of page (which type is []interface{})
 // QuickList has better performance than LinkedList of Add, Range and memory usage
 type QuickList struct {
+	iter.BlueObj
 	data *list.List // list of []interface{}
 	size int
 }
@@ -21,6 +27,9 @@ type iterator struct {
 
 func NewQuickList() *QuickList {
 	l := &QuickList{
+		BlueObj: iter.BlueObj{
+			Type: iter.List,
+		},
 		data: list.New(),
 	}
 	return l
@@ -387,4 +396,13 @@ func (ql *QuickList) Range(start int, stop int) []interface{} {
 		i++
 	}
 	return slice
+}
+
+func (ql *QuickList) Value() string {
+	builder := strings.Builder{}
+	ql.ForEach(func(i int, val interface{}) bool {
+		builder.WriteString(fmt.Sprintf("%v ", val))
+		return true
+	})
+	return builder.String()
 }

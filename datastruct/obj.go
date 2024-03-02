@@ -41,5 +41,5 @@ func (obj *BlueObj) GetSubType() string {
 }
 
 type Value interface {
-	Value() any
+	Value() string
 }

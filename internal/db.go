@@ -2,28 +2,32 @@ package internal
 
 import (
 	"blue/bsp"
+	"blue/datastruct"
 	"blue/datastruct/dict"
 	"blue/datastruct/number"
 	"fmt"
 	"github.com/rosedblabs/rosedb/v2"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
 
 type DBConfig struct {
-	rosedb.Options
+	StorageOptions rosedb.Options
 
+	InitData     map[string]interface{}
+	SetStorage   bool
 	DataDictSize int
-	index        int
+	Index        int
 }
 
 type DbOption func(*DBConfig)
 
 var defaultDBConfig = DBConfig{
-	Options:      rosedb.DefaultOptions,
-	DataDictSize: 1024,
-	index:        0,
+	StorageOptions: rosedb.DefaultOptions,
+	DataDictSize:   1024,
+	Index:          0,
 }
 
 type DB struct {
@@ -41,43 +45,52 @@ func NewDB(opts ...DbOption) *DB {
 		opt(&config)
 	}
 
-	options := config.Options
+	db := &DB{
+		index: config.Index,
+		data:  dict.MakeConcurrent(config.DataDictSize),
+		rw:    &sync.RWMutex{},
+	}
 
-	if _, err := os.Stat(config.DirPath); err != nil {
-		err = os.Mkdir(config.DirPath, 777)
+	if config.SetStorage {
+		options := config.StorageOptions
+
+		if _, err := os.Stat(config.StorageOptions.DirPath); err != nil {
+			err = os.Mkdir(config.StorageOptions.DirPath, 777)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		storage, err := rosedb.Open(options)
 		if err != nil {
 			panic(err)
 		}
-	}
 
-	storage, err := rosedb.Open(options)
-	if err != nil {
-		panic(err)
-	}
+		db.storage = storage
 
-	db := &DB{
-		index:   config.index,
-		data:    dict.MakeConcurrent(config.DataDictSize),
-		storage: storage,
-		rw:      &sync.RWMutex{},
-	}
+		storage.Ascend(func(k []byte, v []byte) (bool, error) {
+			ttl, err := storage.TTL(k)
+			if err != nil {
+				db.data.Put(string(k), DataEntity{
+					Val:    v,
+					Expire: 0,
+				})
+			}
 
-	storage.Ascend(func(k []byte, v []byte) (bool, error) {
-		ttl, err := storage.TTL(k)
-		if err != nil {
 			db.data.Put(string(k), DataEntity{
 				Val:    v,
-				Expire: 0,
+				Expire: uint64(time.Now().Second()) + uint64(ttl),
 			})
-		}
 
-		db.data.Put(string(k), DataEntity{
-			Val:    v,
-			Expire: uint64(time.Now().Second()) + uint64(ttl),
+			return true, nil
 		})
+	}
 
-		return true, nil
-	})
+	if config.InitData != nil {
+		for k, v := range config.InitData {
+			db.data.Put(k, v)
+		}
+	}
 
 	return db
 }
@@ -127,10 +140,36 @@ func (db *DB) ExecChainNumber(ctx *Context) {
 
 func (db *DB) ExecChainString(ctx *Context) {}
 
+func (db *DB) StoragePut(key []byte, value []byte) error {
+	if db.storage == nil {
+		return nil
+	}
+
+	return db.storage.Put(key, value)
+}
+
+func (db *DB) StorageDelete(key []byte) error {
+	if db.storage == nil {
+		return nil
+	}
+
+	return db.storage.Delete(key)
+}
+
+func (db *DB) RangeKV() string {
+	builder := strings.Builder{}
+	db.data.ForEach(func(key string, val interface{}) bool {
+		builder.WriteString(fmt.Sprintf("%s: %s\n", key, val.(datastruct.Value).Value()))
+		return true
+	})
+
+	return builder.String()
+}
+
 func (db *DB) del(key [][]byte) bsp.Reply {
 	for i := range key {
 		db.data.Remove(string(key[i]))
-		err := db.storage.Delete(key[i])
+		err := db.StorageDelete(key[i])
 		if err != nil {
 			return bsp.NewErr(bsp.ErrStorage)
 		}
@@ -147,7 +186,7 @@ func (db *DB) nset(cmd *bsp.BspProto) bsp.Reply {
 	}
 
 	db.data.Put(cmd.Key(), newNumber)
-	err = db.storage.Put(cmd.KeyBytes(), cmd.ValueBytes())
+	err = db.StoragePut(cmd.KeyBytes(), cmd.ValueBytes())
 	if err != nil {
 		return bsp.NewErr(bsp.ErrStorage)
 	}

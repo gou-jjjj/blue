@@ -35,6 +35,8 @@ func NewNumber(number ...any) (*NorNum, error) {
 				return nil, err
 			}
 			n.Set(parseInt)
+		case int64:
+			n.Set(number[0].(int64))
 		default:
 			return nil, bsp.NewErr(bsp.ErrWrongType)
 		}
@@ -43,8 +45,8 @@ func NewNumber(number ...any) (*NorNum, error) {
 	return n, nil
 }
 
-func (n *NorNum) Value() int64 {
-	return n.v
+func (n *NorNum) Value() string {
+	return strconv.FormatInt(n.v, 10)
 }
 
 func (n *NorNum) Add(val int64) int64 {

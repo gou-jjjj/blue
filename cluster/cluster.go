@@ -1,14 +1,30 @@
 package cluster
 
-import "sync"
+import (
+	"blue/internal"
+	"sync"
+)
 
 type Cluster struct {
 	rw        sync.RWMutex
 	observers []string
+	c         Consistent
+	s         internal.Server
 }
 
-func NewCluster() {
+func NewCluster() *Cluster {
+	clu := &Cluster{
+		rw:        sync.RWMutex{},
+		observers: nil,
+		c:         Consistent{},
+		s:         internal.Server{},
+	}
 
+	return clu
+}
+
+func (c *Cluster) Listen() {
+	c.s.Start()
 }
 
 func (c *Cluster) Register(addr ...string) {
@@ -27,21 +43,5 @@ func (c *Cluster) Unregister(addr ...string) {
 				break
 			}
 		}
-	}
-}
-
-func (c *Cluster) Online(addr ...string) {
-	c.Register(addr...)
-
-	for i := range c.observers {
-
-		_ = i
-	}
-}
-
-func (c *Cluster) Offline(addr ...string) {
-	c.Unregister(addr...)
-	for i := range c.observers {
-		_ = i
 	}
 }

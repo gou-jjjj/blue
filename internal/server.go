@@ -29,7 +29,7 @@ type Config struct {
 	Timeout     time.Duration
 	Log         logs.Logger
 	Port        int
-	ClientLimit int32
+	ClientLimit int
 	HandlerFunc ServerInter
 }
 
@@ -130,7 +130,7 @@ func (s *Server) Start() {
 }
 
 func (s *Server) limit(conn net.Conn) bool {
-	if s.currentClient == s.c.ClientLimit {
+	if s.currentClient == int32(s.c.ClientLimit) {
 		conn.Write([]byte("too many client ,try again later ..."))
 		conn.Close()
 		return true

@@ -27,6 +27,7 @@ type Context struct {
 var bconnPool = sync.Pool{
 	New: func() interface{} {
 		return &Context{
+			db:      1,
 			session: rand.RandString(sessionLen),
 		}
 	},
@@ -36,6 +37,7 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn, ok := bconnPool.Get().(*Context)
 	if !ok {
 		return &Context{
+			db:      1,
 			Context: ctx,
 			conn:    conn,
 			session: rand.RandString(sessionLen),
@@ -51,6 +53,7 @@ func (c *Context) SetNext(next Exec) {
 }
 
 func (c *Context) GetDB() uint8 {
+	fmt.Println("db: ", c.db)
 	return c.db
 }
 
@@ -70,7 +73,7 @@ func (c *Context) Close() {
 	if c.conn != nil {
 		_ = c.conn.Close()
 	}
-	c.db = 0
+	c.db = 1
 	c.Context = nil
 	c.nextExec = nil
 	c.request = nil
