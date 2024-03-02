@@ -1,0 +1,6 @@
+{
+  "name": "kvs",
+  "summary": "Returns all key-value pairs in the database",
+  "group": "system",
+  "arguments": []
+}

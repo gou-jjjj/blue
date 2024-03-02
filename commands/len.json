@@ -1,0 +1,8 @@
+{
+  "name": "len",
+  "summary": "Returns the length of a string",
+  "group": "string",
+  "key": "string",
+  "arity": 1,
+  "arguments": []
+}

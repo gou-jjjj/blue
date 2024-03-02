@@ -1,0 +1,11 @@
+{
+  "name": "set",
+  "summary": "Set the value of a key",
+  "group": "string",
+  "key": "string",
+  "arity": 2,
+  "value": "string",
+  "arguments": [
+    "expire"
+  ]
+}

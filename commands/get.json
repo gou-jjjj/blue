@@ -1,0 +1,8 @@
+{
+  "name": "get",
+  "summary": "Returns the string value of a key.",
+  "group": "string",
+  "key": "string",
+  "arity": 1,
+  "arguments": []
+}
