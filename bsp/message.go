@@ -62,7 +62,7 @@ var MessageMap = [...]string{
 
 	ErrCommand:          "ERR unknown command",
 	ErrSyntax:           "ERR syntax error",
-	ErrWrongType:        "WRONGTYPE Operation against a key holding the wrong kind of value",
+	ErrWrongType:        "Err Operation against a key holding the wrong kind of value",
 	ErrHeaderType:       "ERR header type error",
 	ErrValueOutOfRange:  "ERR value is out of range",
 	ErrNumberArguments:  "ERR wrong number of arguments",

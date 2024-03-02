@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"strconv"
@@ -82,6 +81,32 @@ func (c *Client) Nset(k, num string) (string, error) {
 	return c.exec(build)
 }
 
+func (c *Client) Get(k string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.GET).WithKey(k).Build()
+	return c.exec(build)
+}
+
+func (c *Client) Set(k, v string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.SET).
+		WithKey(k).
+		WithValueStr(v).
+		Build()
+
+	return c.exec(build)
+}
+
+func (c *Client) Len(k string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.LEN).WithKey(k).Build()
+
+	return c.exec(build)
+}
+
+func (c *Client) Kvs() (string, error) {
+	build := bsp.NewRequestBuilder(bsp.KVS).Build()
+
+	return c.exec(build)
+}
+
 func (c *Client) Nget(k string) (string, error) {
 	build := bsp.NewRequestBuilder(bsp.NGET).
 		WithKey(k).
@@ -110,7 +135,7 @@ func (c *Client) exec(buf []byte) (string, error) {
 	if err1 != nil {
 		return "", err1
 	}
-	fmt.Printf("%+b\n", bys)
+
 	return bsp.NewReplyMessage(bys)
 }
 

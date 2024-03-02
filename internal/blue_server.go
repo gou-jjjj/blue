@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"blue/bsp"
-	"blue/common/timewheel"
 	"context"
 	"errors"
 	"fmt"
@@ -11,6 +9,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"blue/bsp"
+	"blue/common/timewheel"
 )
 
 type Exec interface {
@@ -113,6 +114,8 @@ func (svr *BlueServer) ExecChain(ctx *Context) bool {
 		} else {
 			svr.selected(ctx)
 		}
+	case bsp.KVS:
+		svr.kvs(ctx)
 
 	default:
 		return false
@@ -130,12 +133,28 @@ func (svr *BlueServer) selectdb(ctx *Context) {
 		ctx.response = bsp.NewErr(bsp.ErrRequestParameter)
 		return
 	}
+
+	if dbIndex < 0 || dbIndex >= len(svr.db) {
+		ctx.response = bsp.NewErr(bsp.ErrRequestParameter)
+		return
+	}
+
 	ctx.SetDB(uint8(dbIndex))
 	ctx.response = bsp.NewInfo(bsp.OK)
 }
 
 func (svr *BlueServer) version(ctx *Context) {
 	ctx.response = bsp.NewStr([]byte("blue v0.1"))
+}
+
+func (svr *BlueServer) kvs(ctx *Context) {
+	kv := svr.db[ctx.GetDB()].RangeKV()
+
+	if kv == "" {
+		ctx.response = bsp.NewInfo(bsp.NULL)
+	} else {
+		ctx.response = bsp.NewStr(kv)
+	}
 }
 
 func (svr *BlueServer) isClose() bool {
