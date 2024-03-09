@@ -27,6 +27,16 @@ type serverConfig struct {
 	RootSession  []string `json:"root_session"`
 }
 
+type clusterConfig struct {
+	Cluster     int    `json:"cluster,omitempty"`
+	Ip          string `json:"ip,omitempty"`
+	Port        int    `json:"port,omitempty"`
+	TryTimes    int    `json:"try_times,omitempty"`
+	DialTimeout int    `json:"dial_timeout,omitempty"`
+	Replicas    int    `json:"replicas,omitempty"`
+	Consistent  int    `json:"consistent,omitempty"`
+}
+
 type logConfig struct {
 	LogOut   string `json:"log_out,omitempty"`
 	LogLevel string `json:"log_level,omitempty"`
@@ -43,6 +53,7 @@ type storageConfig struct {
 
 type BlueConf struct {
 	ServerConfig serverConfig  `json:"server_config"`
+	Cluster      clusterConfig `json:"cluster_config"`
 	LogConfig    logConfig     `json:"log_config"`
 	ClientConfig clientConfig  `json:"client_config"`
 	Storage      storageConfig `json:"storage_config"`

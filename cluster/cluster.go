@@ -105,18 +105,28 @@ func (c *Cluster) Unregister(addr ...string) {
 
 func (c *Cluster) Notify(addr string) {
 	for _, observer := range c.observers {
-		dial, err := net.DialTimeout(network, observer, c.dialTimeout)
-		if err != nil {
-			// 记录连接失败的地址
+		if observer == addr {
 			continue
 		}
 
-		_, err = dial.Write([]byte(addr))
-		if err != nil {
-			dial.Close() // 及时关闭连接
-			continue
-		}
-		dial.Close() // 及时关闭连接
+		go func(addr string, observer string) {
+			conn, err := net.DialTimeout(network, observer, c.dialTimeout)
+			if err != nil {
+				for i := 0; i < c.tryTimes; i++ {
+					conn, err = net.DialTimeout(network, observer, c.dialTimeout)
+					if err == nil {
+						break
+					}
+				}
+			}
+
+			if err != nil {
+				return
+			}
+
+			conn.Write([]byte(addr))
+			conn.Close()
+		}(addr, observer)
 	}
 }
 
@@ -126,4 +136,11 @@ func (c *Cluster) Online(addr string) {
 
 func (c *Cluster) Offline(addr string) {
 	c.Notify("-" + addr)
+}
+
+func (c *Cluster) Close() {
+	addr := c.listener.Addr().String()
+
+	c.Offline(addr)
+	c.listener.Close()
 }

@@ -1,11 +1,12 @@
 {
   "server_config": {
     "ip": "127.0.0.1",
-    "port": 8080,
+    "port": 13140,
     "time_out": 10,
     "db_sum": 8,
     "guest_session": [
-      "1234567890", "0000000000"
+      "1234567890",
+      "0000000000"
     ],
     "admin_session": [
       "1234567891"
@@ -13,6 +14,15 @@
     "root_session": [
       "1234567892"
     ]
+  },
+  "cluster_config": {
+    "cluster": 1,
+    "ip": "127.0.0.1",
+    "port": 13141,
+    "try_times": 3,
+    "dial_timeout": 10,
+    "replicas": 1000,
+    "consistent": 100
   },
   "log_config": {
     "log_level": "info",

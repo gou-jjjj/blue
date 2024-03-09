@@ -4,8 +4,10 @@ import (
 	"blue/common/rand"
 	"blue/config"
 	"context"
+	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/rs/zerolog"
 )
@@ -80,7 +82,8 @@ func NewZeroLog(level zerolog.Level, count int, outPath string) *BlueLog {
 
 	for i := 0; i < count; i++ {
 		r := rand.RandString(8)
-		create, err := os.Create(outPath + "/" + r + ".log")
+		addtime:=fmt.Sprintf("%s-%s",time.Now().Format("2006:01:02-15:04:05"),r)
+		create, err := os.Create(outPath + "/" + addtime + ".log")
 		if err != nil {
 			panic(err)
 		}

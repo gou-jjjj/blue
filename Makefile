@@ -12,4 +12,4 @@ run:
 
 
 req:run
-	@@go run ./api/go/main.go
+	@go run ./api/go/main.go

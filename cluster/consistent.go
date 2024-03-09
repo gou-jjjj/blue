@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"blue/config"
 	"hash/crc32"
 	"slices"
 	"sort"
@@ -8,8 +9,7 @@ import (
 	"sync"
 )
 
-const defalutReplicas = 1000
-
+var defalutReplicas = config.BC.Cluster.Replicas
 var defalutHash = crc32.ChecksumIEEE
 
 type hashfunc func(data []byte) uint32
