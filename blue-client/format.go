@@ -24,6 +24,6 @@ func ErrPrint(d any) {
 	fmt.Printf("%v\n", d)
 }
 
-func SuccessPrint(d any) {
-	fmt.Printf("%v\n", d)
+func SuccessPrint(d string) {
+	fmt.Printf("%v\n", GreenMessage(d))
 }

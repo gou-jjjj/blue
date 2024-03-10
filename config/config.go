@@ -164,7 +164,7 @@ func InitConfig() *internal.DB {
 		panic(err)
 	}
 
-	log.Printf("log init success ...")
+	log.Printf("config init success ...")
 
 	return internal.NewDB(func(c *internal.DBConfig) {
 		c.SetStorage = false

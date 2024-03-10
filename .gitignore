@@ -26,3 +26,4 @@ storage
 logs
 test
 .DS_Store
+blue-client/bin

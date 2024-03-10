@@ -12,19 +12,12 @@ import (
 var BC = new(BlueConf)
 
 type BlueConf struct {
-	Ip       string `json:"ip,omitempty"`
-	Port     int    `json:"port,omitempty"`
-	TimeOut  int    `json:"time_out"`
-	TryTimes int    `json:"try_times"`
-
-	LogOut string `json:"log_out,omitempty"`
-}
-
-var defaultConf = BlueConf{
-	Ip:      "127.0.0.1",
-	Port:    8080,
-	TimeOut: 60,
-	LogOut:  "./log",
+	Ip       string
+	Port     int
+	TimeOut  int
+	TryTimes int
+	DB       int
+	LogOut   string
 }
 
 func init() {
@@ -90,11 +83,6 @@ func parse(str string, conf *BlueConf) {
 				parseInt, err := strconv.Atoi(confs[1])
 				if err == nil {
 					field.SetInt(int64(parseInt))
-				}
-			case reflect.Uint16:
-				parseUint, err := strconv.ParseUint(confs[1], 10, 16)
-				if err == nil {
-					field.SetUint(parseUint)
 				}
 			default:
 				panic("unknown config")

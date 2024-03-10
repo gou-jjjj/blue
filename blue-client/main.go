@@ -1,18 +1,64 @@
 package main
 
 import (
-	"blue/bsp"
 	"bufio"
 	"fmt"
-	"io"
-	"net"
 	"os"
+	"strconv"
 	"strings"
+	"time"
+
+	g "blue/api/go"
 )
 
 var (
-	conn net.Conn
+	conn *g.Client
 )
+
+func init() {
+	Connect()
+}
+
+func Connect() {
+	conn = g.NewClient(func(c *g.Config) {
+		c.Ip = BC.Ip
+		c.Port = BC.Port
+		c.TimeOut = time.Duration(BC.TimeOut) * time.Second
+		c.TryTimes = BC.TryTimes
+	})
+}
+
+// num get a
+func main() {
+	// 从标准输入创建一个新的 bufio.Reader
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		remoteAddr := conn.RemoteAddr()
+		fmt.Printf("%s> %s>", remoteAddr, BlueMessage(strconv.Itoa(BC.DB)))
+		// 读取直到遇到换行符
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			ErrPrint(ErrRead(err.Error()))
+			continue
+		}
+
+		split := TidyInput(input)
+
+		if len(split) == 0 {
+			continue
+		}
+
+	Resend:
+		res, err := Exec(split)
+		if err != nil {
+			Connect()
+			goto Resend
+		}
+
+		SuccessPrint(res)
+	}
+}
 
 func TidyInput(input string) []string {
 	input = strings.TrimSpace(input)
@@ -28,76 +74,45 @@ func TidyInput(input string) []string {
 	return newSplit
 }
 
-func init() {
-	Connect()
-}
-
-func Connect() {
-	var err error
-	for i := 0; i < BC.TryTimes; i++ {
-		conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", BC.Ip, BC.Port))
-		if err != nil {
-			ErrPrint(ErrConnect(err.Error()))
-			os.Exit(1)
-		}
+/*
+Version() (string, error)
+Select(...string) (string, error)
+Del(string) (string, error)
+Nset(string, string) (string, error)
+Get(string) (string, error)
+Set(string, string) (string, error)
+Len(string) (string, error)
+Kvs() (string, error)
+Nget(string) (string, error)
+*/
+func Exec(s []string) (string, error) {
+	if len(s) == 0 {
+		return "", ErrCommand(s[0])
 	}
-}
 
-// num get a
-func main() {
-	// 从标准输入创建一个新的 bufio.Reader
-	reader := bufio.NewReader(os.Stdin)
-
-	for {
-		remoteAddr := conn.RemoteAddr()
-		fmt.Printf("%s> ", remoteAddr.String())
-		// 读取直到遇到换行符
-		input, err := reader.ReadString('\n')
-		if err != nil {
-			ErrPrint(ErrRead(err.Error()))
-			continue
+	switch s[0] {
+	case "set":
+		if len(s) != 3 {
+			return "", ErrArgu(s[0])
 		}
-
-		split := TidyInput(input)
-
-		if len(split) == 0 {
-			continue
+		return conn.Set(s[1], s[2])
+	case "del":
+		if len(s) != 2 {
+			return "", ErrArgu(s[0])
 		}
-
-		exec, err := Exec(split)
-		if err != nil {
-			ErrPrint(err)
-			continue
+		return conn.Del(s[1])
+	case "version":
+		if len(s) != 1 {
+			return "", ErrArgu(s[0])
 		}
-
-		//for _, b := range exec {
-		//	fmt.Printf("[%b]\n", b)
-		//}
-		//continue
-	Resend:
-		_, err = conn.Write(exec)
-		if err != nil {
-			Connect()
-			goto Resend
+		return conn.Version()
+	case "get":
+		if len(s) != 2 {
+			return "", ErrArgu(s[0])
 		}
+		return conn.Get(s[1])
 
-		buf := make([]byte, 1024)
-		n, err := conn.Read(buf)
-		if err != nil && err != io.EOF {
-			ErrPrint(ErrConnect(err.Error()))
-			continue
-		}
-		bytes := buf[:n]
-
-		resp, err := bsp.NewReplyMessage(bytes)
-		if err != nil {
-			ErrPrint(err)
-			continue
-		}
-		SuccessPrint(GreenMessage(resp))
+	default:
+		return "", ErrCommand(s[0])
 	}
-}
-
-func Exec(s []string) ([]byte, error) {
-	return nil, nil
 }

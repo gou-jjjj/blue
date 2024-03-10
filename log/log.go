@@ -5,6 +5,7 @@ import (
 	"blue/config"
 	"context"
 	"fmt"
+	lo "log"
 	"os"
 	"sync"
 	"time"
@@ -38,9 +39,9 @@ func InitSyncLog() {
 func newSyncLog() *BlueLog {
 	dir := config.BC.LogConfig.LogOut
 
-	log := NewZeroLog(logLevel(), 1, dir)
-	log.Info("log init success ...")
-	return log
+	logx := NewZeroLog(logLevel(), 1, dir)
+	lo.Printf("log init success ...")
+	return logx
 }
 
 type BlueLog struct {
@@ -82,7 +83,7 @@ func NewZeroLog(level zerolog.Level, count int, outPath string) *BlueLog {
 
 	for i := 0; i < count; i++ {
 		r := rand.RandString(8)
-		addtime:=fmt.Sprintf("%s-%s",time.Now().Format("2006:01:02-15:04:05"),r)
+		addtime := fmt.Sprintf("%s-%s", time.Now().Format("2006:01:02-15:04:05"), r)
 		create, err := os.Create(outPath + "/" + addtime + ".log")
 		if err != nil {
 			panic(err)

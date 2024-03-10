@@ -4,10 +4,19 @@ import (
 	"blue/config"
 	"blue/internal"
 	"blue/log"
+	"fmt"
 	"time"
 )
 
+var title = `  _       _                
+ | |__   | |  _   _    ___ 
+ | '_ \  | | | | | |  / _ \
+ | |_) | | | | |_| | |  __/
+ |_.__/  |_|  \__,_|  \___|
+                           `
+
 func main() {
+	fmt.Printf("\033[34m%s\033[0m\n", title)
 	configDB := config.InitConfig()
 	log.InitSyncLog()
 

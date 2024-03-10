@@ -1,2 +1,5 @@
 build:
-	go build -o ./build/blue-cli ./
+	@rm -rf ./bin
+	@go build -o ./bin/blue-cli ./
+	@cp ./blue-cli.conf ./bin/
+	@echo "Build blue-cli successfully"

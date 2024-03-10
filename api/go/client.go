@@ -1,4 +1,4 @@
-package main
+package blue
 
 import (
 	"blue/bsp"
@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 	"strconv"
+	"time"
 )
 
 var (
@@ -17,8 +18,11 @@ var (
 type Option func(*Config)
 
 type Config struct {
-	ip   string
-	port int
+	Ip       string
+	Port     int
+	DB       int
+	TryTimes int
+	TimeOut  time.Duration
 }
 
 type Client struct {
@@ -28,8 +32,11 @@ type Client struct {
 
 func WithDefaultOpt() Option {
 	return func(c *Config) {
-		c.ip = "127.0.0.1"
-		c.port = 8080
+		c.Ip = "127.0.0.1"
+		c.Port = 13140
+		c.TimeOut = 5 * time.Second
+		c.TryTimes = 3
+		c.DB = 1
 	}
 }
 
@@ -39,25 +46,39 @@ func NewClient(opts ...Option) *Client {
 		opt(c)
 	}
 
-	dial, err := net.Dial("tcp", c.ip+":"+strconv.Itoa(c.port))
+	cli := &Client{
+		Config: *c,
+	}
+
+	cli.connect()
+
+	_, err := cli.Select(strconv.Itoa(c.DB))
 	if err != nil {
 		panic(err)
 	}
 
-	cli := &Client{
-		Config: *c,
-		conn:   dial,
-	}
 	return cli
 }
 
-func (c *Client) Addr() string {
+func (c *Client) connect() {
+	var err error
+	for i := 0; i < c.TryTimes; i++ {
+		c.conn, err = net.DialTimeout("tcp", c.Ip+":"+strconv.Itoa(c.Port), c.TimeOut)
+		if err == nil {
+			return
+		}
+	}
+
+	panic(err)
+}
+
+func (c *Client) RemoteAddr() string {
 	return c.conn.RemoteAddr().String()
 }
 
 func (c *Client) SetAddr(ip string, port int) {
-	c.ip = ip
-	c.port = port
+	c.Ip = ip
+	c.Port = port
 }
 
 func (c *Client) Version() (string, error) {

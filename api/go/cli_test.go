@@ -1,8 +1,11 @@
-package main
+package blue
 
-import "fmt"
+import (
+	"fmt"
+	"testing"
+)
 
-func main() {
+func TestCli(t *testing.T) {
 	c := NewClient(WithDefaultOpt())
 	fmt.Println(c.Select())
 	fmt.Println(c.Select("43"))
