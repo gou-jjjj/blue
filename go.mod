@@ -5,8 +5,8 @@ go 1.21
 require (
 	github.com/hdt3213/godis v1.2.9
 	github.com/panjf2000/ants/v2 v2.9.0
-	github.com/rosedblabs/rosedb/v2 v2.3.4
-	github.com/rs/zerolog v1.31.0
+	github.com/rosedblabs/rosedb/v2 v2.3.5
+	github.com/rs/zerolog v1.32.0
 )
 
 require (
