@@ -12,7 +12,6 @@ import (
 	"blue/datastruct/list"
 	"blue/datastruct/number"
 	str "blue/datastruct/string"
-	"blue/internal"
 )
 
 var BC BlueConf
@@ -43,8 +42,8 @@ type logConfig struct {
 }
 
 type clientConfig struct {
-	ClientLive  int `json:"client_live,omitempty"`
-	ClientLimit int `json:"client_limit,omitempty"`
+	ClientActive int `json:"client_active,omitempty"`
+	ClientLimit  int `json:"client_limit,omitempty"`
 }
 
 type storageConfig struct {
@@ -115,7 +114,7 @@ StoragePath: %v
 `,
 		c.ServerConfig.Ip, c.ServerConfig.Port, c.ServerConfig.TimeOut, c.ServerConfig.DBSum,
 		c.LogConfig.LogOut, c.LogConfig.LogLevel,
-		c.ClientConfig.ClientLive, c.ClientConfig.ClientLimit,
+		c.ClientConfig.ClientActive, c.ClientConfig.ClientLimit,
 		c.Storage.StoragePath)
 	return s
 }
@@ -132,15 +131,15 @@ var defaultConfig = BlueConf{
 		LogLevel: "Info",
 	},
 	ClientConfig: clientConfig{
-		ClientLive:  10,
-		ClientLimit: 10,
+		ClientActive: 10,
+		ClientLimit:  10,
 	},
 	Storage: storageConfig{
 		StoragePath: "./storage/data",
 	},
 }
 
-func InitConfig() *internal.DB {
+func InitConfig() map[string]interface{} {
 	configFile, err := os.Open("./config.json")
 	if err != nil {
 		panic(err)
@@ -166,10 +165,5 @@ func InitConfig() *internal.DB {
 
 	log.Printf("config init success ...")
 
-	return internal.NewDB(func(c *internal.DBConfig) {
-		c.SetStorage = false
-		c.DataDictSize = 1024
-		c.Index = 0
-		c.InitData = BC.Entries()
-	})
+	return BC.Entries()
 }

@@ -20,8 +20,8 @@ func BlueMessage(s string) string {
 	return fmt.Sprintf("\033[34m%s\033[0m", s)
 }
 
-func ErrPrint(d any) {
-	fmt.Printf("%v\n", d)
+func ErrPrint(d string) {
+	fmt.Printf("%v\n", RedMessage(d))
 }
 
 func SuccessPrint(d string) {

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"blue/bsp"
 	"context"
 	"errors"
 	"fmt"
@@ -8,9 +9,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
 
-	"blue/bsp"
 	"blue/common/timewheel"
 )
 
@@ -74,7 +73,7 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 	}()
 
 	for {
-		timewheel.Delay(1*time.Minute, client.session, func() {
+		timewheel.Delay(client.maxActive, client.session, func() {
 			svr.closeClient(client)
 		})
 

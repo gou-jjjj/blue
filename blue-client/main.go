@@ -39,7 +39,7 @@ func main() {
 		// 读取直到遇到换行符
 		input, err := reader.ReadString('\n')
 		if err != nil {
-			ErrPrint(ErrRead(err.Error()))
+			ErrPrint(ErrRead(err.Error()).Error())
 			continue
 		}
 
@@ -49,11 +49,19 @@ func main() {
 			continue
 		}
 
-	Resend:
 		res, err := Exec(split)
 		if err != nil {
+			if !strings.Contains(err.Error(), "broken pipe") {
+				ErrPrint(err.Error())
+				continue
+			}
+
 			Connect()
-			goto Resend
+			res, err = Exec(split)
+			if err != nil {
+				ErrPrint(err.Error())
+				os.Exit(0)
+			}
 		}
 
 		SuccessPrint(res)
@@ -91,6 +99,9 @@ func Exec(s []string) (string, error) {
 	}
 
 	switch s[0] {
+	case "exit":
+		os.Exit(0)
+		//return "", nil
 	case "set":
 		if len(s) != 3 {
 			return "", ErrArgu(s[0])
@@ -115,4 +126,5 @@ func Exec(s []string) (string, error) {
 	default:
 		return "", ErrCommand(s[0])
 	}
+	return "", nil
 }

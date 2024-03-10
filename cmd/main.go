@@ -21,7 +21,12 @@ func main() {
 	log.InitSyncLog()
 
 	dbs := make([]*internal.DB, config.BC.ServerConfig.DBSum+1)
-	dbs[0] = configDB
+	dbs[0] = internal.NewDB(func(c *internal.DBConfig) {
+		c.SetStorage = false
+		c.DataDictSize = 1024
+		c.Index = 0
+		c.InitData = configDB
+	})
 
 	for i := 1; i <= config.BC.ServerConfig.DBSum; i++ {
 		dbs[i] = internal.NewDB(func(c *internal.DBConfig) {

@@ -1,10 +1,12 @@
 package internal
 
 import (
+	"blue/config"
 	"context"
 	"fmt"
 	"net"
 	"sync"
+	"time"
 
 	"blue/bsp"
 	"blue/common/rand"
@@ -15,13 +17,15 @@ const (
 )
 
 type Context struct {
-	context.Context
-	conn     net.Conn
-	db       uint8
-	session  string
-	request  *bsp.BspProto
-	response bsp.Reply
 	nextExec Exec
+
+	context.Context
+	conn      net.Conn
+	db        uint8
+	session   string
+	request   *bsp.BspProto
+	response  bsp.Reply
+	maxActive time.Duration
 }
 
 var bconnPool = sync.Pool{
@@ -37,14 +41,20 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn, ok := bconnPool.Get().(*Context)
 	if !ok {
 		return &Context{
-			db:      1,
 			Context: ctx,
 			conn:    conn,
+			db:      1,
 			session: rand.RandString(sessionLen),
+			maxActive: time.Duration(config.BC.ClientConfig.ClientActive) *
+				time.Second,
 		}
 	}
 	bconn.Context = ctx
 	bconn.conn = conn
+	bconn.db = 1
+	bconn.session = rand.RandString(sessionLen)
+	bconn.maxActive = time.Duration(config.BC.ClientConfig.ClientActive) * time.Second
+
 	return bconn
 }
 
@@ -78,6 +88,7 @@ func (c *Context) Close() {
 	c.nextExec = nil
 	c.request = nil
 	c.response = nil
+	c.maxActive = 0
 	bconnPool.Put(c)
 	return
 }
