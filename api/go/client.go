@@ -18,10 +18,10 @@ var (
 type Option func(*Config)
 
 type Config struct {
-	Ip       string
-	Port     int
+	Addr     string
 	DB       int
 	TryTimes int
+	token    string
 	TimeOut  time.Duration
 }
 
@@ -32,11 +32,29 @@ type Client struct {
 
 func WithDefaultOpt() Option {
 	return func(c *Config) {
-		c.Ip = "127.0.0.1"
-		c.Port = 13140
+		c.Addr = "127.0.0.1:13140"
 		c.TimeOut = 5 * time.Second
 		c.TryTimes = 3
 		c.DB = 1
+	}
+}
+
+func WithCluster(addr string, token string) Option {
+	return func(c *Config) {
+		c.Addr = addr
+		c.token = token
+	}
+}
+
+func WithAddr(addr string) Option {
+	return func(c *Config) {
+		c.Addr = addr
+	}
+}
+
+func WithToken(token string) Option {
+	return func(c *Config) {
+		c.token = token
 	}
 }
 
@@ -63,7 +81,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) connect() {
 	var err error
 	for i := 0; i < c.TryTimes; i++ {
-		c.conn, err = net.DialTimeout("tcp", c.Ip+":"+strconv.Itoa(c.Port), c.TimeOut)
+		c.conn, err = net.DialTimeout("tcp", c.Addr, c.TimeOut)
 		if err == nil {
 			return
 		}
@@ -74,11 +92,6 @@ func (c *Client) connect() {
 
 func (c *Client) RemoteAddr() string {
 	return c.conn.RemoteAddr().String()
-}
-
-func (c *Client) SetAddr(ip string, port int) {
-	c.Ip = ip
-	c.Port = port
 }
 
 func (c *Client) Version() (string, error) {

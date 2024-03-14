@@ -1,0 +1,9 @@
+{
+  "name": "lpush",
+  "summary": "Insert values at the head of the list stored at key.",
+  "group": "list",
+  "key": "string",
+  "arity": 2,
+  "value": "string",
+  "arguments": []
+}

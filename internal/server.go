@@ -16,8 +16,7 @@ import (
 )
 
 const (
-	NetWork = "tcp"
-
+	NetWork        = "tcp"
 	MaxClientLimit = 1<<16 - 1
 	TimeOut        = 10 * time.Second
 )

@@ -1,0 +1,9 @@
+{
+  "name": "lset",
+  "summary": "Set the value of a list",
+  "group": "list",
+  "key": "string",
+  "arity":2,
+  "value": "string",
+  "arguments": []
+}

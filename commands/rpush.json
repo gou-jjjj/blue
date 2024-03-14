@@ -1,0 +1,9 @@
+{
+  "name": "rpush",
+  "summary": "Add the value to the end of the list stored at key",
+  "group": "list",
+  "key": "string",
+  "arity": 2,
+  "value": "string",
+  "arguments": []
+}

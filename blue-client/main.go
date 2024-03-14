@@ -82,49 +82,4 @@ func TidyInput(input string) []string {
 	return newSplit
 }
 
-/*
-Version() (string, error)
-Select(...string) (string, error)
-Del(string) (string, error)
-Nset(string, string) (string, error)
-Get(string) (string, error)
-Set(string, string) (string, error)
-Len(string) (string, error)
-Kvs() (string, error)
-Nget(string) (string, error)
-*/
-func Exec(s []string) (string, error) {
-	if len(s) == 0 {
-		return "", ErrCommand(s[0])
-	}
 
-	switch s[0] {
-	case "exit":
-		os.Exit(0)
-		//return "", nil
-	case "set":
-		if len(s) != 3 {
-			return "", ErrArgu(s[0])
-		}
-		return conn.Set(s[1], s[2])
-	case "del":
-		if len(s) != 2 {
-			return "", ErrArgu(s[0])
-		}
-		return conn.Del(s[1])
-	case "version":
-		if len(s) != 1 {
-			return "", ErrArgu(s[0])
-		}
-		return conn.Version()
-	case "get":
-		if len(s) != 2 {
-			return "", ErrArgu(s[0])
-		}
-		return conn.Get(s[1])
-
-	default:
-		return "", ErrCommand(s[0])
-	}
-	return "", nil
-}

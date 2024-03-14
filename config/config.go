@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
 	"reflect"
 
@@ -17,17 +18,17 @@ import (
 var BC BlueConf
 
 type serverConfig struct {
-	Ip           string   `json:"ip,omitempty"`
-	Port         int      `json:"port,omitempty"`
-	TimeOut      int      `json:"time_out"`
-	DBSum        int      `json:"db_sum"`
-	GuestSession []string `json:"guest_session"`
-	AdminSession []string `json:"admin_session"`
-	RootSession  []string `json:"root_session"`
+	Ip         string   `json:"ip,omitempty"`
+	Port       int      `json:"port,omitempty"`
+	TimeOut    int      `json:"time_out"`
+	DBSum      int      `json:"db_sum"`
+	GuestToken []string `json:"guest_token"`
+	AdminToken []string `json:"admin_token"`
+	RootToken  []string `json:"root_token"`
 }
 
 type clusterConfig struct {
-	Cluster     int    `json:"cluster,omitempty"`
+	ClusterAddr string `json:"cluster,omitempty"`
 	Ip          string `json:"ip,omitempty"`
 	Port        int    `json:"port,omitempty"`
 	TryTimes    int    `json:"try_times,omitempty"`
@@ -51,11 +52,11 @@ type storageConfig struct {
 }
 
 type BlueConf struct {
-	ServerConfig serverConfig  `json:"server_config"`
-	Cluster      clusterConfig `json:"cluster_config"`
-	LogConfig    logConfig     `json:"log_config"`
-	ClientConfig clientConfig  `json:"client_config"`
-	Storage      storageConfig `json:"storage_config"`
+	ServerConfig  serverConfig  `json:"server_config"`
+	ClusterConfig clusterConfig `json:"cluster_config"`
+	LogConfig     logConfig     `json:"log_config"`
+	ClientConfig  clientConfig  `json:"client_config"`
+	StorageConfig storageConfig `json:"storage_config"`
 }
 
 func (c *BlueConf) Entries() map[string]interface{} {
@@ -115,7 +116,7 @@ StoragePath: %v
 		c.ServerConfig.Ip, c.ServerConfig.Port, c.ServerConfig.TimeOut, c.ServerConfig.DBSum,
 		c.LogConfig.LogOut, c.LogConfig.LogLevel,
 		c.ClientConfig.ClientActive, c.ClientConfig.ClientLimit,
-		c.Storage.StoragePath)
+		c.StorageConfig.StoragePath)
 	return s
 }
 
@@ -134,7 +135,7 @@ var defaultConfig = BlueConf{
 		ClientActive: 10,
 		ClientLimit:  10,
 	},
-	Storage: storageConfig{
+	StorageConfig: storageConfig{
 		StoragePath: "./storage/data",
 	},
 }
@@ -166,4 +167,20 @@ func InitConfig() map[string]interface{} {
 	log.Printf("config init success ...")
 
 	return BC.Entries()
+}
+
+func OpenCluster() bool {
+	// 解析地址
+	ip, _, err := net.SplitHostPort(BC.ClusterConfig.ClusterAddr)
+	if err != nil {
+		return false
+	}
+
+	// 解析IP地址
+	ipAddress := net.ParseIP(ip)
+	if ipAddress == nil {
+		return false
+	}
+
+	return true
 }

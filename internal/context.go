@@ -13,16 +13,15 @@ import (
 )
 
 const (
-	sessionLen = 10
+	TokenLen = 10
 )
 
 type Context struct {
-	nextExec Exec
-
 	context.Context
+	nextExec  Exec
 	conn      net.Conn
 	db        uint8
-	session   string
+	cliToken  string
 	request   *bsp.BspProto
 	response  bsp.Reply
 	maxActive time.Duration
@@ -31,8 +30,8 @@ type Context struct {
 var bconnPool = sync.Pool{
 	New: func() interface{} {
 		return &Context{
-			db:      1,
-			session: rand.RandString(sessionLen),
+			db:       1,
+			cliToken: rand.RandString(TokenLen),
 		}
 	},
 }
@@ -41,10 +40,10 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn, ok := bconnPool.Get().(*Context)
 	if !ok {
 		return &Context{
-			Context: ctx,
-			conn:    conn,
-			db:      1,
-			session: rand.RandString(sessionLen),
+			Context:  ctx,
+			conn:     conn,
+			db:       1,
+			cliToken: rand.RandString(TokenLen),
 			maxActive: time.Duration(config.BC.ClientConfig.ClientActive) *
 				time.Second,
 		}
@@ -52,7 +51,7 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn.Context = ctx
 	bconn.conn = conn
 	bconn.db = 1
-	bconn.session = rand.RandString(sessionLen)
+	bconn.cliToken = rand.RandString(TokenLen)
 	bconn.maxActive = time.Duration(config.BC.ClientConfig.ClientActive) * time.Second
 
 	return bconn

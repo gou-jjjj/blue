@@ -3,6 +3,7 @@ package cluster
 import (
 	"fmt"
 	"net"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -14,24 +15,18 @@ func TestNewCluster(t *testing.T) {
 		panic(err)
 	}
 
-	dial.Write([]byte("+192.22.43.11:9000"))
-	dial.Close()
+	fmt.Println(dial.Write([]byte("+192.22.43.11:9015\n")))
+	fmt.Println(dial.Write([]byte("+192.22.43.11:9013\n")))
+	fmt.Println(dial.Write([]byte("+192.22.43.11:9019\n")))
+	fmt.Println(dial.Close())
 
-	dial, err = net.Dial("tcp", ":8080")
-	if err != nil {
-		panic(err)
+	<-time.NewTimer(2 * time.Second).C
+	
+	m := map[string]int{}
+	for i := 0; i < int(1e5); i++ {
+		m[cluster.c.Get(strconv.Itoa(i))]++
 	}
+	fmt.Println(m)
 
-	dial.Write([]byte("+192.22.43.11:9010"))
-	dial.Close()
-
-	dial, err = net.Dial("tcp", ":8080")
-	if err != nil {
-		panic(err)
-	}
-
-	dial.Write([]byte("-192.22.43.11:9010"))
-	dial.Close()
-	<-time.NewTimer(5 * time.Second).C
 	fmt.Println(cluster.observers)
 }

@@ -3,7 +3,6 @@ module blue
 go 1.21
 
 require (
-	github.com/hdt3213/godis v1.2.9
 	github.com/panjf2000/ants/v2 v2.9.0
 	github.com/rosedblabs/rosedb/v2 v2.3.5
 	github.com/rs/zerolog v1.32.0
@@ -21,5 +20,5 @@ require (
 	github.com/rosedblabs/wal v1.3.6 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 )

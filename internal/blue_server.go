@@ -2,6 +2,8 @@ package internal
 
 import (
 	"blue/bsp"
+	"blue/cluster"
+	"blue/config"
 	"context"
 	"errors"
 	"fmt"
@@ -9,6 +11,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"blue/common/timewheel"
 )
@@ -25,9 +28,10 @@ type ServerInter interface {
 
 // BlueServer implements tcp.Handler and serves as a redis server
 type BlueServer struct {
-	activeConn sync.Map // *client -> placeholder
+	activeConn sync.Map
 	db         []*DB
 	closed     atomic.Int32
+	cc         *cluster.Cluster
 }
 
 func NewBlueServer(dbs ...*DB) *BlueServer {
@@ -38,6 +42,14 @@ func NewBlueServer(dbs ...*DB) *BlueServer {
 
 	for i := 0; i < len(dbs); i++ {
 		b.db[i] = dbs[i]
+	}
+
+	if config.OpenCluster() {
+		b.cc = cluster.NewCluster(
+			config.BC.ClusterConfig.TryTimes,
+			config.BC.ClusterConfig.ClusterAddr,
+			"",
+			time.Duration(config.BC.ClusterConfig.DialTimeout)*time.Second)
 	}
 
 	return b
@@ -73,7 +85,7 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 	}()
 
 	for {
-		timewheel.Delay(client.maxActive, client.session, func() {
+		timewheel.Delay(client.maxActive, client.cliToken, func() {
 			svr.closeClient(client)
 		})
 

@@ -4,19 +4,19 @@
     "port": 13140,
     "time_out": 10,
     "db_sum": 8,
-    "guest_session": [
+    "guest_token": [
       "1234567890",
       "0000000000"
     ],
-    "admin_session": [
+    "admin_token": [
       "1234567891"
     ],
-    "root_session": [
+    "root_token": [
       "1234567892"
     ]
   },
   "cluster_config": {
-    "cluster": 1,
+    "cluster_addr": "127.0.0.1:13140",
     "ip": "127.0.0.1",
     "port": 13141,
     "try_times": 3,

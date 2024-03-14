@@ -1,10 +1,18 @@
 package cluster
 
 import (
+	g "blue/api/go"
+	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"sync"
 	"time"
+)
+
+const (
+	sleep_ = 1
+	done   = '\n'
 )
 
 type Subject interface {
@@ -20,19 +28,20 @@ type Cluster struct {
 	observers   []string
 	c           *Consistent
 	listener    net.Listener
-	ip          string
-	port        int32
+	addr        string
+	token       string
 	tryTimes    int
+	configAddr  string
 	dialTimeout time.Duration
 }
 
-func NewCluster(ip string, port int32, try int, dialTimeout time.Duration) *Cluster {
+func NewCluster(try int, confAddr string, token string, dialTimeout time.Duration) *Cluster {
 	clu := &Cluster{
 		rw:          sync.RWMutex{},
 		observers:   make([]string, 0),
-		c:           NewConsistent(),
-		ip:          ip,
-		port:        port,
+		c:           NewConsistent(100),
+		addr:        confAddr,
+		token:       token,
 		tryTimes:    try,
 		dialTimeout: dialTimeout,
 	}
@@ -42,8 +51,15 @@ func NewCluster(ip string, port int32, try int, dialTimeout time.Duration) *Clus
 	return clu
 }
 
+func (c *Cluster) Init() {
+	once := sync.Once{}
+	once.Do(func() {
+		g.NewClient(g.WithCluster(c.addr, c.token))
+	})
+}
+
 func (c *Cluster) Listen() {
-	l, err := net.Listen(network, fmt.Sprintf("%s:%d", c.ip, c.port))
+	l, err := net.Listen(network, c.addr)
 	if err != nil {
 		panic(err)
 	}
@@ -53,27 +69,39 @@ func (c *Cluster) Listen() {
 }
 
 func (c *Cluster) accept() {
+	var conn net.Conn
+	var err error
+
 	for {
-		conn, err := c.listener.Accept()
+		conn, err = c.listener.Accept()
 		if err != nil {
 			panic(err)
 		}
 
-		mess := make([]byte, 1024)
-		read, err := conn.Read(mess)
-		if err != nil {
-			conn.Close()
+		go c.handle(conn)
+	}
+}
+
+func (c *Cluster) handle(conn net.Conn) {
+	defer conn.Close()
+
+	reader := bufio.NewReader(conn)
+	for {
+		addr, err := reader.ReadString(done)
+		if err != nil && err != io.EOF {
+			return
+		}
+
+		if len(addr) == 0 || addr[0] != '+' && addr[0] != '-' {
 			continue
 		}
 
-		mess = mess[:read]
-		if mess[0] == '+' {
-			c.Register(string(mess[1:]))
-		} else if mess[0] == '-' {
-			c.Unregister(string(mess[1:]))
+		fmt.Println("addr:", addr)
+		if addr[0] == '+' {
+			c.Register(addr[1 : len(addr)-1])
+		} else {
+			c.Unregister(addr[1 : len(addr)-1])
 		}
-
-		conn.Close()
 	}
 }
 
@@ -116,6 +144,8 @@ func (c *Cluster) Notify(addr string) {
 					conn, err = net.DialTimeout(network, observer, c.dialTimeout)
 					if err == nil {
 						break
+					} else {
+						time.Sleep(time.Duration(sleep_) * time.Second)
 					}
 				}
 			}

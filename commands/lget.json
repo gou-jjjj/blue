@@ -1,0 +1,9 @@
+{
+  "name": "lget",
+  "summary": "Gets all values for the list of given key",
+  "group": "list",
+  "key": "string",
+  "arity":  1,
+  "value": "list",
+  "arguments": []
+}

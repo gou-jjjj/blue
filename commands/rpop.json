@@ -1,0 +1,9 @@
+{
+  "name": "rpop",
+  "summary": "Remove and get the last element in a list",
+  "group": "list",
+  "key": "string",
+  "arity": 1,
+  "value": "string",
+  "arguments": []
+}

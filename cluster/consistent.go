@@ -1,7 +1,6 @@
 package cluster
 
 import (
-	"blue/config"
 	"hash/crc32"
 	"slices"
 	"sort"
@@ -9,7 +8,7 @@ import (
 	"sync"
 )
 
-var defalutReplicas = config.BC.Cluster.Replicas
+var defalutReplicas = 100
 var defalutHash = crc32.ChecksumIEEE
 
 type hashfunc func(data []byte) uint32
@@ -28,7 +27,11 @@ type Consistent struct {
 	h        hashfunc
 }
 
-func NewConsistent() *Consistent {
+func NewConsistent(replicas int) *Consistent {
+	if replicas >= defalutReplicas {
+		replicas = defalutReplicas
+	}
+
 	c := new(Consistent)
 	c.replicas = defalutReplicas
 	c.nodes = make([]Node, 0)
