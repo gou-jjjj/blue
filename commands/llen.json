@@ -1,0 +1,9 @@
+{
+  "name": "llen",
+  "summary": "Returns the length of the list stored at key.",
+  "group": "list",
+  "key": "string",
+  "arity": 1,
+  "value": "string",
+  "arguments": []
+}

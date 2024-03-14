@@ -10,9 +10,6 @@ import (
 	"blue/bsp"
 	"blue/datastruct"
 	"blue/datastruct/dict"
-	"blue/datastruct/number"
-	str "blue/datastruct/string"
-
 	"github.com/rosedblabs/rosedb/v2"
 )
 
@@ -129,31 +126,6 @@ func (db *DB) ExecChainDB(ctx *Context) {
 	}
 }
 
-func (db *DB) ExecChainNumber(ctx *Context) {
-	switch ctx.request.Handle() {
-	case bsp.NSET:
-		ctx.response = db.nset(ctx.request)
-	case bsp.NGET:
-		ctx.response = db.nget(ctx.request)
-	default:
-		ctx.response = bsp.NewErr(bsp.ErrCommand)
-	}
-
-}
-
-func (db *DB) ExecChainString(ctx *Context) {
-	switch ctx.request.Handle() {
-	case bsp.SET:
-		ctx.response = db.set(ctx.request)
-	case bsp.GET:
-		ctx.response = db.get(ctx.request)
-	case bsp.LEN:
-		ctx.response = db.len(ctx.request)
-	default:
-		ctx.response = bsp.NewErr(bsp.ErrCommand)
-	}
-}
-
 func (db *DB) StoragePut(key []byte, value []byte) error {
 	if db.storage == nil {
 		return nil
@@ -188,74 +160,4 @@ func (db *DB) del(key [][]byte) bsp.Reply {
 		}
 	}
 	return bsp.NewInfo(bsp.OK)
-}
-
-func (db *DB) nset(cmd *bsp.BspProto) bsp.Reply {
-	db.data.RemoveWithLock(cmd.ValueStr())
-
-	newNumber, err := number.NewNumber(cmd.ValueBytes())
-	if err != nil {
-		return bsp.NewErr(bsp.ErrWrongType, cmd.ValueStr())
-	}
-
-	db.data.Put(cmd.Key(), newNumber)
-	err = db.StoragePut(cmd.KeyBytes(), cmd.ValueBytes())
-	if err != nil {
-		return bsp.NewErr(bsp.ErrStorage)
-	}
-
-	return bsp.NewInfo(bsp.OK)
-}
-
-func (db *DB) nget(cmd *bsp.BspProto) bsp.Reply {
-	v, ok := db.data.Get(cmd.Key())
-	if !ok {
-		return bsp.NewInfo(bsp.NULL)
-	}
-
-	n, ok := v.(number.Number)
-	if !ok {
-		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
-	}
-
-	return bsp.NewNum(n.Get())
-}
-
-func (db *DB) set(cmd *bsp.BspProto) bsp.Reply {
-	db.data.RemoveWithLock(cmd.ValueStr())
-	db.data.Put(cmd.Key(), str.NewString(cmd.ValueStr()))
-	err := db.StoragePut(cmd.KeyBytes(), cmd.ValueBytes())
-	if err != nil {
-		return bsp.NewErr(bsp.ErrStorage)
-	}
-
-	return bsp.NewInfo(bsp.OK)
-}
-
-func (db *DB) get(cmd *bsp.BspProto) bsp.Reply {
-	v, ok := db.data.Get(cmd.Key())
-	if !ok {
-		return bsp.NewInfo(bsp.NULL)
-	}
-
-	s, ok := v.(str.String)
-	if !ok {
-		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
-	}
-
-	return bsp.NewStr(s.Get())
-}
-
-func (db *DB) len(cmd *bsp.BspProto) bsp.Reply {
-	v, ok := db.data.Get(cmd.Key())
-	if !ok {
-		return bsp.NewInfo(bsp.NULL)
-	}
-
-	s, ok := v.(str.String)
-	if !ok {
-		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
-	}
-
-	return bsp.NewNum(int64(s.Len()))
 }
