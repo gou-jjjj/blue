@@ -143,6 +143,10 @@ func (db *DB) StorageDelete(key []byte) error {
 }
 
 func (db *DB) RangeKV() string {
+	if db.data.Len() == 0 {
+		return ""
+	}
+
 	builder := strings.Builder{}
 	db.data.ForEach(func(key string, val interface{}) bool {
 		builder.WriteString(fmt.Sprintf("%s: %s\n", key, val.(datastruct.Value).Value()))

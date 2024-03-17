@@ -41,7 +41,12 @@ func (db *DB) lget(cmd *bsp.BspProto) bsp.Reply {
 	if !ok {
 		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
 	}
-	return bsp.NewList([]byte(l.Value()))
+
+	if l.Len() == 0 {
+		return bsp.NewInfo(bsp.NULL)
+	}
+
+	return bsp.NewStr(l.Value())
 }
 
 func (db *DB) llen(cmd *bsp.BspProto) bsp.Reply {
@@ -68,7 +73,7 @@ func (db *DB) lpush(cmd *bsp.BspProto) bsp.Reply {
 		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
 	}
 	for i := range cmd.Values() {
-		l.Insert(0, cmd.Values()[i])
+		l.Insert(0, string(cmd.Values()[i]))
 	}
 	return bsp.NewInfo(bsp.OK)
 }
@@ -99,7 +104,7 @@ func (db *DB) rpush(cmd *bsp.BspProto) bsp.Reply {
 		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
 	}
 	for i := range cmd.Values() {
-		l.Add(cmd.Values()[i])
+		l.Add(string(cmd.Values()[i]))
 	}
 	return bsp.NewInfo(bsp.OK)
 }

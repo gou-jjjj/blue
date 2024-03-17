@@ -399,6 +399,10 @@ func (ql *QuickList) Range(start int, stop int) []interface{} {
 }
 
 func (ql *QuickList) Value() string {
+	if ql.Len() == 0 {
+		return ""
+	}
+
 	builder := strings.Builder{}
 	ql.ForEach(func(i int, val interface{}) bool {
 		builder.WriteString(fmt.Sprintf("%v ", val))

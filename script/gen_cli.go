@@ -90,7 +90,7 @@ func main() {
 
 	for _, cmd := range cmds {
 		upName := strings.ToUpper(cmd.Name[:1]) + cmd.Name[1:]
-		code.WriteString(fmt.Sprintf("	\"%s\": %s(),\n", upName, upName))
+		code.WriteString(fmt.Sprintf("	\"%s\": %s(),\n", cmd.Name, upName))
 	}
 
 	code.WriteString("}\n")

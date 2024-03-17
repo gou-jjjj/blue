@@ -1,9 +1,6 @@
 package internal
 
 import (
-	"blue/bsp"
-	"blue/cluster"
-	"blue/config"
 	"context"
 	"errors"
 	"fmt"
@@ -13,8 +10,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	"blue/bsp"
+	"blue/cluster"
+	"blue/config"
+
 	"blue/common/timewheel"
 )
+
+const version_ = "blue v0.1"
 
 type Exec interface {
 	ExecChain(*Context) bool
@@ -155,7 +158,7 @@ func (svr *BlueServer) selectdb(ctx *Context) {
 }
 
 func (svr *BlueServer) version(ctx *Context) {
-	ctx.response = bsp.NewStr([]byte("blue v0.1"))
+	ctx.response = bsp.NewStr([]byte(version_))
 }
 
 func (svr *BlueServer) kvs(ctx *Context) {

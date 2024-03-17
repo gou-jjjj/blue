@@ -7,3 +7,7 @@ build:
 
 cli:
 	@cd ./bin && ./blue-cli
+
+
+.PHONY:
+run:build cli

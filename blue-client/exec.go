@@ -36,7 +36,7 @@ func Expire() CmdFunc {
 		if len(s) > 3 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Expire(s[1],s[2])
+		return conn.Expire(s[1], s[2])
 	}
 }
 
@@ -108,7 +108,7 @@ func Lpush() CmdFunc {
 		if len(s) > 3 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Lpush(s[1],s[2])
+		return conn.Lpush(s[1], s[2])
 	}
 }
 
@@ -135,7 +135,7 @@ func Nset() CmdFunc {
 		if len(s) > 3 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Nset(s[1],s[2])
+		return conn.Nset(s[1], s[2])
 	}
 }
 
@@ -153,7 +153,7 @@ func Rpush() CmdFunc {
 		if len(s) > 3 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Rpush(s[1],s[2])
+		return conn.Rpush(s[1], s[2])
 	}
 }
 
@@ -162,7 +162,10 @@ func Select() CmdFunc {
 		if len(s) > 2 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Select(s[1])
+		if len(s) == 2 {
+			return conn.Select(s[1])
+		}
+		return conn.Select()
 	}
 }
 
@@ -171,7 +174,7 @@ func Set() CmdFunc {
 		if len(s) > 3 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Set(s[1],s[2])
+		return conn.Set(s[1], s[2])
 	}
 }
 
@@ -185,22 +188,22 @@ func Version() CmdFunc {
 }
 
 var funcMap = map[string]CmdFunc{
-	"Del": Del(),
-	"Expire": Expire(),
-	"Get": Get(),
-	"Incr": Incr(),
-	"Kvs": Kvs(),
-	"Len": Len(),
-	"Lget": Lget(),
-	"Llen": Llen(),
-	"Lpop": Lpop(),
-	"Lpush": Lpush(),
-	"Lset": Lset(),
-	"Nget": Nget(),
-	"Nset": Nset(),
-	"Rpop": Rpop(),
-	"Rpush": Rpush(),
-	"Select": Select(),
-	"Set": Set(),
-	"Version": Version(),
+	"del":     Del(),
+	"expire":  Expire(),
+	"get":     Get(),
+	"incr":    Incr(),
+	"kvs":     Kvs(),
+	"len":     Len(),
+	"lget":    Lget(),
+	"llen":    Llen(),
+	"lpop":    Lpop(),
+	"lpush":   Lpush(),
+	"lset":    Lset(),
+	"nget":    Nget(),
+	"nset":    Nset(),
+	"rpop":    Rpop(),
+	"rpush":   Rpush(),
+	"select":  Select(),
+	"set":     Set(),
+	"version": Version(),
 }

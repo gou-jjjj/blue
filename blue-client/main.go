@@ -1,7 +1,6 @@
 package main
 
 import (
-	"blue/blue-client/bin"
 	"bufio"
 	"fmt"
 	"os"
@@ -25,6 +24,7 @@ func Connect() {
 		c.Addr = BC.Addr
 		c.TimeOut = time.Duration(BC.TimeOut) * time.Second
 		c.TryTimes = BC.TryTimes
+		c.DB = BC.DB
 	})
 }
 
@@ -49,7 +49,11 @@ func main() {
 			continue
 		}
 
-		res, err := bin.Exec(conn, split)
+		if split[0] == "exit" {
+			os.Exit(0)
+		}
+
+		res, err := Exec(conn, split)
 		if err != nil {
 			if !strings.Contains(err.Error(), "broken pipe") {
 				ErrPrint(err.Error())
@@ -57,7 +61,7 @@ func main() {
 			}
 
 			Connect()
-			res, err = bin.Exec(conn, split)
+			res, err = Exec(conn, split)
 			if err != nil {
 				ErrPrint(err.Error())
 				os.Exit(0)
@@ -70,7 +74,7 @@ func main() {
 
 func TidyInput(input string) []string {
 	input = strings.TrimSpace(input)
-	split := strings.Split(input, " ")
+	split := strings.Fields(input)
 	newSplit := make([]string, 0, len(split))
 
 	for i := range split {

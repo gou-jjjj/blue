@@ -3,7 +3,6 @@ package config
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -99,25 +98,6 @@ func (c *BlueConf) Entries() map[string]interface{} {
 	}
 
 	return entries
-}
-
-func (c *BlueConf) String() string {
-	s := fmt.Sprintf(
-		`Ip: %v
-Port: %v
-TimeOut: %v
-DBSum: %v
-LogOut: %v
-LogLevel: %v
-ClientLive: %v
-ClientLimit: %v
-StoragePath: %v
-`,
-		c.ServerConfig.Ip, c.ServerConfig.Port, c.ServerConfig.TimeOut, c.ServerConfig.DBSum,
-		c.LogConfig.LogOut, c.LogConfig.LogLevel,
-		c.ClientConfig.ClientActive, c.ClientConfig.ClientLimit,
-		c.StorageConfig.StoragePath)
-	return s
 }
 
 var defaultConfig = BlueConf{

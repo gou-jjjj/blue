@@ -29,7 +29,7 @@
     "log_out": "./logs"
   },
   "client_config": {
-    "client_active": 30,
+    "client_active": 300,
     "client_limit": 1000
   },
   "storage_config": {
