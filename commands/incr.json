@@ -2,7 +2,7 @@
   "name": "incr",
   "summary": "Increment the integer value of a key by the given amount",
   "group": "number",
-  "arity": 2,
+  "arity": 1,
   "key": "string",
   "value": "number",
   "arguments": []

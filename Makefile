@@ -19,7 +19,9 @@ bin:
 	@cp -r ./config.json bin/
 	@mkdir -p bin/logs
 
-
+exec:
+	@rm ./blue-client/exec.go
+	@go generate ./script/gen_cli.go
 
 commands:
 	@go generate ./script/gen_cmds.go
