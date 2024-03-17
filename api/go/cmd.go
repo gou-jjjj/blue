@@ -114,3 +114,18 @@ func (c *Client) Lpush(k, v string) (string, error) {
 
 	return c.exec(build)
 }
+
+func (c *Client) Expire(k, v string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.EXPIRE).
+		WithKey(k).
+		WithValueStr(v).
+		Build()
+
+	return c.exec(build)
+}
+
+func (c *Client) Incr(k string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.INCR).WithKey(k).Build()
+
+	return c.exec(build)
+}

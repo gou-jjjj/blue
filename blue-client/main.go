@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blue/blue-client/bin"
 	"bufio"
 	"fmt"
 	"os"
@@ -48,7 +49,7 @@ func main() {
 			continue
 		}
 
-		res, err := Exec(conn, split)
+		res, err := bin.Exec(conn, split)
 		if err != nil {
 			if !strings.Contains(err.Error(), "broken pipe") {
 				ErrPrint(err.Error())
@@ -56,7 +57,7 @@ func main() {
 			}
 
 			Connect()
-			res, err = Exec(conn, split)
+			res, err = bin.Exec(conn, split)
 			if err != nil {
 				ErrPrint(err.Error())
 				os.Exit(0)

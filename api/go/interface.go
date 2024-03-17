@@ -17,4 +17,6 @@ type CLi interface {
 	Lpush(string, string) (string, error)
 	Rpop(string) (string, error)
 	Rpush(string, string) (string, error)
+	Expire(string, string) (string, error)
+	Incr(string) (string, error)
 }
