@@ -3,14 +3,12 @@ package log
 import (
 	"blue/common/rand"
 	"blue/config"
-	"context"
 	"fmt"
-	lo "log"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
+	lo "log"
 )
 
 var (
@@ -39,110 +37,46 @@ func InitSyncLog() {
 func newSyncLog() *BlueLog {
 	dir := config.BC.LogConfig.LogOut
 
-	logx := NewZeroLog(logLevel(), 1, dir)
+	logx := NewZeroLog(logLevel(), dir)
 	lo.Printf("log init success ...")
 	return logx
 }
 
 type BlueLog struct {
-	count    int
-	l        []zerolog.Logger
-	sw       sync.WaitGroup
-	errChan  chan string
-	infoChan chan string
-	warnChan chan string
-	done     context.Context
-	can      context.CancelFunc
+	l zerolog.Logger
 }
 
-func NewZeroLog(level zerolog.Level, count int, outPath string) *BlueLog {
-	if count <= 0 {
-		count = 1
-	}
-
+func NewZeroLog(level zerolog.Level, outPath string) *BlueLog {
 	zerolog.TimestampFieldName = "T"
 	zerolog.MessageFieldName = "M"
 	zerolog.LevelFieldName = "L"
-
-	ctx, cancelFunc := context.WithCancel(context.Background())
-
-	b := &BlueLog{
-		errChan:  make(chan string, 10000), // 缓冲大小可以根据需要调整
-		warnChan: make(chan string, 10000), // 缓冲大小可以根据需要调整
-		infoChan: make(chan string, 10000), // 缓冲大小可以根据需要调整
-		done:     ctx,
-		can:      cancelFunc,
-		count:    count,
-		l:        make([]zerolog.Logger, count),
-	}
 
 	err := os.MkdirAll(outPath, 0777)
 	if err != nil {
 		panic(err)
 	}
 
-	for i := 0; i < count; i++ {
-		r := rand.RandString(8)
-		addtime := fmt.Sprintf("%s-%s", time.Now().Format("2006:01:02-15:04:05"), r)
-		create, err := os.Create(outPath + "/" + addtime + ".log")
-		if err != nil {
-			panic(err)
-		}
-		b.l[i] = zerolog.New(create).Level(level).With().Timestamp().Logger()
+	r := rand.RandString(8)
+	addtime := fmt.Sprintf("%s-%s", time.Now().Format("2006:01:02-15:04:05"), r)
+	create, err := os.Create(fmt.Sprintf("%s/%s.log", outPath, addtime))
+	if err != nil {
+		panic(err)
 	}
+	logger := zerolog.New(create).Level(level).With().Timestamp().Logger()
 
-	b.startLogging()
-
-	return b
-}
-
-func (l *BlueLog) startLogging() {
-	for i := range l.l {
-		go func(i int) {
-			l.sw.Add(1)
-			defer l.sw.Done()
-			for {
-				select {
-				case msg, ok := <-l.errChan:
-					if ok {
-						l.l[i].Error().Msg(msg)
-					}
-				case msg, ok := <-l.infoChan:
-					if ok {
-						l.l[i].Info().Msg(msg)
-					}
-				case msg, ok := <-l.warnChan:
-					if ok {
-						l.l[i].Warn().Msg(msg)
-					}
-				case <-l.done.Done():
-					return
-				}
-			}
-		}(i)
+	return &BlueLog{
+		l: logger,
 	}
-}
-
-func (l *BlueLog) StopLogging() {
-	close(l.errChan)
-	close(l.infoChan)
-	close(l.warnChan)
-
-	for len(l.warnChan) != 0 || len(l.errChan) != 0 || len(l.infoChan) != 0 {
-	}
-
-	l.can()
-	l.sw.Wait()
 }
 
 func (l *BlueLog) Info(msg string) {
-	l.infoChan <- msg
+	l.l.Info().Msg(msg)
 }
 
 func (l *BlueLog) Warn(msg string) {
-	l.warnChan <- msg
+	l.l.Warn().Msg(msg)
 }
 
 func (l *BlueLog) Err(msg string) {
-	l.errChan <- msg
+	l.l.Error().Msg(msg)
 }
