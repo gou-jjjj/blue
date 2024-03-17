@@ -22,7 +22,7 @@ bin:
 
 
 commands:
-	@go generate ./scripts/gen_cmds.go
+	@go generate ./script/gen_cmds.go
 
 run:
 	@go run ./cmd/main.go

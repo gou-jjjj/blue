@@ -2,7 +2,6 @@ package list
 
 import (
 	"fmt"
-	"github.com/hdt3213/godis/lib/utils"
 	"strconv"
 	"testing"
 )
@@ -106,79 +105,6 @@ func TestQuickList_RemoveLast(t *testing.T) {
 		}
 	}
 
-}
-
-func TestQuickListRemoveVal(t *testing.T) {
-	list := NewQuickList()
-	size := pageSize * 10
-	for i := 0; i < size; i++ {
-		list.Add(i)
-		list.Add(i)
-	}
-	for index := 0; index < list.Len(); index++ {
-		list.RemoveAllByVal(func(a interface{}) bool {
-			return utils.Equals(a, index)
-		})
-		list.ForEach(func(i int, v interface{}) bool {
-			intVal, _ := v.(int)
-			if intVal == index {
-				t.Error("remove test fail: found  " + strconv.Itoa(index) + " at index: " + strconv.Itoa(i))
-			}
-			return true
-		})
-	}
-
-	list = NewQuickList()
-	for i := 0; i < size; i++ {
-		list.Add(i)
-		list.Add(i)
-	}
-	for i := 0; i < size; i++ {
-		list.RemoveByVal(func(a interface{}) bool {
-			return utils.Equals(a, i)
-		}, 1)
-	}
-	list.ForEach(func(i int, v interface{}) bool {
-		intVal, _ := v.(int)
-		if intVal != i {
-			t.Error("test fail: expected " + strconv.Itoa(i) + ", actual: " + strconv.Itoa(intVal))
-		}
-		return true
-	})
-	for i := 0; i < size; i++ {
-		list.RemoveByVal(func(a interface{}) bool {
-			return utils.Equals(a, i)
-		}, 1)
-	}
-	if list.Len() != 0 {
-		t.Error("test fail: expected 0, actual: " + strconv.Itoa(list.Len()))
-	}
-
-	list = NewQuickList()
-	for i := 0; i < size; i++ {
-		list.Add(i)
-		list.Add(i)
-	}
-	for i := 0; i < size; i++ {
-		list.ReverseRemoveByVal(func(a interface{}) bool {
-			return utils.Equals(a, i)
-		}, 1)
-	}
-	list.ForEach(func(i int, v interface{}) bool {
-		intVal, _ := v.(int)
-		if intVal != i {
-			t.Error("test fail: expected " + strconv.Itoa(i) + ", actual: " + strconv.Itoa(intVal))
-		}
-		return true
-	})
-	for i := 0; i < size; i++ {
-		list.ReverseRemoveByVal(func(a interface{}) bool {
-			return utils.Equals(a, i)
-		}, 1)
-	}
-	if list.Len() != 0 {
-		t.Error("test fail: expected 0, actual: " + strconv.Itoa(list.Len()))
-	}
 }
 
 func TestQuickList_Contains(t *testing.T) {

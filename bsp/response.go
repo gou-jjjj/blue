@@ -79,6 +79,11 @@ func NewNum(num any) *NumResp {
 			n:   ReplyNumber,
 			num: strbytes.Uint642Bytes(uint64(num.(int64))),
 		}
+	case int:
+		return &NumResp{
+			n:   ReplyNumber,
+			num: strbytes.Uint642Bytes(uint64(num.(int))),
+		}
 	case []byte:
 		return &NumResp{
 			n:   ReplyNumber,

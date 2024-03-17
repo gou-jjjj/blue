@@ -104,7 +104,7 @@ func (db *DB) ExecChain(ctx *Context) bool {
 	case bsp.TypeString:
 		db.ExecChainString(ctx)
 	case bsp.TypeList:
-
+		db.ExecChainList(ctx)
 	case bsp.TypeSet:
 
 	case bsp.TypeJson:

@@ -404,5 +404,6 @@ func (ql *QuickList) Value() string {
 		builder.WriteString(fmt.Sprintf("%v ", val))
 		return true
 	})
-	return builder.String()
+	res := builder.String()[:builder.Len()-1]
+	return res
 }

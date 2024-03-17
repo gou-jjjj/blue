@@ -21,8 +21,7 @@ func init() {
 
 func Connect() {
 	conn = g.NewClient(func(c *g.Config) {
-		c.Ip = BC.Ip
-		c.Port = BC.Port
+		c.Addr = BC.Addr
 		c.TimeOut = time.Duration(BC.TimeOut) * time.Second
 		c.TryTimes = BC.TryTimes
 	})
@@ -49,7 +48,7 @@ func main() {
 			continue
 		}
 
-		res, err := Exec(split)
+		res, err := Exec(conn, split)
 		if err != nil {
 			if !strings.Contains(err.Error(), "broken pipe") {
 				ErrPrint(err.Error())
@@ -57,7 +56,7 @@ func main() {
 			}
 
 			Connect()
-			res, err = Exec(split)
+			res, err = Exec(conn, split)
 			if err != nil {
 				ErrPrint(err.Error())
 				os.Exit(0)
@@ -81,5 +80,3 @@ func TidyInput(input string) []string {
 	}
 	return newSplit
 }
-
-

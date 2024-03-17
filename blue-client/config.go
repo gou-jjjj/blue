@@ -12,8 +12,7 @@ import (
 var BC = new(BlueConf)
 
 type BlueConf struct {
-	Ip       string
-	Port     int
+	Addr     string
 	TimeOut  int
 	TryTimes int
 	DB       int

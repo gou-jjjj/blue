@@ -8,6 +8,20 @@ import "blue/commands"
 
 const cmdLen = 18
 
+// set -----------------------------
+const (
+)
+
+// json -----------------------------
+const (
+)
+
+// system -----------------------------
+const (
+	KVS Header = 1 + TypeSystem
+	VERSION Header = 2 + TypeSystem
+)
+
 // db -----------------------------
 const (
 	DEL Header = 1 + TypeDB
@@ -38,20 +52,6 @@ const (
 	LSET Header = 5 + TypeList
 	RPOP Header = 6 + TypeList
 	RPUSH Header = 7 + TypeList
-)
-
-// set -----------------------------
-const (
-)
-
-// json -----------------------------
-const (
-)
-
-// system -----------------------------
-const (
-	KVS Header = 1 + TypeSystem
-	VERSION Header = 2 + TypeSystem
 )
 
 var HandleMap = [...]string{
@@ -107,7 +107,7 @@ var CommandsMap = [...]commands.Cmd{
 	LLEN: {Name:"LLEN",Summary: "Returns the length of the list stored at key.", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
 	LPOP: {Name:"LPOP",Summary: "Remove and get the first element in a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
 	LPUSH: {Name:"LPUSH",Summary: "Insert values at the head of the list stored at key.", Group: "list", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
-	LSET: {Name:"LSET",Summary: "Set the value of a list", Group: "list", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
+	LSET: {Name:"LSET",Summary: "Set the value of a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
 	NGET: {Name:"NGET",Summary: "Returns the number value of a key.", Group: "number", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	NSET: {Name:"NSET",Summary: "Set the value of a number", Group: "number", Arity: 2, Key: "string", Value: "number", Arguments: []string{"expire"}},
 	RPOP: {Name:"RPOP",Summary: "Remove and get the last element in a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},

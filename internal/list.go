@@ -1,40 +1,120 @@
 package internal
 
-import "blue/bsp"
+import (
+	"blue/bsp"
+	"blue/datastruct/list"
+)
 
 func (db *DB) ExecChainList(ctx *Context) {
 	switch ctx.request.Handle() {
 	case bsp.LSET:
-		db.lset(ctx.request)
+		ctx.response = db.lset(ctx.request)
 	case bsp.LGET:
-		db.lget(ctx.request)
+		ctx.response = db.lget(ctx.request)
 	case bsp.LLEN:
-		db.llen(ctx.request)
+		ctx.response = db.llen(ctx.request)
 	case bsp.LPUSH:
-		db.lpush(ctx.request)
+		ctx.response = db.lpush(ctx.request)
 	case bsp.LPOP:
-		db.lpop(ctx.request)
+		ctx.response = db.lpop(ctx.request)
 	case bsp.RPUSH:
-		db.rpush(ctx.request)
+		ctx.response = db.rpush(ctx.request)
 	case bsp.RPOP:
-		db.rpop(ctx.request)
+		ctx.response = db.rpop(ctx.request)
 	default:
 		ctx.response = bsp.NewErr(bsp.ErrCommand)
 	}
 }
 
-func (db *DB) lset(cmd *bsp.BspProto) {
-
+func (db *DB) lset(cmd *bsp.BspProto) bsp.Reply {
+	newlist := list.NewQuickList()
+	db.data.Put(cmd.Key(), newlist)
+	return bsp.NewInfo(bsp.OK)
 }
 
-func (db *DB) lget(cmd *bsp.BspProto) {}
+func (db *DB) lget(cmd *bsp.BspProto) bsp.Reply {
+	quickList, ok := db.data.Get(cmd.Key())
+	if !ok {
+		return bsp.NewInfo(bsp.NULL)
+	}
+	l, ok := quickList.(*list.QuickList)
+	if !ok {
+		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
+	}
+	return bsp.NewList([]byte(l.Value()))
+}
 
-func (db *DB) llen(cmd *bsp.BspProto) {}
+func (db *DB) llen(cmd *bsp.BspProto) bsp.Reply {
+	quickList, ok := db.data.Get(cmd.Key())
+	if !ok {
+		return bsp.NewInfo(bsp.NULL)
 
-func (db *DB) lpush(cmd *bsp.BspProto) {}
+	}
+	l, ok := quickList.(*list.QuickList)
+	if !ok {
+		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
+	}
+	return bsp.NewNum(l.Len())
+}
 
-func (db *DB) lpop(cmd *bsp.BspProto) {}
+func (db *DB) lpush(cmd *bsp.BspProto) bsp.Reply {
+	quickList, ok := db.data.Get(cmd.Key())
+	if !ok {
+		db.lset(cmd)
+		quickList, _ = db.data.Get(cmd.Key())
+	}
+	l, ok := quickList.(*list.QuickList)
+	if !ok {
+		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
+	}
+	for i := range cmd.Values() {
+		l.Insert(0, cmd.Values()[i])
+	}
+	return bsp.NewInfo(bsp.OK)
+}
 
-func (db *DB) rpush(cmd *bsp.BspProto) {}
+func (db *DB) lpop(cmd *bsp.BspProto) bsp.Reply {
+	quickList, ok := db.data.Get(cmd.Key())
+	if !ok {
+		return bsp.NewInfo(bsp.NULL)
+	}
+	l, ok := quickList.(*list.QuickList)
+	if !ok {
+		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
+	}
 
-func (db *DB) rpop(cmd *bsp.BspProto) {}
+	v := l.Remove(0)
+
+	return bsp.NewStr(v)
+}
+
+func (db *DB) rpush(cmd *bsp.BspProto) bsp.Reply {
+	quickList, ok := db.data.Get(cmd.Key())
+	if !ok {
+		db.lset(cmd)
+		quickList, _ = db.data.Get(cmd.Key())
+	}
+	l, ok := quickList.(*list.QuickList)
+	if !ok {
+		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
+	}
+	for i := range cmd.Values() {
+		l.Add(cmd.Values()[i])
+	}
+	return bsp.NewInfo(bsp.OK)
+}
+
+func (db *DB) rpop(cmd *bsp.BspProto) bsp.Reply {
+	quickList, ok := db.data.Get(cmd.Key())
+	if !ok {
+		return bsp.NewInfo(bsp.NULL)
+	}
+	l, ok := quickList.(*list.QuickList)
+	if !ok {
+		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
+	}
+
+	v := l.RemoveLast()
+
+	return bsp.NewStr(v)
+}

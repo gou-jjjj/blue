@@ -94,69 +94,6 @@ func (c *Client) RemoteAddr() string {
 	return c.conn.RemoteAddr().String()
 }
 
-func (c *Client) Version() (string, error) {
-	build := bsp.NewRequestBuilder(bsp.VERSION).Build()
-
-	return c.exec(build)
-}
-
-func (c *Client) Del(key string) (string, error) {
-	build := bsp.NewRequestBuilder(bsp.DEL).WithKey(key).Build()
-
-	return c.exec(build)
-}
-
-func (c *Client) Nset(k, num string) (string, error) {
-	build := bsp.NewRequestBuilder(bsp.NSET).
-		WithKey(k).
-		WithValueNum(num).
-		Build()
-
-	return c.exec(build)
-}
-
-func (c *Client) Get(k string) (string, error) {
-	build := bsp.NewRequestBuilder(bsp.GET).WithKey(k).Build()
-	return c.exec(build)
-}
-
-func (c *Client) Set(k, v string) (string, error) {
-	build := bsp.NewRequestBuilder(bsp.SET).
-		WithKey(k).
-		WithValueStr(v).
-		Build()
-
-	return c.exec(build)
-}
-
-func (c *Client) Len(k string) (string, error) {
-	build := bsp.NewRequestBuilder(bsp.LEN).WithKey(k).Build()
-
-	return c.exec(build)
-}
-
-func (c *Client) Kvs() (string, error) {
-	build := bsp.NewRequestBuilder(bsp.KVS).Build()
-
-	return c.exec(build)
-}
-
-func (c *Client) Nget(k string) (string, error) {
-	build := bsp.NewRequestBuilder(bsp.NGET).
-		WithKey(k).
-		Build()
-
-	return c.exec(build)
-}
-
-func (c *Client) Select(num ...string) (string, error) {
-	build := bsp.NewRequestBuilder(bsp.SELECT)
-	if len(num) != 0 {
-		build.WithKey(num[0])
-	}
-	return c.exec(build.Build())
-}
-
 func (c *Client) exec(buf []byte) (string, error) {
 	_, err := c.conn.Write(buf)
 	if err != nil {
