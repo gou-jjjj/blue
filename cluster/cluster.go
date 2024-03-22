@@ -2,10 +2,12 @@ package cluster
 
 import (
 	g "blue/api/go"
+	"blue/common/addr"
 	"bufio"
 	"fmt"
 	"io"
 	"net"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -28,38 +30,54 @@ type Cluster struct {
 	observers   []string
 	c           *Consistent
 	listener    net.Listener
-	addr        string
+	ip          string
+	port        int
 	token       string
 	tryTimes    int
 	configAddr  string
 	dialTimeout time.Duration
 }
 
-func NewCluster(try int, confAddr string, token string, dialTimeout time.Duration) *Cluster {
+func NewCluster(try int, port int, token string, dialTimeout time.Duration) *Cluster {
 	clu := &Cluster{
 		rw:          sync.RWMutex{},
 		observers:   make([]string, 0),
 		c:           NewConsistent(100),
-		addr:        confAddr,
+		port:        port,
 		token:       token,
 		tryTimes:    try,
 		dialTimeout: dialTimeout,
 	}
 
-	clu.Listen()
+	en0 := addr.LocalIpEn0()
+	if en0 == "" {
+		panic("en0 err")
+	}
+	clu.ip = en0
+
+	clu.addLocalAddr()
+	clu.listen()
 
 	return clu
+}
+
+func (c *Cluster) addLocalAddr() {
+	c.Register(c.LocalAddr())
+}
+
+func (c *Cluster) LocalAddr() string {
+	return c.ip + ":" + strconv.Itoa(c.port)
 }
 
 func (c *Cluster) Init() {
 	once := sync.Once{}
 	once.Do(func() {
-		g.NewClient(g.WithCluster(c.addr, c.token))
+		g.NewClient(g.WithCluster(c.LocalAddr(), c.token))
 	})
 }
 
-func (c *Cluster) Listen() {
-	l, err := net.Listen(network, c.addr)
+func (c *Cluster) listen() {
+	l, err := net.Listen(network, c.LocalAddr())
 	if err != nil {
 		panic(err)
 	}
@@ -83,7 +101,9 @@ func (c *Cluster) accept() {
 }
 
 func (c *Cluster) handle(conn net.Conn) {
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+	}()
 
 	reader := bufio.NewReader(conn)
 	for {
@@ -160,17 +180,17 @@ func (c *Cluster) Notify(addr string) {
 	}
 }
 
-func (c *Cluster) Online(addr string) {
+func (c *Cluster) online(addr string) {
 	c.Notify("+" + addr)
 }
 
-func (c *Cluster) Offline(addr string) {
+func (c *Cluster) offline(addr string) {
 	c.Notify("-" + addr)
 }
 
 func (c *Cluster) Close() {
-	addr := c.listener.Addr().String()
+	addr := c.LocalAddr()
 
-	c.Offline(addr)
-	c.listener.Close()
+	c.offline(addr)
+	_ = c.listener.Close()
 }

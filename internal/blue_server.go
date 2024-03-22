@@ -100,20 +100,31 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 		case req := <-bch:
 			fmt.Printf("%s\n", req)
 			client.request = req
+			bsp.BspPool.Put(req)
+
 			client.response = bsp.Reply(nil)
 			svr.ExecChain(client)
-			client.Reply()
-			bsp.BspPool.Put(req)
-			continue
+			_, err := client.Reply()
+			if err != nil {
+				cancelFunc()
+			}
+
 		case err := <-errch:
 			if !errors.Is(err, bsp.RequestEnd) {
 				client.response = err
-				client.Reply()
+				_, err1 := client.Reply()
+				if err1 != nil {
+					cancelFunc()
+				}
 			}
 
 			return
 		}
 	}
+}
+
+func (svr *BlueServer) RemoteHandler(ctx *Context) {
+	svr.cc.Unregister()
 }
 
 func (svr *BlueServer) ExecChain(ctx *Context) {
