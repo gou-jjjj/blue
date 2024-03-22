@@ -19,8 +19,10 @@ import (
 
 const version_ = "blue v0.1"
 
+var clusterConf = config.BC.ClusterConfig
+
 type Exec interface {
-	ExecChain(*Context) bool
+	ExecChain(*Context)
 }
 
 type ServerInter interface {
@@ -47,12 +49,12 @@ func NewBlueServer(dbs ...*DB) *BlueServer {
 		b.db[i] = dbs[i]
 	}
 
-	if config.OpenCluster() {
+	if clusterConf.OpenCluster() {
 		b.cc = cluster.NewCluster(
-			config.BC.ClusterConfig.TryTimes,
-			config.BC.ClusterConfig.ClusterAddr,
+			clusterConf.TryTimes,
+			clusterConf.ClusterAddr,
 			"",
-			time.Duration(config.BC.ClusterConfig.DialTimeout)*time.Second)
+			time.Duration(clusterConf.DialTimeout)*time.Second)
 	}
 
 	return b
@@ -99,11 +101,7 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 			fmt.Printf("%s\n", req)
 			client.request = req
 			client.response = bsp.Reply(nil)
-			ok := svr.ExecChain(client)
-			if !ok {
-				svr.db[client.GetDB()].ExecChain(client)
-			}
-
+			svr.ExecChain(client)
 			client.Reply()
 			bsp.BspPool.Put(req)
 			continue
@@ -118,7 +116,7 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 	}
 }
 
-func (svr *BlueServer) ExecChain(ctx *Context) bool {
+func (svr *BlueServer) ExecChain(ctx *Context) {
 	switch ctx.request.Handle() {
 	case bsp.VERSION:
 		svr.version(ctx)
@@ -130,11 +128,9 @@ func (svr *BlueServer) ExecChain(ctx *Context) bool {
 		}
 	case bsp.KVS:
 		svr.kvs(ctx)
-
 	default:
-		return false
+		svr.db[ctx.GetDB()].ExecChain(ctx)
 	}
-	return true
 }
 
 func (svr *BlueServer) selected(ctx *Context) {

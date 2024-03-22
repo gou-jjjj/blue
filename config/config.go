@@ -149,9 +149,9 @@ func InitConfig() map[string]interface{} {
 	return BC.Entries()
 }
 
-func OpenCluster() bool {
+func (c clusterConfig) OpenCluster() bool {
 	// 解析地址
-	ip, _, err := net.SplitHostPort(BC.ClusterConfig.ClusterAddr)
+	ip, _, err := net.SplitHostPort(c.ClusterAddr)
 	if err != nil {
 		return false
 	}

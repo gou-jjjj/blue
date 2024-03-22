@@ -95,7 +95,7 @@ func NewDB(opts ...DbOption) *DB {
 	return db
 }
 
-func (db *DB) ExecChain(ctx *Context) bool {
+func (db *DB) ExecChain(ctx *Context) {
 	switch ctx.request.Type() {
 	case bsp.TypeDB:
 		db.ExecChainDB(ctx)
@@ -113,8 +113,6 @@ func (db *DB) ExecChain(ctx *Context) bool {
 		fmt.Printf("db:[%+b]", ctx.request.Type())
 		ctx.response = bsp.NewErr(bsp.ErrCommand)
 	}
-
-	return true
 }
 
 func (db *DB) ExecChainDB(ctx *Context) {
