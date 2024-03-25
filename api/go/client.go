@@ -18,11 +18,12 @@ var (
 type Option func(*Config)
 
 type Config struct {
-	Addr     string
-	DB       int
-	TryTimes int
-	token    string
-	TimeOut  time.Duration
+	Addr      string
+	DB        int
+	TryTimes  int
+	token     string
+	TimeOut   time.Duration
+	DefaultDB bool
 }
 
 type Client struct {
@@ -58,7 +59,7 @@ func WithToken(token string) Option {
 	}
 }
 
-func NewClient(opts ...Option) *Client {
+func NewClient(opts ...Option) (*Client, error) {
 	c := &Config{}
 	for _, opt := range opts {
 		opt(c)
@@ -68,30 +69,45 @@ func NewClient(opts ...Option) *Client {
 		Config: *c,
 	}
 
-	cli.connect()
-
-	_, err := cli.Select(strconv.Itoa(c.DB))
+	err := cli.connect()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return cli
+	if c.DefaultDB {
+		_, err = cli.Select(strconv.Itoa(c.DB))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return cli, nil
 }
 
-func (c *Client) connect() {
+func (c *Client) connect() error {
 	var err error
 	for i := 0; i < c.TryTimes; i++ {
 		c.conn, err = net.DialTimeout("tcp", c.Addr, c.TimeOut)
 		if err == nil {
-			return
+			return nil
 		}
 	}
 
-	panic(err)
+	return err
 }
 
 func (c *Client) RemoteAddr() string {
 	return c.conn.RemoteAddr().String()
+}
+
+func (c *Client) DirectExec(buf []byte) ([]byte, error) {
+	_, err := c.conn.Write(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	read := bufio.NewReader(c.conn)
+	return read.ReadBytes(bsp.Done)
 }
 
 func (c *Client) exec(buf []byte) (string, error) {

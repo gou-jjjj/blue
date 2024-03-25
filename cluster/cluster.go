@@ -2,7 +2,8 @@ package cluster
 
 import (
 	g "blue/api/go"
-	"blue/common/addr"
+	"blue/bsp"
+	add "blue/common/server"
 	"bufio"
 	"fmt"
 	"io"
@@ -36,6 +37,7 @@ type Cluster struct {
 	tryTimes    int
 	configAddr  string
 	dialTimeout time.Duration
+	remoteCli   map[string]*g.Client
 }
 
 func NewCluster(try int, port int, token string, dialTimeout time.Duration) *Cluster {
@@ -49,7 +51,7 @@ func NewCluster(try int, port int, token string, dialTimeout time.Duration) *Clu
 		dialTimeout: dialTimeout,
 	}
 
-	en0 := addr.LocalIpEn0()
+	en0 := add.LocalIpEn0()
 	if en0 == "" {
 		panic("en0 err")
 	}
@@ -67,13 +69,6 @@ func (c *Cluster) addLocalAddr() {
 
 func (c *Cluster) LocalAddr() string {
 	return c.ip + ":" + strconv.Itoa(c.port)
-}
-
-func (c *Cluster) Init() {
-	once := sync.Once{}
-	once.Do(func() {
-		g.NewClient(g.WithCluster(c.LocalAddr(), c.token))
-	})
 }
 
 func (c *Cluster) listen() {
@@ -98,6 +93,37 @@ func (c *Cluster) accept() {
 
 		go c.handle(conn)
 	}
+}
+
+func (c *Cluster) Dial(ctx *bsp.BspProto) ([]byte, bool) {
+W:
+	if ctx.Key() == "" {
+		return nil, false
+	}
+
+	remoteAddr := c.c.Get(ctx.Key())
+	if c.LocalAddr() == remoteAddr {
+		return nil, false
+	}
+
+	cli, err := c.getClient(remoteAddr)
+	if err != nil {
+		c.Unregister(remoteAddr)
+		goto W
+	}
+
+	exec, err := cli.DirectExec(ctx.Buf())
+	if err != nil {
+		c.Unregister(remoteAddr)
+		goto W
+	}
+
+	if exec == nil {
+		c.Unregister(remoteAddr)
+		goto W
+	}
+
+	return exec, true
 }
 
 func (c *Cluster) handle(conn net.Conn) {
@@ -186,6 +212,32 @@ func (c *Cluster) online(addr string) {
 
 func (c *Cluster) offline(addr string) {
 	c.Notify("-" + addr)
+}
+
+func (c *Cluster) setClient(addr string) (*g.Client, error) {
+	cli, err := g.NewClient(g.WithDefaultOpt(), func(c *g.Config) {
+		c.Addr = addr
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	c.remoteCli[addr] = cli
+	return cli, nil
+}
+
+func (c *Cluster) getClient(addr string) (*g.Client, error) {
+	if conn, ok := c.remoteCli[addr]; ok {
+		return conn, nil
+	} else {
+		nconn, err := c.setClient(addr)
+		if err != nil {
+			return nil, err
+		}
+
+		return nconn, nil
+	}
 }
 
 func (c *Cluster) Close() {

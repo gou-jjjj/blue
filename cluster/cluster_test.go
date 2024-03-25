@@ -10,9 +10,6 @@ func TestNewCluster(t *testing.T) {
 
 	fmt.Printf("%v\n", cluster.observers)
 	fmt.Printf("%v\n", cluster.c.members)
-
-	cluster.Register("dqwdq", "dwd")
-	fmt.Printf("%v\n", cluster.observers)
-	fmt.Printf("%v\n", cluster.c.members)
+	fmt.Printf("%v\n", cluster.c.nodes)
 
 }

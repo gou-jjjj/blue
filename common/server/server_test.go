@@ -1,4 +1,4 @@
-package internal
+package server
 
 import (
 	"fmt"
@@ -6,6 +6,5 @@ import (
 )
 
 func TestName(t *testing.T) {
-
 	fmt.Printf("%v\n", LocalIpEn0())
 }

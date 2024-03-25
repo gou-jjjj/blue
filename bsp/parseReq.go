@@ -25,7 +25,8 @@ func parse0(r io.Reader) (*BspProto, *ErrResp) {
 			return nil, SyntaxErr
 		}
 
-		res := BspPool.Get().(*BspProto)
+		res := NewBspProto()
+		res.SetBuf(bs)
 		res.SetHeader(NewHeader(Header(bs[0])))
 		if res.Header == HandleErr {
 			return nil, NewErr(ErrHeaderType)

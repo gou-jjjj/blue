@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,7 +36,7 @@ func Exec(conn *g.Client, s []string) (string, error) {
 
 func main() {
 	// 读取 JSON 文件
-	files := []string{} // 添加更多文件名
+	files := make([]string, 0) // 添加更多文件名
 
 	err := filepath.Walk("../commands", func(path string, info fs.FileInfo, err error) error {
 		if filepath.Ext(path) != ".json" {
@@ -59,7 +58,7 @@ func main() {
 
 	var cmds []commands.Cmd
 	for _, file := range files {
-		data, err := ioutil.ReadFile(file)
+		data, err := os.ReadFile(file)
 		if err != nil {
 			fmt.Println("Error reading file:", err)
 			return

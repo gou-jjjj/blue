@@ -203,6 +203,24 @@ func NewErr(e ReplyType, msg ...any) *ErrResp {
 	return re
 }
 
+type ClusterReply struct {
+	buf []byte
+}
+
+func NewClusterReply(buf []byte) *ClusterReply {
+	return &ClusterReply{
+		buf: buf,
+	}
+}
+
+func (c ClusterReply) Bytes() []byte {
+	return c.buf
+}
+
+func (c ClusterReply) String() string {
+	return string(c.buf)
+}
+
 var (
 	RequestEnd = NewErr(ErrEnd)
 	SyntaxErr  = NewErr(ErrSyntax)

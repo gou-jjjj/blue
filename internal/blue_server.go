@@ -5,16 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"blue/bsp"
 	"blue/cluster"
-	"blue/config"
-
 	"blue/common/timewheel"
+	"blue/config"
 )
 
 const version_ = "blue v0.1"
@@ -52,20 +50,12 @@ func NewBlueServer(dbs ...*DB) *BlueServer {
 	if clusterConf.OpenCluster() {
 		b.cc = cluster.NewCluster(
 			clusterConf.TryTimes,
-			clusterConf.ClusterAddr,
+			clusterConf.Port,
 			"",
 			time.Duration(clusterConf.DialTimeout)*time.Second)
 	}
 
 	return b
-}
-
-func (svr *BlueServer) closeClient(client *Context) {
-	if client == nil {
-		return
-	}
-	client.Close()
-	svr.activeConn.Delete(client)
 }
 
 // Handle receives and executes redis commands
@@ -89,9 +79,18 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 		close(errch)
 	}()
 
+	if svr.isCluster() {
+		svr.clusterHandle(client, bch, errch)
+	} else {
+		svr.localHandle(client, bch, errch)
+	}
+
+}
+
+func (svr *BlueServer) localHandle(ctx *Context, bch chan *bsp.BspProto, errch chan *bsp.ErrResp) {
 	for {
-		timewheel.Delay(client.maxActive, client.cliToken, func() {
-			svr.closeClient(client)
+		timewheel.Delay(ctx.maxActive, ctx.cliToken, func() {
+			svr.closeClient(ctx)
 		})
 
 		select {
@@ -99,32 +98,49 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 			return
 		case req := <-bch:
 			fmt.Printf("%s\n", req)
-			client.request = req
-			bsp.BspPool.Put(req)
+			ctx.request = req
+			bsp.PutBspProto(req)
 
-			client.response = bsp.Reply(nil)
-			svr.ExecChain(client)
-			_, err := client.Reply()
-			if err != nil {
-				cancelFunc()
-			}
+			ctx.response = bsp.Reply(nil)
+			svr.ExecChain(ctx)
+			_, _ = ctx.Reply()
 
 		case err := <-errch:
 			if !errors.Is(err, bsp.RequestEnd) {
-				client.response = err
-				_, err1 := client.Reply()
-				if err1 != nil {
-					cancelFunc()
-				}
+				ctx.response = err
+				_, _ = ctx.Reply()
 			}
-
-			return
 		}
 	}
 }
 
-func (svr *BlueServer) RemoteHandler(ctx *Context) {
-	svr.cc.Unregister()
+func (svr *BlueServer) clusterHandle(ctx *Context, bch chan *bsp.BspProto, errch chan *bsp.ErrResp) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case req := <-bch:
+			fmt.Printf("%s\n", req)
+			ctx.request = req
+			ctx.response = bsp.Reply(nil)
+
+			bsp.PutBspProto(req)
+			res, ok := svr.cc.Dial(ctx.request)
+			if !ok {
+				svr.ExecChain(ctx)
+			} else {
+				ctx.response = bsp.NewClusterReply(res)
+			}
+
+			_, _ = ctx.Reply()
+
+		case err := <-errch:
+			if !errors.Is(err, bsp.RequestEnd) {
+				ctx.response = err
+				_, _ = ctx.Reply()
+			}
+		}
+	}
 }
 
 func (svr *BlueServer) ExecChain(ctx *Context) {
@@ -144,42 +160,20 @@ func (svr *BlueServer) ExecChain(ctx *Context) {
 	}
 }
 
-func (svr *BlueServer) selected(ctx *Context) {
-	ctx.response = bsp.NewStr(ctx.GetDB())
-}
-
-func (svr *BlueServer) selectdb(ctx *Context) {
-	dbIndex, err := strconv.Atoi(ctx.request.Key())
-	if err != nil {
-		ctx.response = bsp.NewErr(bsp.ErrRequestParameter)
-		return
-	}
-
-	if dbIndex < 0 || dbIndex >= len(svr.db) {
-		ctx.response = bsp.NewErr(bsp.ErrRequestParameter)
-		return
-	}
-
-	ctx.SetDB(uint8(dbIndex))
-	ctx.response = bsp.NewInfo(bsp.OK)
-}
-
-func (svr *BlueServer) version(ctx *Context) {
-	ctx.response = bsp.NewStr([]byte(version_))
-}
-
-func (svr *BlueServer) kvs(ctx *Context) {
-	kv := svr.db[ctx.GetDB()].RangeKV()
-
-	if kv == "" {
-		ctx.response = bsp.NewInfo(bsp.NULL)
-	} else {
-		ctx.response = bsp.NewStr(kv)
-	}
+func (svr *BlueServer) isCluster() bool {
+	return svr.cc == nil
 }
 
 func (svr *BlueServer) isClose() bool {
 	return svr.closed.Load() == 1
+}
+
+func (svr *BlueServer) closeClient(client *Context) {
+	if client == nil {
+		return
+	}
+	client.Close()
+	svr.activeConn.Delete(client)
 }
 
 // Close stops handler

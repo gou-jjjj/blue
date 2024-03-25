@@ -7,6 +7,23 @@ import (
 	"sync"
 )
 
+var bspPool = sync.Pool{
+	New: func() interface{} {
+		return &BspProto{}
+	},
+}
+
+func NewBspProto() *BspProto {
+	return bspPool.Get().(*BspProto)
+}
+
+func PutBspProto(b *BspProto) {
+	b.key = ""
+	b.value = nil
+	b.buf = nil
+	bspPool.Put(b)
+}
+
 type BspProtoInter interface {
 	SetHeader(Header)
 	Key() string
@@ -18,18 +35,15 @@ type BspProtoInter interface {
 	ValueStr() string
 	SetValue([]byte)
 	SetValues([][]byte)
+	Buf() []byte
+	SetBuf([]byte)
 }
 
 type BspProto struct {
 	Header
 	key   string
 	value [][]byte
-}
-
-var BspPool = sync.Pool{
-	New: func() interface{} {
-		return &BspProto{}
-	},
+	buf   []byte
 }
 
 func (b *BspProto) String() string {
@@ -77,4 +91,12 @@ func (b *BspProto) SetValue(value []byte) {
 
 func (b *BspProto) SetValues(values [][]byte) {
 	b.value = values
+}
+
+func (b *BspProto) Buf() []byte {
+	return b.buf
+}
+
+func (b *BspProto) SetBuf(buf []byte) {
+	b.buf = buf
 }

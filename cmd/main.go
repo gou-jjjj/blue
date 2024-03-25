@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blue/common/server"
 	"blue/config"
 	"blue/internal"
 	"blue/log"
@@ -38,8 +39,8 @@ func main() {
 
 	handler := internal.NewBlueServer(dbs...)
 
-	server := internal.NewServer(
-		func(c *internal.Config) {
+	server := server.NewServer(
+		func(c *server.Config) {
 			c.Ip = config.BC.ServerConfig.Ip
 			c.Port = config.BC.ServerConfig.Port
 			c.ClientLimit = config.BC.ClientConfig.ClientLimit
