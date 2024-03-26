@@ -117,7 +117,7 @@ func writeFunc(code *strings.Builder, cmd commands.Cmd) {
 
 	code.WriteString(fmt.Sprintf(`func %s() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > %d {
+		if len(s) != %d {
 			return "", ErrArgu(s[0])
 		}
 		return conn.%s

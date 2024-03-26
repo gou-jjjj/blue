@@ -75,6 +75,9 @@ func main() {
 			}
 		}
 
+		if split[0] == "select" && len(split) == 2 && res == "ok" {
+			BC.DB, _ = strconv.Atoi(split[1])
+		}
 		SuccessPrint(res)
 	}
 }

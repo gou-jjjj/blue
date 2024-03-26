@@ -97,7 +97,7 @@ func NewServer(fs ...ConfigFunc) *Server {
 }
 
 func (s *Server) close() {
-	s.listen.Close()
+	_ = s.listen.Close()
 	s.isClo = true
 	close(s.errClo)
 	s.c.Log.Info().Msg("server start closing ...")
@@ -130,8 +130,8 @@ func (s *Server) Start() {
 
 func (s *Server) limit(conn net.Conn) bool {
 	if s.currentClient == int32(s.c.ClientLimit) {
-		conn.Write([]byte("too many client ,try again later ..."))
-		conn.Close()
+		_, _ = conn.Write([]byte("too many client ,try again later ..."))
+		_ = conn.Close()
 		return true
 	}
 	return false
@@ -164,7 +164,7 @@ func (s *Server) server() {
 				s.c.Log.Info().Msgf("close conn: %s, %v;", conn.RemoteAddr().String(),
 					time.Now().Sub(subtime.(time.Time)))
 				s.waitClient.Done()
-				conn.Close()
+				_ = conn.Close()
 			}()
 
 			s.c.HandlerFunc.Handle(context.Background(), conn)

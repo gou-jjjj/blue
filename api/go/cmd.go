@@ -1,6 +1,9 @@
 package blue
 
-import "blue/bsp"
+import (
+	"blue/bsp"
+	"strconv"
+)
 
 func (c *Client) Version() (string, error) {
 	build := bsp.NewRequestBuilder(bsp.VERSION).Build()
@@ -15,6 +18,11 @@ func (c *Client) Del(key string) (string, error) {
 }
 
 func (c *Client) Nset(k, num string) (string, error) {
+	_, err := strconv.Atoi(num)
+	if err != nil {
+		return "", ErrDataType(num)
+	}
+
 	build := bsp.NewRequestBuilder(bsp.NSET).
 		WithKey(k).
 		WithValueNum(num).

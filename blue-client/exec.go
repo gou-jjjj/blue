@@ -24,7 +24,7 @@ func Exec(conn *g.Client, s []string) (string, error) {
 
 func Del() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 2 {
+		if len(s) != 2 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Del(s[1])
@@ -33,7 +33,7 @@ func Del() CmdFunc {
 
 func Expire() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 3 {
+		if len(s) != 3 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Expire(s[1], s[2])
@@ -42,7 +42,7 @@ func Expire() CmdFunc {
 
 func Get() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 2 {
+		if len(s) != 2 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Get(s[1])
@@ -51,7 +51,7 @@ func Get() CmdFunc {
 
 func Incr() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 2 {
+		if len(s) != 2 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Incr(s[1])
@@ -60,7 +60,7 @@ func Incr() CmdFunc {
 
 func Kvs() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 1 {
+		if len(s) != 1 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Kvs()
@@ -69,7 +69,7 @@ func Kvs() CmdFunc {
 
 func Len() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 2 {
+		if len(s) != 2 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Len(s[1])
@@ -78,7 +78,7 @@ func Len() CmdFunc {
 
 func Lget() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 2 {
+		if len(s) != 2 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Lget(s[1])
@@ -87,7 +87,7 @@ func Lget() CmdFunc {
 
 func Llen() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 2 {
+		if len(s) != 2 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Llen(s[1])
@@ -96,7 +96,7 @@ func Llen() CmdFunc {
 
 func Lpop() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 2 {
+		if len(s) != 2 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Lpop(s[1])
@@ -105,7 +105,7 @@ func Lpop() CmdFunc {
 
 func Lpush() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 3 {
+		if len(s) != 3 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Lpush(s[1], s[2])
@@ -114,7 +114,7 @@ func Lpush() CmdFunc {
 
 func Lset() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 2 {
+		if len(s) != 2 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Lset(s[1])
@@ -123,7 +123,7 @@ func Lset() CmdFunc {
 
 func Nget() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 2 {
+		if len(s) != 2 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Nget(s[1])
@@ -132,7 +132,7 @@ func Nget() CmdFunc {
 
 func Nset() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 3 {
+		if len(s) != 3 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Nset(s[1], s[2])
@@ -141,7 +141,7 @@ func Nset() CmdFunc {
 
 func Rpop() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 2 {
+		if len(s) != 2 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Rpop(s[1])
@@ -150,7 +150,7 @@ func Rpop() CmdFunc {
 
 func Rpush() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 3 {
+		if len(s) != 3 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Rpush(s[1], s[2])
@@ -171,7 +171,7 @@ func Select() CmdFunc {
 
 func Set() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 3 {
+		if len(s) != 3 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Set(s[1], s[2])
@@ -180,7 +180,7 @@ func Set() CmdFunc {
 
 func Version() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
-		if len(s) > 1 {
+		if len(s) != 1 {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Version()
