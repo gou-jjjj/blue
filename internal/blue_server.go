@@ -97,13 +97,13 @@ func (svr *BlueServer) localHandle(ctx *Context, bch chan *bsp.BspProto, errch c
 		case <-ctx.Done():
 			return
 		case req := <-bch:
-			fmt.Printf("%s\n", req)
+			fmt.Printf("local req:[%+v]\n", req)
 			ctx.request = req
-			bsp.PutBspProto(req)
-
 			ctx.response = bsp.Reply(nil)
+
 			svr.ExecChain(ctx)
 			_, _ = ctx.Reply()
+			bsp.PutBspProto(req)
 
 		case err := <-errch:
 			if !errors.Is(err, bsp.RequestEnd) {
@@ -120,11 +120,10 @@ func (svr *BlueServer) clusterHandle(ctx *Context, bch chan *bsp.BspProto, errch
 		case <-ctx.Done():
 			return
 		case req := <-bch:
-			fmt.Printf("%s\n", req)
+			fmt.Printf("cluster req:[%+v]\n", req)
 			ctx.request = req
 			ctx.response = bsp.Reply(nil)
 
-			bsp.PutBspProto(req)
 			res, ok := svr.cc.Dial(ctx.request)
 			if !ok {
 				svr.ExecChain(ctx)
@@ -133,6 +132,7 @@ func (svr *BlueServer) clusterHandle(ctx *Context, bch chan *bsp.BspProto, errch
 			}
 
 			_, _ = ctx.Reply()
+			bsp.PutBspProto(req)
 
 		case err := <-errch:
 			if !errors.Is(err, bsp.RequestEnd) {
@@ -161,7 +161,7 @@ func (svr *BlueServer) ExecChain(ctx *Context) {
 }
 
 func (svr *BlueServer) isCluster() bool {
-	return svr.cc == nil
+	return svr.cc != nil
 }
 
 func (svr *BlueServer) isClose() bool {

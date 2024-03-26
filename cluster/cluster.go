@@ -3,7 +3,7 @@ package cluster
 import (
 	g "blue/api/go"
 	"blue/bsp"
-	add "blue/common/server"
+	add "blue/common/network"
 	"bufio"
 	"fmt"
 	"io"

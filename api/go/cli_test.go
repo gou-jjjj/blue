@@ -7,7 +7,7 @@ import (
 )
 
 func TestCli(t *testing.T) {
-	c := NewClient(WithDefaultOpt())
+	c, _ := NewClient(WithDefaultOpt())
 
 	fmt.Println(c.Lpush("a1", "1"))
 	fmt.Println(c.Lpush("a1", "2"))

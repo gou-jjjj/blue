@@ -150,7 +150,10 @@ func InitConfig() map[string]interface{} {
 }
 
 func (c clusterConfig) OpenCluster() bool {
-	// 解析地址
+	if c.ClusterAddr == "" {
+		return false
+	}
+
 	ip, _, err := net.SplitHostPort(c.ClusterAddr)
 	if err != nil {
 		return false

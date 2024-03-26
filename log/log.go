@@ -30,7 +30,7 @@ func logLevel() zerolog.Level {
 	return l
 }
 
-func InitSyncLog() {
+func InitLog() {
 	Blog = newSyncLog()
 }
 

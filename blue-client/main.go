@@ -16,11 +16,15 @@ var (
 )
 
 func init() {
-	Connect()
+	var err error
+	conn, err = Connect()
+	if err != nil {
+		panic(err)
+	}
 }
 
-func Connect() {
-	conn = g.NewClient(func(c *g.Config) {
+func Connect() (*g.Client, error) {
+	return g.NewClient(func(c *g.Config) {
 		c.Addr = BC.Addr
 		c.TimeOut = time.Duration(BC.TimeOut) * time.Second
 		c.TryTimes = BC.TryTimes
@@ -60,7 +64,10 @@ func main() {
 				continue
 			}
 
-			Connect()
+			conn, err = Connect()
+			if err != nil {
+				panic(err)
+			}
 			res, err = Exec(conn, split)
 			if err != nil {
 				ErrPrint(err.Error())

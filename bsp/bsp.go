@@ -18,6 +18,7 @@ func NewBspProto() *BspProto {
 }
 
 func PutBspProto(b *BspProto) {
+	b.Header = 0
 	b.key = ""
 	b.value = nil
 	b.buf = nil
@@ -98,5 +99,6 @@ func (b *BspProto) Buf() []byte {
 }
 
 func (b *BspProto) SetBuf(buf []byte) {
-	b.buf = buf
+	b.buf = make([]byte, len(buf))
+	copy(b.buf, buf)
 }

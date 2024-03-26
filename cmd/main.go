@@ -1,25 +1,30 @@
 package main
 
 import (
-	"blue/common/server"
+	"fmt"
+	"os"
+	"time"
+
 	"blue/config"
 	"blue/internal"
 	"blue/log"
-	"fmt"
-	"time"
 )
 
 var title = `  _       _                
  | |__   | |  _   _    ___ 
  | '_ \  | | | | | |  / _ \
- | |_) | | | | |_| | |  __/
+ | |_) | | | | |_| | | |__/
  |_.__/  |_|  \__,_|  \___|
                            `
 
-func main() {
+func init() {
 	fmt.Printf("\033[34m%s\033[0m\n", title)
+	fmt.Println(os.Getpid(), os.Getuid())
+}
+
+func main() {
 	configDB := config.InitConfig()
-	log.InitSyncLog()
+	log.InitLog()
 
 	dbs := make([]*internal.DB, config.BC.ServerConfig.DBSum+1)
 	dbs[0] = internal.NewDB(func(c *internal.DBConfig) {
@@ -39,15 +44,13 @@ func main() {
 
 	handler := internal.NewBlueServer(dbs...)
 
-	server := server.NewServer(
-		func(c *server.Config) {
+	internal.NewServer(
+		func(c *internal.Config) {
 			c.Ip = config.BC.ServerConfig.Ip
 			c.Port = config.BC.ServerConfig.Port
 			c.ClientLimit = config.BC.ClientConfig.ClientLimit
 			c.Timeout = time.Duration(config.BC.ServerConfig.TimeOut) * time.Second
 			c.HandlerFunc = handler
 		},
-	)
-
-	server.Start()
+	).Start()
 }

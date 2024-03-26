@@ -16,8 +16,6 @@
     ]
   },
   "cluster_config": {
-    "cluster_addr": "127.0.0.1:13140",
-    "ip": "127.0.0.1",
     "port": 13141,
     "try_times": 3,
     "dial_timeout": 10,

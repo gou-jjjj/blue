@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+var split = []byte{Split}
+
 func parse0(r io.Reader) (*BspProto, *ErrResp) {
 	reader := bufio.NewReader(r)
 	for {
@@ -24,7 +26,7 @@ func parse0(r io.Reader) (*BspProto, *ErrResp) {
 		if len(bs) < 2 {
 			return nil, SyntaxErr
 		}
-
+		fmt.Printf("bs: {%+b}\n", bs)
 		res := NewBspProto()
 		res.SetBuf(bs)
 		res.SetHeader(NewHeader(Header(bs[0])))
@@ -40,29 +42,29 @@ func parse0(r io.Reader) (*BspProto, *ErrResp) {
 			return res, nil
 		}
 
-		split := bytes.Split(bs[1:len(bs)-1], []byte{Split})
+		bss := bytes.Split(bs[1:len(bs)-1], split)
 
 		switch arity {
 		case 1:
-			if len(split) != 1 {
+			if len(bss) != 1 {
 				return nil, NewErr(ErrSyntax)
 			}
 
-			res.SetKey(string(split[0]))
+			res.SetKey(string(bss[0]))
 
 		case 2:
-			if len(split) != 2 {
+			if len(bss) != 2 {
 				return nil, NewErr(ErrSyntax)
 			}
-			res.SetKey(string(split[0]))
-			res.SetValue(split[1])
+			res.SetKey(string(bss[0]))
+			res.SetValue(bss[1])
 
 		case -1:
-			if len(split) == 0 {
+			if len(bss) == 0 {
 				return nil, NewErr(ErrSyntax)
 			}
 
-			res.SetValues(split)
+			res.SetValues(bss)
 
 		default:
 

@@ -8,20 +8,6 @@ import "blue/commands"
 
 const cmdLen = 18
 
-// set -----------------------------
-const (
-)
-
-// json -----------------------------
-const (
-)
-
-// system -----------------------------
-const (
-	KVS Header = 1 + TypeSystem
-	VERSION Header = 2 + TypeSystem
-)
-
 // db -----------------------------
 const (
 	DEL Header = 1 + TypeDB
@@ -52,6 +38,20 @@ const (
 	LSET Header = 5 + TypeList
 	RPOP Header = 6 + TypeList
 	RPUSH Header = 7 + TypeList
+)
+
+// set -----------------------------
+const (
+)
+
+// json -----------------------------
+const (
+)
+
+// system -----------------------------
+const (
+	KVS Header = 1 + TypeSystem
+	VERSION Header = 2 + TypeSystem
 )
 
 var HandleMap = [...]string{
@@ -97,10 +97,10 @@ var HandleMap2 = map[string]Header{
 }
 
 var CommandsMap = [...]commands.Cmd{
-	DEL: {Name:"DEL",Summary: "Remove the specified keys", Group: "db", Arity: -1, Key: "list", Value: "", Arguments: []string{}},
+	DEL: {Name:"DEL",Summary: "Remove the specified keys", Group: "db", Arity: 1, Key: "list", Value: "", Arguments: []string{}},
 	EXPIRE: {Name:"EXPIRE",Summary: "Set a key's time to live in seconds", Group: "db", Arity: 2, Key: "string", Value: "number", Arguments: []string{}},
 	GET: {Name:"GET",Summary: "Returns the string value of a key.", Group: "string", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
-	INCR: {Name:"INCR",Summary: "Increment the integer value of a key by the given amount", Group: "number", Arity: 2, Key: "string", Value: "number", Arguments: []string{}},
+	INCR: {Name:"INCR",Summary: "Increment the integer value of a key by the given amount", Group: "number", Arity: 1, Key: "string", Value: "number", Arguments: []string{}},
 	KVS: {Name:"KVS",Summary: "Returns all key-value pairs in the database", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
 	LEN: {Name:"LEN",Summary: "Returns the length of a string", Group: "string", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	LGET: {Name:"LGET",Summary: "Gets all values for the list of given key", Group: "list", Arity: 1, Key: "string", Value: "list", Arguments: []string{}},
