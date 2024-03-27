@@ -1,8 +1,8 @@
 {
   "name": "select",
   "summary": "Select a db.",
-  "group": "db",
+  "group": "system",
   "arity": 1,
-  "key": "number",
+  "key": "string",
   "arguments": []
 }

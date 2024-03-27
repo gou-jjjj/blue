@@ -156,23 +156,6 @@ func (svr *BlueServer) clusterHandle(ctx *Context, bch chan *bsp.BspProto, errch
 	}
 }
 
-func (svr *BlueServer) ExecChain(ctx *Context) {
-	switch ctx.request.Handle() {
-	case bsp.VERSION:
-		svr.version(ctx)
-	case bsp.SELECT:
-		if ctx.request.Key() != "" {
-			svr.selectdb(ctx)
-		} else {
-			svr.selected(ctx)
-		}
-	case bsp.KVS:
-		svr.kvs(ctx)
-	default:
-		svr.db[ctx.GetDB()].ExecChain(ctx)
-	}
-}
-
 func (svr *BlueServer) isCluster() bool {
 	return svr.cc != nil
 }

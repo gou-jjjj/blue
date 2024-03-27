@@ -1,0 +1,9 @@
+{
+  "name": "sget",
+  "summary": "Gets all the values in the set, if the set exists",
+  "group": "set",
+  "key": "string",
+  "arity":1,
+  "value": "",
+  "arguments": []
+}

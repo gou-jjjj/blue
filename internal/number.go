@@ -11,6 +11,8 @@ func (db *DB) ExecChainNumber(ctx *Context) {
 		ctx.response = db.nset(ctx.request)
 	case bsp.NGET:
 		ctx.response = db.nget(ctx.request)
+	case bsp.INCR:
+		ctx.response = db.incr(ctx.request)
 	default:
 		ctx.response = bsp.NewErr(bsp.ErrCommand)
 	}
@@ -46,4 +48,18 @@ func (db *DB) nget(cmd *bsp.BspProto) bsp.Reply {
 	}
 
 	return bsp.NewNum(n.Get())
+}
+
+func (db *DB) incr(cmd *bsp.BspProto) bsp.Reply {
+	v, ok := db.data.Get(cmd.Key())
+	if !ok {
+		return bsp.NewInfo(bsp.NULL)
+	}
+
+	n, ok := v.(number.Number)
+	if !ok {
+		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
+	}
+
+	return bsp.NewNum(n.Incr())
 }

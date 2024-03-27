@@ -106,7 +106,7 @@ func (db *DB) ExecChain(ctx *Context) {
 	case bsp.TypeList:
 		db.ExecChainList(ctx)
 	case bsp.TypeSet:
-
+		db.ExecChainSet(ctx)
 	case bsp.TypeJson:
 
 	default:
@@ -118,7 +118,12 @@ func (db *DB) ExecChain(ctx *Context) {
 func (db *DB) ExecChainDB(ctx *Context) {
 	switch ctx.request.Handle() {
 	case bsp.DEL:
-		ctx.response = db.del(ctx.request.Values())
+		ctx.response = db.del(ctx.request)
+	case bsp.EXPIRE:
+		ctx.response = db.expire(ctx.request)
+	case bsp.KVS:
+		ctx.response = db.kvs(ctx.request)
+
 	default:
 		ctx.response = bsp.NewErr(bsp.ErrCommand)
 	}
@@ -153,7 +158,8 @@ func (db *DB) RangeKV() string {
 	return builder.String()[:builder.Len()-1]
 }
 
-func (db *DB) del(key [][]byte) bsp.Reply {
+func (db *DB) del(ctx *bsp.BspProto) bsp.Reply {
+	key := ctx.Values()
 	for i := range key {
 		db.data.Remove(string(key[i]))
 		err := db.StorageDelete(key[i])
@@ -162,4 +168,18 @@ func (db *DB) del(key [][]byte) bsp.Reply {
 		}
 	}
 	return bsp.NewInfo(bsp.OK)
+}
+
+func (db *DB) expire(ctx *bsp.BspProto) bsp.Reply {
+	return bsp.NewInfo(bsp.OK)
+}
+
+func (db *DB) kvs(ctx *bsp.BspProto) bsp.Reply {
+	kv := db.RangeKV()
+
+	if kv == "" {
+		return bsp.NewInfo(bsp.NULL)
+	}
+
+	return bsp.NewStr(kv)
 }

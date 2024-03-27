@@ -1,0 +1,9 @@
+{
+  "name": "sdel",
+  "summary": "Removes a given value from a set if it exists",
+  "group": "set",
+  "key": "string",
+  "arity":2,
+  "value": "string",
+  "arguments": []
+}

@@ -5,6 +5,29 @@ import (
 	"strconv"
 )
 
+var (
+	pong = []byte("pong")
+)
+
+func (svr *BlueServer) ExecChain(ctx *Context) {
+	switch ctx.request.Handle() {
+	case bsp.VERSION:
+		svr.version(ctx)
+	case bsp.SELECT:
+		if ctx.request.Key() != "" {
+			svr.selectdb(ctx)
+		} else {
+			svr.selected(ctx)
+		}
+	case bsp.HELP:
+		svr.help(ctx)
+	case bsp.PING:
+		svr.ping(ctx)
+	default:
+		svr.db[ctx.GetDB()].ExecChain(ctx)
+	}
+}
+
 func (svr *BlueServer) selected(ctx *Context) {
 	ctx.response = bsp.NewStr(ctx.GetDB())
 }
@@ -29,12 +52,11 @@ func (svr *BlueServer) version(ctx *Context) {
 	ctx.response = bsp.NewStr([]byte(version_))
 }
 
-func (svr *BlueServer) kvs(ctx *Context) {
-	kv := svr.db[ctx.GetDB()].RangeKV()
+func (svr *BlueServer) help(ctx *Context) {
+	v := ctx.request.HandleInfo().Summary
+	ctx.response = bsp.NewStr([]byte(v))
+}
 
-	if kv == "" {
-		ctx.response = bsp.NewInfo(bsp.NULL)
-	} else {
-		ctx.response = bsp.NewStr(kv)
-	}
+func (svr *BlueServer) ping(ctx *Context) {
+	ctx.response = bsp.NewStr(pong)
 }
