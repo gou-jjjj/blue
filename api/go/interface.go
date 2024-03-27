@@ -4,15 +4,20 @@ type CLi interface {
 	//system
 	Version() (string, error)
 	Select(...string) (string, error)
-	Del(string) (string, error)
+	Exit() (string, error)
+	Ping() (string, error)
+	Help(string) (string, error)
 
 	//number
 	Nset(string, string) (string, error)
 	Nget(string) (string, error)
 	Incr(string) (string, error)
 
+	//db
 	Len(string) (string, error)
 	Kvs() (string, error)
+	Del(string) (string, error)
+	Expire(string, string) (string, error)
 
 	//list
 	Llen(string) (string, error)
@@ -22,8 +27,6 @@ type CLi interface {
 	Lpush(string, string) (string, error)
 	Rpop(string) (string, error)
 	Rpush(string, string) (string, error)
-
-	Expire(string, string) (string, error)
 
 	// Set
 	Sadd(string, string) (string, error)

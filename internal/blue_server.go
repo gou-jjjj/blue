@@ -101,7 +101,7 @@ func (svr *BlueServer) Handle(ctx context.Context, conn net.Conn) {
 }
 
 func (svr *BlueServer) localHandle(ctx *Context, bch chan *bsp.BspProto, errch chan *bsp.ErrResp) {
-	for {
+	for !ctx.isClose() {
 		timewheel.Delay(ctx.maxActive, ctx.cliToken, func() {
 			svr.closeClient(ctx)
 		})
@@ -128,7 +128,7 @@ func (svr *BlueServer) localHandle(ctx *Context, bch chan *bsp.BspProto, errch c
 }
 
 func (svr *BlueServer) clusterHandle(ctx *Context, bch chan *bsp.BspProto, errch chan *bsp.ErrResp) {
-	for {
+	for !ctx.isClose() {
 		select {
 		case <-ctx.Done():
 			return
@@ -165,7 +165,7 @@ func (svr *BlueServer) isClose() bool {
 }
 
 func (svr *BlueServer) closeClient(client *Context) {
-	if client == nil {
+	if client == nil || client.isClose() {
 		return
 	}
 	client.Close()

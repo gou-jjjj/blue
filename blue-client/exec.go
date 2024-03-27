@@ -31,6 +31,15 @@ func Del() CmdFunc {
 	}
 }
 
+func Exit() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) != 1 {
+			return "", ErrArgu(s[0])
+		}
+		return conn.Exit()
+	}
+}
+
 func Expire() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
 		if len(s) != 3 {
@@ -252,6 +261,7 @@ func Version() CmdFunc {
 
 var funcMap = map[string]CmdFunc{
 	"del": Del(),
+	"exit": Exit(),
 	"expire": Expire(),
 	"get": Get(),
 	"help": Help(),

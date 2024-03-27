@@ -1,0 +1,9 @@
+{
+  "name": "exit",
+  "summary": "Exit the blue",
+  "group": "system",
+  "key": "",
+  "arity":0,
+  "value": "",
+  "arguments": []
+}

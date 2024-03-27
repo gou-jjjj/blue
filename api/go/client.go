@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"os"
 	"strconv"
 	"time"
 )
@@ -124,6 +125,14 @@ func (c *Client) exec(buf []byte) (string, error) {
 	}
 
 	return bsp.NewReplyMessage(bys)
+}
+
+func (c *Client) exit(buf []byte) {
+	_, err := c.conn.Write(buf)
+	if err != nil {
+		c.conn.Write(buf)
+	}
+	os.Exit(0)
 }
 
 func (c *Client) execPipeline(buf [][]byte) (s []string, err error) {

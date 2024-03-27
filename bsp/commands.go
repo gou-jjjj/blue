@@ -6,7 +6,28 @@ package bsp
 
 import "blue/commands"
 
-const cmdLen = 25
+const cmdLen = 26
+
+// db -----------------------------
+const (
+	DEL Header = 1 + TypeDB
+	EXPIRE Header = 2 + TypeDB
+	KVS Header = 3 + TypeDB
+)
+
+// number -----------------------------
+const (
+	INCR Header = 1 + TypeNumber
+	NGET Header = 2 + TypeNumber
+	NSET Header = 3 + TypeNumber
+)
+
+// string -----------------------------
+const (
+	GET Header = 1 + TypeString
+	LEN Header = 2 + TypeString
+	SET Header = 3 + TypeString
+)
 
 // list -----------------------------
 const (
@@ -34,35 +55,16 @@ const (
 
 // system -----------------------------
 const (
-	HELP Header = 1 + TypeSystem
-	PING Header = 2 + TypeSystem
-	SELECT Header = 3 + TypeSystem
-	VERSION Header = 4 + TypeSystem
-)
-
-// db -----------------------------
-const (
-	DEL Header = 1 + TypeDB
-	EXPIRE Header = 2 + TypeDB
-	KVS Header = 3 + TypeDB
-)
-
-// number -----------------------------
-const (
-	INCR Header = 1 + TypeNumber
-	NGET Header = 2 + TypeNumber
-	NSET Header = 3 + TypeNumber
-)
-
-// string -----------------------------
-const (
-	GET Header = 1 + TypeString
-	LEN Header = 2 + TypeString
-	SET Header = 3 + TypeString
+	EXIT Header = 1 + TypeSystem
+	HELP Header = 2 + TypeSystem
+	PING Header = 3 + TypeSystem
+	SELECT Header = 4 + TypeSystem
+	VERSION Header = 5 + TypeSystem
 )
 
 var HandleMap = [...]string{
 	DEL: "DEL",
+	EXIT: "EXIT",
 	EXPIRE: "EXPIRE",
 	GET: "GET",
 	HELP: "HELP",
@@ -91,6 +93,7 @@ var HandleMap = [...]string{
 
 var HandleMap2 = map[string]Header{
 	"DEL": DEL,
+	"EXIT": EXIT,
 	"EXPIRE": EXPIRE,
 	"GET": GET,
 	"HELP": HELP,
@@ -119,6 +122,7 @@ var HandleMap2 = map[string]Header{
 
 var CommandsMap = [...]commands.Cmd{
 	DEL: {Name:"DEL",Summary: "Remove the specified keys", Group: "db", Arity: 1, Key: "list", Value: "", Arguments: []string{}},
+	EXIT: {Name:"EXIT",Summary: "Exit the blue", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
 	EXPIRE: {Name:"EXPIRE",Summary: "Set a key's time to live in seconds", Group: "db", Arity: 2, Key: "string", Value: "number", Arguments: []string{}},
 	GET: {Name:"GET",Summary: "Returns the string value of a key.", Group: "string", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	HELP: {Name:"HELP",Summary: "Returns the action of the given command", Group: "system", Arity: 1, Key: "string", Value: "", Arguments: []string{}},

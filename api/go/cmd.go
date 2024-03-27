@@ -192,3 +192,10 @@ func (c *Client) Help(k string) (string, error) {
 
 	return c.exec(build)
 }
+
+func (c *Client) Exit() (s string, err error) {
+	build := bsp.NewRequestBuilder(bsp.EXIT).Build()
+
+	c.exit(build)
+	return
+}

@@ -3,6 +3,7 @@ package internal
 import (
 	"blue/config"
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"sync"
@@ -25,12 +26,14 @@ type Context struct {
 	request   *bsp.BspProto
 	response  bsp.Reply
 	maxActive time.Duration
+	isclose   int
 }
 
 var bconnPool = sync.Pool{
 	New: func() interface{} {
 		return &Context{
 			db:       1,
+			isclose:  0,
 			cliToken: rand.RandString(TokenLen),
 		}
 	},
@@ -43,6 +46,7 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 			Context:  ctx,
 			conn:     conn,
 			db:       1,
+			isclose:  0,
 			cliToken: rand.RandString(TokenLen),
 			maxActive: time.Duration(config.BC.ClientConfig.ClientActive) *
 				time.Second,
@@ -51,6 +55,7 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn.Context = ctx
 	bconn.conn = conn
 	bconn.db = 1
+	bconn.isclose = 0
 	bconn.cliToken = rand.RandString(TokenLen)
 	bconn.maxActive = time.Duration(config.BC.ClientConfig.ClientActive) * time.Second
 
@@ -75,7 +80,14 @@ func (c *Context) Reply() (int, error) {
 		return c.conn.Write(bsp.NewErr(bsp.ErrReplication).Bytes())
 	}
 	fmt.Printf("reply:[%v]\n", c.response.String())
+	if c.isClose() {
+		return 0, errors.New("conn is close")
+	}
 	return c.conn.Write(c.response.Bytes())
+}
+
+func (c *Context) isClose() bool {
+	return c.isclose == 1
 }
 
 func (c *Context) Close() {
@@ -88,6 +100,7 @@ func (c *Context) Close() {
 	c.request = nil
 	c.response = nil
 	c.maxActive = 0
+	c.isclose = 1
 	bconnPool.Put(c)
 	return
 }

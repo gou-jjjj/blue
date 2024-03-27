@@ -53,10 +53,6 @@ func main() {
 			continue
 		}
 
-		if split[0] == "exit" {
-			os.Exit(0)
-		}
-
 		res, err := Exec(conn, split)
 		if err != nil {
 			if !strings.Contains(err.Error(), "broken pipe") {

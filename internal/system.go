@@ -23,6 +23,8 @@ func (svr *BlueServer) ExecChain(ctx *Context) {
 		svr.help(ctx)
 	case bsp.PING:
 		svr.ping(ctx)
+	case bsp.EXIT:
+		svr.exit(ctx)
 	default:
 		svr.db[ctx.GetDB()].ExecChain(ctx)
 	}
@@ -59,4 +61,8 @@ func (svr *BlueServer) help(ctx *Context) {
 
 func (svr *BlueServer) ping(ctx *Context) {
 	ctx.response = bsp.NewStr(pong)
+}
+
+func (svr *BlueServer) exit(ctx *Context) {
+	svr.closeClient(ctx)
 }
