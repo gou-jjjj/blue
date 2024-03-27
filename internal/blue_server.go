@@ -48,14 +48,27 @@ func NewBlueServer(dbs ...*DB) *BlueServer {
 	}
 
 	if clusterConf.OpenCluster() {
-		b.cc = cluster.NewCluster(
-			clusterConf.TryTimes,
-			clusterConf.Port,
-			"",
-			time.Duration(clusterConf.DialTimeout)*time.Second)
+		b.initClu()
 	}
 
 	return b
+}
+
+func (svr *BlueServer) initClu() {
+	svr.cc = cluster.NewCluster(
+		clusterConf.TryTimes,
+		clusterConf.Port,
+		"",
+		time.Duration(clusterConf.DialTimeout)*time.Second)
+
+	// 发送本地地址到集群
+	svr.cc.Notify(svr.cc.LocalAddr())
+
+	// 获取集群地址
+	addrs := svr.cc.GetClusterAddrs(clusterConf.ClusterAddr)
+
+	// 注册集群地址
+	svr.cc.Register(addrs...)
 }
 
 // Handle receives and executes redis commands

@@ -48,7 +48,10 @@ func (c *Consistent) eltKey(elt string, idx int) string {
 func (c *Consistent) Add(elt string) {
 	c.rw.Lock()
 	defer c.rw.Unlock()
-	c.add(elt)
+
+	if _, ok := c.members[elt]; !ok {
+		c.add(elt)
+	}
 }
 
 func (c *Consistent) add(elt string) {

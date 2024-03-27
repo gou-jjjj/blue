@@ -1,0 +1,9 @@
+{
+  "name": "sin",
+  "summary": "Checks whether the given value is in the given set",
+  "group": "set",
+  "key": "string",
+  "arity":2,
+  "value": "string",
+  "arguments": []
+}

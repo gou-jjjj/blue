@@ -1,0 +1,9 @@
+{
+  "name": "help",
+  "summary": "Returns the action of the given command",
+  "group": "system",
+  "key": "string",
+  "arity":1,
+  "value": "",
+  "arguments": []
+}

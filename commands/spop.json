@@ -1,0 +1,9 @@
+{
+  "name": "spop",
+  "summary": "Remove and return a random member from a set",
+  "group": "set",
+  "key": "string",
+  "arity":1,
+  "value": "",
+  "arguments": []
+}

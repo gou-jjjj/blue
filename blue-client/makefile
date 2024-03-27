@@ -6,8 +6,10 @@ build:
 
 
 cli:
-	@cd ./bin && ./blue-cli
+	@cd ./bin ; ./blue-cli
 
+run1:
+	@go run main.go
 
 .PHONY:
 run:build cli

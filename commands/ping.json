@@ -1,0 +1,9 @@
+{
+  "name": "ping",
+  "summary": "Pings the bot to check if it is online.",
+  "group": "system",
+  "key": "",
+  "arity":0,
+  "value": "",
+  "arguments": []
+}

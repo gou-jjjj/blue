@@ -6,7 +6,19 @@ package bsp
 
 import "blue/commands"
 
-const cmdLen = 18
+const cmdLen = 23
+
+// json -----------------------------
+const (
+)
+
+// system -----------------------------
+const (
+	HELP Header = 1 + TypeSystem
+	KVS Header = 2 + TypeSystem
+	PING Header = 3 + TypeSystem
+	VERSION Header = 4 + TypeSystem
+)
 
 // db -----------------------------
 const (
@@ -42,22 +54,16 @@ const (
 
 // set -----------------------------
 const (
-)
-
-// json -----------------------------
-const (
-)
-
-// system -----------------------------
-const (
-	KVS Header = 1 + TypeSystem
-	VERSION Header = 2 + TypeSystem
+	SADD Header = 1 + TypeSet
+	SIN Header = 2 + TypeSet
+	SPOP Header = 3 + TypeSet
 )
 
 var HandleMap = [...]string{
 	DEL: "DEL",
 	EXPIRE: "EXPIRE",
 	GET: "GET",
+	HELP: "HELP",
 	INCR: "INCR",
 	KVS: "KVS",
 	LEN: "LEN",
@@ -68,10 +74,14 @@ var HandleMap = [...]string{
 	LSET: "LSET",
 	NGET: "NGET",
 	NSET: "NSET",
+	PING: "PING",
 	RPOP: "RPOP",
 	RPUSH: "RPUSH",
+	SADD: "SADD",
 	SELECT: "SELECT",
 	SET: "SET",
+	SIN: "SIN",
+	SPOP: "SPOP",
 	VERSION: "VERSION",
 }
 
@@ -79,6 +89,7 @@ var HandleMap2 = map[string]Header{
 	"DEL": DEL,
 	"EXPIRE": EXPIRE,
 	"GET": GET,
+	"HELP": HELP,
 	"INCR": INCR,
 	"KVS": KVS,
 	"LEN": LEN,
@@ -89,10 +100,14 @@ var HandleMap2 = map[string]Header{
 	"LSET": LSET,
 	"NGET": NGET,
 	"NSET": NSET,
+	"PING": PING,
 	"RPOP": RPOP,
 	"RPUSH": RPUSH,
+	"SADD": SADD,
 	"SELECT": SELECT,
 	"SET": SET,
+	"SIN": SIN,
+	"SPOP": SPOP,
 	"VERSION": VERSION,
 }
 
@@ -100,6 +115,7 @@ var CommandsMap = [...]commands.Cmd{
 	DEL: {Name:"DEL",Summary: "Remove the specified keys", Group: "db", Arity: 1, Key: "list", Value: "", Arguments: []string{}},
 	EXPIRE: {Name:"EXPIRE",Summary: "Set a key's time to live in seconds", Group: "db", Arity: 2, Key: "string", Value: "number", Arguments: []string{}},
 	GET: {Name:"GET",Summary: "Returns the string value of a key.", Group: "string", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	HELP: {Name:"HELP",Summary: "Returns the action of the given command", Group: "system", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	INCR: {Name:"INCR",Summary: "Increment the integer value of a key by the given amount", Group: "number", Arity: 1, Key: "string", Value: "number", Arguments: []string{}},
 	KVS: {Name:"KVS",Summary: "Returns all key-value pairs in the database", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
 	LEN: {Name:"LEN",Summary: "Returns the length of a string", Group: "string", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
@@ -110,10 +126,14 @@ var CommandsMap = [...]commands.Cmd{
 	LSET: {Name:"LSET",Summary: "Set the value of a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
 	NGET: {Name:"NGET",Summary: "Returns the number value of a key.", Group: "number", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	NSET: {Name:"NSET",Summary: "Set the value of a number", Group: "number", Arity: 2, Key: "string", Value: "number", Arguments: []string{"expire"}},
+	PING: {Name:"PING",Summary: "Pings the bot to check if it is online.", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
 	RPOP: {Name:"RPOP",Summary: "Remove and get the last element in a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
 	RPUSH: {Name:"RPUSH",Summary: "Add the value to the end of the list stored at key", Group: "list", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
+	SADD: {Name:"SADD",Summary: "Add the specified members to the set stored at key. Specified members that are already a member of this set are ignored. If key does not exist, a new set is created before adding the specified members.", Group: "set", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
 	SELECT: {Name:"SELECT",Summary: "Select a db.", Group: "db", Arity: 1, Key: "number", Value: "", Arguments: []string{}},
 	SET: {Name:"SET",Summary: "Set the value of a key", Group: "string", Arity: 2, Key: "string", Value: "string", Arguments: []string{"expire"}},
+	SIN: {Name:"SIN",Summary: "Checks whether the given value is in the given set", Group: "set", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
+	SPOP: {Name:"SPOP",Summary: "Remove and return a random member from a set", Group: "set", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	VERSION: {Name:"VERSION",Summary: "Get the version of the system.", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
 }
 

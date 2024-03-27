@@ -1,16 +1,18 @@
 package cluster
 
 import (
-	g "blue/api/go"
-	"blue/bsp"
-	add "blue/common/network"
 	"bufio"
-	"fmt"
+	"bytes"
 	"io"
 	"net"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
+
+	g "blue/api/go"
+	"blue/bsp"
+	add "blue/common/network"
 )
 
 const (
@@ -126,6 +128,34 @@ W:
 	return exec, true
 }
 
+func (c *Cluster) GetClusterAddrs(addr string) []string {
+	conn, err := net.Dial(network, addr)
+	if err != nil {
+		println(err.Error())
+		return []string{}
+	}
+	defer func() {
+		_ = conn.Close()
+	}()
+
+	_, err = conn.Write([]byte("=\n"))
+	if err != nil {
+		println(err.Error())
+		return []string{}
+	}
+
+	time.Sleep(1 * time.Second)
+	red := bufio.NewReader(conn)
+	byt, err := red.ReadBytes(done)
+	if err != nil || len(byt) == 0 {
+
+		return []string{}
+	}
+
+	res := string(byt)
+	return strings.Fields(res)
+}
+
 func (c *Cluster) handle(conn net.Conn) {
 	defer func() {
 		_ = conn.Close()
@@ -138,15 +168,26 @@ func (c *Cluster) handle(conn net.Conn) {
 			return
 		}
 
-		if len(addr) == 0 || addr[0] != '+' && addr[0] != '-' {
+		if len(addr) == 0 || addr[0] != '+' && addr[0] != '-' && addr[0] != '=' {
 			continue
 		}
 
-		fmt.Println("addr:", addr)
 		if addr[0] == '+' {
 			c.Register(addr[1 : len(addr)-1])
-		} else {
+		} else if addr[0] == '-' {
 			c.Unregister(addr[1 : len(addr)-1])
+		} else {
+			res := bytes.Buffer{}
+			for _, addr = range c.observers {
+				res.WriteString(addr)
+				res.WriteString(" ")
+			}
+			res.WriteByte(done)
+
+			_, err = conn.Write(res.Bytes())
+			if err != nil {
+				return
+			}
 		}
 	}
 }
@@ -200,8 +241,8 @@ func (c *Cluster) Notify(addr string) {
 				return
 			}
 
-			conn.Write([]byte(addr))
-			conn.Close()
+			_, _ = conn.Write([]byte(addr))
+			_ = conn.Close()
 		}(addr, observer)
 	}
 }
@@ -241,8 +282,8 @@ func (c *Cluster) getClient(addr string) (*g.Client, error) {
 }
 
 func (c *Cluster) Close() {
-	addr := c.LocalAddr()
+	//addr := c.LocalAddr()
 
-	c.offline(addr)
+	//c.offline(addr)
 	_ = c.listener.Close()
 }

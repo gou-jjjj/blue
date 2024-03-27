@@ -15,7 +15,7 @@ cmdJson="{ \
 
 bin:
 	@rm -f ./bin/*
-	@go build -o bin/ ./cmd/...
+	@go build -o bin/blue-server ./cmd/...
 	@cp -r ./config.json bin/
 	@mkdir -p bin/logs
 
