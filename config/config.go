@@ -121,7 +121,7 @@ var defaultConfig = BlueConf{
 }
 
 func InitConfig() map[string]interface{} {
-	configFile, err := os.Open("./config.json")
+	configFile, err := os.Open("./blue-server.json")
 	if err != nil {
 		panic(err)
 	}
