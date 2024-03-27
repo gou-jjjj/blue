@@ -34,6 +34,20 @@ func Exec(conn *g.Client, s []string) (string, error) {
 
 `
 
+const select_ = `func Select() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) > 2 {
+			return "", ErrArgu(s[0])
+		}
+		if len(s) == 2 {
+			return conn.Select(s[1])
+		}
+		return conn.Select()
+	}
+}
+
+`
+
 func main() {
 	// 读取 JSON 文件
 	files := make([]string, 0) // 添加更多文件名
@@ -82,6 +96,11 @@ func main() {
 	code.WriteString(code_)
 
 	for _, cmd := range cmds {
+		if cmd.Name == "select" {
+			selectFunc(&code, cmd)
+			continue
+		}
+
 		writeFunc(&code, cmd)
 	}
 
@@ -125,4 +144,8 @@ func writeFunc(code *strings.Builder, cmd commands.Cmd) {
 }
 `, upName, cmd.Arity+1, tmp))
 	code.WriteString("\n")
+}
+
+func selectFunc(code *strings.Builder, cmd commands.Cmd) {
+	code.WriteString(select_)
 }

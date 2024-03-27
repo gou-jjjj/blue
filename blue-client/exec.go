@@ -36,7 +36,7 @@ func Expire() CmdFunc {
 		if len(s) != 3 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Expire(s[1], s[2])
+		return conn.Expire(s[1],s[2])
 	}
 }
 
@@ -46,6 +46,15 @@ func Get() CmdFunc {
 			return "", ErrArgu(s[0])
 		}
 		return conn.Get(s[1])
+	}
+}
+
+func Help() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) != 2 {
+			return "", ErrArgu(s[0])
+		}
+		return conn.Help(s[1])
 	}
 }
 
@@ -108,7 +117,7 @@ func Lpush() CmdFunc {
 		if len(s) != 3 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Lpush(s[1], s[2])
+		return conn.Lpush(s[1],s[2])
 	}
 }
 
@@ -135,7 +144,16 @@ func Nset() CmdFunc {
 		if len(s) != 3 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Nset(s[1], s[2])
+		return conn.Nset(s[1],s[2])
+	}
+}
+
+func Ping() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) != 1 {
+			return "", ErrArgu(s[0])
+		}
+		return conn.Ping()
 	}
 }
 
@@ -153,7 +171,25 @@ func Rpush() CmdFunc {
 		if len(s) != 3 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Rpush(s[1], s[2])
+		return conn.Rpush(s[1],s[2])
+	}
+}
+
+func Sadd() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) != 3 {
+			return "", ErrArgu(s[0])
+		}
+		return conn.Sadd(s[1],s[2])
+	}
+}
+
+func Sdel() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) != 3 {
+			return "", ErrArgu(s[0])
+		}
+		return conn.Sdel(s[1],s[2])
 	}
 }
 
@@ -174,7 +210,34 @@ func Set() CmdFunc {
 		if len(s) != 3 {
 			return "", ErrArgu(s[0])
 		}
-		return conn.Set(s[1], s[2])
+		return conn.Set(s[1],s[2])
+	}
+}
+
+func Sget() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) != 2 {
+			return "", ErrArgu(s[0])
+		}
+		return conn.Sget(s[1])
+	}
+}
+
+func Sin() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) != 3 {
+			return "", ErrArgu(s[0])
+		}
+		return conn.Sin(s[1],s[2])
+	}
+}
+
+func Spop() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) != 2 {
+			return "", ErrArgu(s[0])
+		}
+		return conn.Spop(s[1])
 	}
 }
 
@@ -188,22 +251,29 @@ func Version() CmdFunc {
 }
 
 var funcMap = map[string]CmdFunc{
-	"del":     Del(),
-	"expire":  Expire(),
-	"get":     Get(),
-	"incr":    Incr(),
-	"kvs":     Kvs(),
-	"len":     Len(),
-	"lget":    Lget(),
-	"llen":    Llen(),
-	"lpop":    Lpop(),
-	"lpush":   Lpush(),
-	"lset":    Lset(),
-	"nget":    Nget(),
-	"nset":    Nset(),
-	"rpop":    Rpop(),
-	"rpush":   Rpush(),
-	"select":  Select(),
-	"set":     Set(),
+	"del": Del(),
+	"expire": Expire(),
+	"get": Get(),
+	"help": Help(),
+	"incr": Incr(),
+	"kvs": Kvs(),
+	"len": Len(),
+	"lget": Lget(),
+	"llen": Llen(),
+	"lpop": Lpop(),
+	"lpush": Lpush(),
+	"lset": Lset(),
+	"nget": Nget(),
+	"nset": Nset(),
+	"ping": Ping(),
+	"rpop": Rpop(),
+	"rpush": Rpush(),
+	"sadd": Sadd(),
+	"sdel": Sdel(),
+	"select": Select(),
+	"set": Set(),
+	"sget": Sget(),
+	"sin": Sin(),
+	"spop": Spop(),
 	"version": Version(),
 }

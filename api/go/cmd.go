@@ -137,3 +137,58 @@ func (c *Client) Incr(k string) (string, error) {
 
 	return c.exec(build)
 }
+
+func (c *Client) Ping() (string, error) {
+	build := bsp.NewRequestBuilder(bsp.PING).Build()
+	return c.exec(build)
+}
+
+func (c *Client) Sadd(k, v string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.SADD).
+		WithKey(k).
+		WithValueStr(v).
+		Build()
+
+	return c.exec(build)
+}
+
+func (c *Client) Spop(k string) (string, error) {
+
+	build := bsp.NewRequestBuilder(bsp.SPOP).
+		WithKey(k).
+		Build()
+
+	return c.exec(build)
+}
+
+func (c *Client) Sin(k, v string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.SIN).
+		WithKey(k).
+		WithValueStr(v).
+		Build()
+
+	return c.exec(build)
+}
+
+func (c *Client) Sdel(k, v string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.SDEL).
+		WithKey(k).
+		WithValueStr(v).
+		Build()
+
+	return c.exec(build)
+}
+
+func (c *Client) Sget(k string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.SGET).
+		WithKey(k).
+		Build()
+
+	return c.exec(build)
+}
+
+func (c *Client) Help(k string) (string, error) {
+	build := bsp.NewRequestBuilder(bsp.HELP).WithKey(k).Build()
+
+	return c.exec(build)
+}
