@@ -18,7 +18,7 @@ COPY . .
 RUN go mod tidy
 
 # 根据 Makefile 文件构建应用
-RUN make .server && make bin
+RUN  make bin
 
 # 使用 alpine 作为运行时镜像的基础
 FROM alpine:latest

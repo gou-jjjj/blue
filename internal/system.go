@@ -3,6 +3,7 @@ package internal
 import (
 	"blue/bsp"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -55,8 +56,14 @@ func (svr *BlueServer) version(ctx *Context) {
 }
 
 func (svr *BlueServer) help(ctx *Context) {
-	v := ctx.request.HandleInfo().Summary
-	ctx.response = bsp.NewStr([]byte(v))
+	k := ctx.request.Key()
+	upk := strings.ToUpper(k)
+	if handleId, ok := bsp.HandleMap2[upk]; !ok {
+		ctx.response = bsp.NewErr(bsp.ErrRequestParameter, k)
+	} else {
+		summary := bsp.CommandsMap[handleId].Summary
+		ctx.response = bsp.NewStr(summary)
+	}
 }
 
 func (svr *BlueServer) ping(ctx *Context) {
