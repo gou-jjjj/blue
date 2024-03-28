@@ -2,6 +2,7 @@ package internal
 
 import (
 	"blue/config"
+	"blue/log"
 	"context"
 	"errors"
 	"fmt"
@@ -79,7 +80,7 @@ func (c *Context) Reply() (int, error) {
 	if c.response == nil {
 		return c.conn.Write(bsp.NewErr(bsp.ErrReplication).Bytes())
 	}
-	fmt.Printf("reply:[%v]\n", c.response.String())
+	log.Info("reply", c.response.String())
 	if c.isClose() {
 		return 0, errors.New("conn is close")
 	}

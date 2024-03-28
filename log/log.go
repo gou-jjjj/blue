@@ -1,12 +1,13 @@
 package log
 
 import (
-	"blue/common/rand"
-	"blue/config"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
+
+	"blue/common/rand"
+	"blue/config"
 
 	"github.com/rs/zerolog"
 )
@@ -14,23 +15,25 @@ import (
 var (
 	blog *blueLog
 
-	Info = func(msg string) {
-		blog.info(msg)
+	Info = func(msg ...string) {
+		blog.info(msg...)
 	}
 
-	Warn = func(msg string) {
-		blog.warn(msg)
+	Warn = func(msg ...string) {
+		blog.warn(msg...)
 	}
 
-	Error = func(msg string) {
-		blog.err(msg)
+	Error = func(msg ...string) {
+		blog.err(msg...)
 	}
 )
 
 var level = map[string]zerolog.Level{
-	"Error": zerolog.ErrorLevel,
-	"warn":  zerolog.WarnLevel,
-	"info":  zerolog.InfoLevel,
+	"error":   zerolog.ErrorLevel,
+	"err":     zerolog.ErrorLevel,
+	"warn":    zerolog.WarnLevel,
+	"warning": zerolog.WarnLevel,
+	"info":    zerolog.InfoLevel,
 }
 
 func logLevel() zerolog.Level {
@@ -93,14 +96,29 @@ func newZeroLog(level zerolog.Level, outPath string) *blueLog {
 	}
 }
 
-func (l *blueLog) info(msg string) {
-	l.l.Info().Msg(msg)
+func (l *blueLog) info(msg ...string) {
+	if len(msg) == 0 {
+	} else if len(msg) == 1 {
+		l.l.Info().Msg(msg[0])
+	} else {
+		l.l.Info().Msgf("%s,%s", msg[0], msg[1])
+	}
 }
 
-func (l *blueLog) warn(msg string) {
-	l.l.Warn().Msg(msg)
+func (l *blueLog) warn(msg ...string) {
+	if len(msg) == 0 {
+	} else if len(msg) == 1 {
+		l.l.Warn().Msg(msg[0])
+	} else {
+		l.l.Warn().Msgf("%s,%s", msg[0], msg[1])
+	}
 }
 
-func (l *blueLog) err(msg string) {
-	l.l.Error().Msg(msg)
+func (l *blueLog) err(msg ...string) {
+	if len(msg) == 0 {
+	} else if len(msg) == 1 {
+		l.l.Error().Msg(msg[0])
+	} else {
+		l.l.Error().Msgf("%s,%s", msg[0], msg[1])
+	}
 }

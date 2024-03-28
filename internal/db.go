@@ -2,6 +2,7 @@ package internal
 
 import (
 	"blue/config"
+	"blue/log"
 	"fmt"
 	"os"
 	"strings"
@@ -60,7 +61,8 @@ func NewDB(opts ...DbOption) *DB {
 	}
 
 	db.InitStorage(dbConfig)
-
+	log.Info(fmt.Sprintf("db{index[%d] initdata:[%v] initStorage[%v] }",
+		db.index, len(dbConfig.InitData) != 0, dbConfig.SetStorage))
 	return db
 }
 

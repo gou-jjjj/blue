@@ -1,9 +1,9 @@
 package internal
 
 import (
+	"blue/log"
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -112,7 +112,7 @@ func (svr *BlueServer) localHandle(ctx *Context, bch chan *bsp.BspProto, errch c
 		case <-ctx.Done():
 			return
 		case req := <-bch:
-			fmt.Printf("local req:[%+v]\n", req)
+			log.Info("local", req.String())
 			ctx.request = req
 			ctx.response = bsp.Reply(nil)
 
@@ -135,7 +135,7 @@ func (svr *BlueServer) clusterHandle(ctx *Context, bch chan *bsp.BspProto, errch
 		case <-ctx.Done():
 			return
 		case req := <-bch:
-			fmt.Printf("cluster req:[%+v]\n", req)
+			log.Info("cluster", req.String())
 			ctx.request = req
 			ctx.response = bsp.Reply(nil)
 

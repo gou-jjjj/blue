@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"blue/log"
 	"context"
 	"errors"
 	"fmt"
@@ -11,8 +12,6 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
-
-	logs "github.com/rs/zerolog"
 )
 
 const (
@@ -26,7 +25,6 @@ type ConfigFunc func(*Config)
 type Config struct {
 	Ip          string
 	Timeout     time.Duration
-	Log         logs.Logger
 	Port        int
 	ClientLimit int
 	HandlerFunc ServerInter
@@ -37,7 +35,6 @@ func (c Config) Addr() string {
 }
 
 var defaultConfig = Config{
-	Log:         logs.New(os.Stdout).With().Timestamp().Logger(),
 	Ip:          "127.0.0.1",
 	Port:        8080,
 	ClientLimit: 10,
@@ -100,7 +97,7 @@ func (s *Server) close() {
 	_ = s.listen.Close()
 	s.isClo = true
 	close(s.errClo)
-	s.c.Log.Info().Msg("server start closing ...")
+	log.Info("server start closing ...")
 }
 
 func (s *Server) Start() {
@@ -115,16 +112,16 @@ func (s *Server) Start() {
 	go func() {
 		select {
 		case <-sigclo:
-			s.c.Log.Info().Msg("receive close signal...")
+			log.Info("receive close signal...")
 		case err = <-s.errClo:
-			s.c.Log.Error().Msgf("server error: %v", err)
+			log.Error(fmt.Sprintf("server error: %v", err))
 		}
 
 		close(sigclo)
 		s.close()
 	}()
 
-	s.c.Log.Info().Msgf("listen on %s ...", s.c.Addr())
+	log.Info(fmt.Sprintf("listen on %v ...", s.c.Addr()))
 	s.server()
 }
 
@@ -153,7 +150,7 @@ func (s *Server) server() {
 		s.waitClient.Add(1)
 		s.cliOnlineTime.Store(conn.RemoteAddr().String(), time.Now())
 
-		s.c.Log.Info().Msgf("new conn: %s ,%d ", conn.RemoteAddr().String(), s.currentClient)
+		log.Info(fmt.Sprintf("new conn: %s ,%d ", conn.RemoteAddr().String(), s.currentClient))
 
 		go func(conn net.Conn) {
 			defer func() {
@@ -161,8 +158,8 @@ func (s *Server) server() {
 
 				subtime, _ := s.cliOnlineTime.Load(conn.RemoteAddr().String())
 				s.cliOnlineTime.Delete(conn.RemoteAddr().String())
-				s.c.Log.Info().Msgf("close conn: %s, %v;", conn.RemoteAddr().String(),
-					time.Now().Sub(subtime.(time.Time)))
+				log.Info(fmt.Sprintf("close conn: %s, %v;", conn.RemoteAddr().String(),
+					time.Now().Sub(subtime.(time.Time))))
 				s.waitClient.Done()
 				_ = conn.Close()
 			}()
@@ -172,5 +169,5 @@ func (s *Server) server() {
 	}
 
 	s.waitClient.Wait()
-	s.c.Log.Info().Msg("server closed ...")
+	log.Error("server closed ...")
 }
