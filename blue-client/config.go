@@ -88,5 +88,4 @@ func parse(str string, conf *BlueConf) {
 			}
 		}
 	}
-
 }
