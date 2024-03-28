@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"time"
@@ -18,16 +19,20 @@ var title = `
  |_.__/  |_|  \__,_|  \___|
                            `
 
+var confPath = flag.String("c", "./blue-server.json", "config file path")
+
 func init() {
 	fmt.Printf("\033[34m%s\033[0m\n", title)
 	fmt.Println(os.Getpid(), os.Getuid())
 }
 
 func main() {
-	configDB := config.InitConfig()
+	flag.Parse()
+
+	configDB := config.InitConfig(*confPath)
 	log.InitLog()
 
-	dbs := make([]*internal.DB, config.BC.ServerConfig.DBSum+1)
+	dbs := make([]*internal.DB, config.SvrCfg.DBSum+1)
 	dbs[0] = internal.NewDB(func(c *internal.DBConfig) {
 		c.SetStorage = false
 		c.DataDictSize = 1024
@@ -35,7 +40,7 @@ func main() {
 		c.InitData = configDB
 	})
 
-	for i := 1; i <= config.BC.ServerConfig.DBSum; i++ {
+	for i := 1; i <= config.SvrCfg.DBSum; i++ {
 		dbs[i] = internal.NewDB(func(c *internal.DBConfig) {
 			c.SetStorage = false
 			c.DataDictSize = 1024
@@ -47,10 +52,10 @@ func main() {
 
 	internal.NewServer(
 		func(c *internal.Config) {
-			c.Ip = config.BC.ServerConfig.Ip
-			c.Port = config.BC.ServerConfig.Port
-			c.ClientLimit = config.BC.ClientConfig.ClientLimit
-			c.Timeout = time.Duration(config.BC.ServerConfig.TimeOut) * time.Second
+			c.Ip = config.SvrCfg.Ip
+			c.Port = config.SvrCfg.Port
+			c.ClientLimit = config.CliCfg.ClientLimit
+			c.Timeout = time.Duration(config.SvrCfg.TimeOut) * time.Second
 			c.HandlerFunc = handler
 		},
 	).Start()

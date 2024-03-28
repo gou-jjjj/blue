@@ -1,4 +1,4 @@
-package log
+package config
 
 import "fmt"
 
@@ -20,4 +20,13 @@ func StorageInitSuccess() {
 
 func ServerInitSuccess() {
 	fmt.Println("Server init success ...")
+}
+
+func ErrPanic(err error, data ...string) {
+	if err != nil {
+		if len(data) > 0 {
+			panic(fmt.Sprintf("%s: %s", err.Error(), data[0]))
+		}
+		panic(err)
+	}
 }

@@ -48,7 +48,7 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 			db:       1,
 			isclose:  0,
 			cliToken: rand.RandString(TokenLen),
-			maxActive: time.Duration(config.BC.ClientConfig.ClientActive) *
+			maxActive: time.Duration(config.CliCfg.ClientActive) *
 				time.Second,
 		}
 	}
@@ -57,7 +57,7 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn.db = 1
 	bconn.isclose = 0
 	bconn.cliToken = rand.RandString(TokenLen)
-	bconn.maxActive = time.Duration(config.BC.ClientConfig.ClientActive) * time.Second
+	bconn.maxActive = time.Duration(config.CliCfg.ClientActive) * time.Second
 
 	return bconn
 }

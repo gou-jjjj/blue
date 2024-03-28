@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+const (
+	space = ' '
+)
+
 func (db *DB) ExecChainSet(ctx *Context) {
 	switch ctx.request.Handle() {
 	case bsp.SADD:
@@ -106,8 +110,9 @@ func (db *DB) sget(cmd *bsp.BspProto) bsp.Reply {
 	res := strings.Builder{}
 	st.Each(func(v string) bool {
 		res.WriteString(v)
-		return true
+		res.WriteByte(space)
+		return false
 	})
-
-	return bsp.NewStr(res.String())
+	l := res.Len()
+	return bsp.NewStr(res.String()[:l-1])
 }

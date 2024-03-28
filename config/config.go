@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
-	"log"
 	"net"
 	"os"
 	"reflect"
@@ -14,7 +13,19 @@ import (
 	str "blue/datastruct/string"
 )
 
-var BC BlueConf
+var (
+	blueConf BlueConf
+
+	SvrCfg = blueConf.ServerConfig
+
+	CluCfg = blueConf.ClusterConfig
+
+	LogCfg = blueConf.LogConfig
+
+	CliCfg = blueConf.ClientConfig
+
+	StoCfg = blueConf.StorageConfig
+)
 
 type serverConfig struct {
 	Ip         string   `json:"ip,omitempty"`
@@ -109,7 +120,7 @@ var defaultConfig = BlueConf{
 	},
 	LogConfig: logConfig{
 		LogOut:   "./logfile/log.log",
-		LogLevel: "Info",
+		LogLevel: "info",
 	},
 	ClientConfig: clientConfig{
 		ClientActive: 10,
@@ -120,8 +131,8 @@ var defaultConfig = BlueConf{
 	},
 }
 
-func InitConfig() map[string]interface{} {
-	configFile, err := os.Open("./blue-server.json")
+func InitConfig(path string) map[string]interface{} {
+	configFile, err := os.Open(path)
 	if err != nil {
 		panic(err)
 	}
@@ -139,14 +150,20 @@ func InitConfig() map[string]interface{} {
 		bytes = append(bytes, readByte)
 	}
 
-	err = json.Unmarshal(bytes, &BC)
+	err = json.Unmarshal(bytes, &blueConf)
 	if err != nil {
 		panic(err)
 	}
 
-	log.Printf("config init success ...")
+	SvrCfg = blueConf.ServerConfig
+	CluCfg = blueConf.ClusterConfig
+	LogCfg = blueConf.LogConfig
+	CliCfg = blueConf.ClientConfig
+	StoCfg = blueConf.StorageConfig
 
-	return BC.Entries()
+	ConfigInitSuccess()
+
+	return blueConf.Entries()
 }
 
 func (c clusterConfig) OpenCluster() bool {

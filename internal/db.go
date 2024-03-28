@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"blue/config"
 	"fmt"
 	"os"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"blue/bsp"
 	"blue/datastruct"
 	"blue/datastruct/dict"
+
 	"github.com/rosedblabs/rosedb/v2"
 )
 
@@ -40,22 +42,34 @@ type DB struct {
 
 func NewDB(opts ...DbOption) *DB {
 	// 指定选项
-	config := defaultDBConfig
+	dbConfig := defaultDBConfig
 	for _, opt := range opts {
-		opt(&config)
+		opt(&dbConfig)
 	}
 
 	db := &DB{
-		index: config.Index,
-		data:  dict.MakeConcurrent(config.DataDictSize),
+		index: dbConfig.Index,
+		data:  dict.MakeConcurrent(dbConfig.DataDictSize),
 		rw:    &sync.RWMutex{},
 	}
 
-	if config.SetStorage {
-		options := config.StorageOptions
+	if dbConfig.InitData != nil {
+		for k, v := range dbConfig.InitData {
+			db.data.Put(k, v)
+		}
+	}
 
-		if _, err := os.Stat(config.StorageOptions.DirPath); err != nil {
-			err = os.Mkdir(config.StorageOptions.DirPath, 777)
+	db.InitStorage(dbConfig)
+
+	return db
+}
+
+func (db *DB) InitStorage(dbConfig DBConfig) {
+	if dbConfig.SetStorage {
+		options := dbConfig.StorageOptions
+
+		if _, err := os.Stat(dbConfig.StorageOptions.DirPath); err != nil {
+			err = os.Mkdir(dbConfig.StorageOptions.DirPath, 777)
 			if err != nil {
 				panic(err)
 			}
@@ -84,15 +98,9 @@ func NewDB(opts ...DbOption) *DB {
 
 			return true, nil
 		})
-	}
 
-	if config.InitData != nil {
-		for k, v := range config.InitData {
-			db.data.Put(k, v)
-		}
+		config.StorageInitSuccess()
 	}
-
-	return db
 }
 
 func (db *DB) ExecChain(ctx *Context) {

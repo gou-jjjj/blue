@@ -17,7 +17,7 @@ import (
 
 const version_ = "blue v0.1"
 
-var clusterConf = config.BC.ClusterConfig
+var clusterConf = config.CluCfg
 
 type Exec interface {
 	ExecChain(*Context)
@@ -51,6 +51,7 @@ func NewBlueServer(dbs ...*DB) *BlueServer {
 		b.initClu()
 	}
 
+	config.ServerInitSuccess()
 	return b
 }
 
@@ -69,6 +70,7 @@ func (svr *BlueServer) initClu() {
 
 	// 注册集群地址
 	svr.cc.Register(addrs...)
+	config.ClusterInitSuccess()
 }
 
 // Handle receives and executes redis commands

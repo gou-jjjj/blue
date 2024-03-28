@@ -5,24 +5,36 @@ import (
 	"blue/config"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/rs/zerolog"
-	lo "log"
 )
 
 var (
-	Blog *BlueLog
+	blog *blueLog
+
+	Info = func(msg string) {
+		blog.info(msg)
+	}
+
+	Warn = func(msg string) {
+		blog.warn(msg)
+	}
+
+	Error = func(msg string) {
+		blog.err(msg)
+	}
 )
 
-var LogLevel = map[string]zerolog.Level{
+var level = map[string]zerolog.Level{
 	"Error": zerolog.ErrorLevel,
-	"Warn":  zerolog.WarnLevel,
-	"Info":  zerolog.InfoLevel,
+	"warn":  zerolog.WarnLevel,
+	"info":  zerolog.InfoLevel,
 }
 
 func logLevel() zerolog.Level {
-	l, ok := LogLevel[config.BC.LogConfig.LogLevel]
+	l, ok := level[config.LogCfg.LogLevel]
 	if !ok {
 		return zerolog.InfoLevel
 	}
@@ -31,52 +43,64 @@ func logLevel() zerolog.Level {
 }
 
 func InitLog() {
-	Blog = newSyncLog()
+	blog = newLog()
+	config.LogInitSuccess()
 }
 
-func newSyncLog() *BlueLog {
-	dir := config.BC.LogConfig.LogOut
+func newLog() *blueLog {
+	dir := config.LogCfg.LogOut
 
-	logx := NewZeroLog(logLevel(), dir)
-	lo.Printf("log init success ...")
+	logx := newZeroLog(logLevel(), dir)
 	return logx
 }
 
-type BlueLog struct {
+type blueLog struct {
 	l zerolog.Logger
 }
 
-func NewZeroLog(level zerolog.Level, outPath string) *BlueLog {
+func newZeroLog(level zerolog.Level, outPath string) *blueLog {
 	zerolog.TimestampFieldName = "T"
 	zerolog.MessageFieldName = "M"
 	zerolog.LevelFieldName = "L"
 
-	err := os.MkdirAll(outPath, 0777)
-	if err != nil {
-		panic(err)
+	openFile := &os.File{}
+	if filepath.Ext(outPath) == ".log" {
+		var err error
+		openFile, err = os.Open(outPath)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		var err error
+		if _, err = os.Stat(outPath); os.IsNotExist(err) {
+			err = os.MkdirAll(outPath, 0777)
+			if err != nil {
+				config.ErrPanic(err, outPath)
+			}
+		}
+		r := rand.RandString(8)
+		addtime := fmt.Sprintf("%s-%s", time.Now().Format("2006:01:02-15:04:05"), r)
+		openFile, err = os.Create(fmt.Sprintf("%s/%s.log", outPath, addtime))
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	r := rand.RandString(8)
-	addtime := fmt.Sprintf("%s-%s", time.Now().Format("2006:01:02-15:04:05"), r)
-	create, err := os.Create(fmt.Sprintf("%s/%s.log", outPath, addtime))
-	if err != nil {
-		panic(err)
-	}
-	logger := zerolog.New(create).Level(level).With().Timestamp().Logger()
+	logger := zerolog.New(openFile).Level(level).With().Timestamp().Logger()
 
-	return &BlueLog{
+	return &blueLog{
 		l: logger,
 	}
 }
 
-func (l *BlueLog) Info(msg string) {
+func (l *blueLog) info(msg string) {
 	l.l.Info().Msg(msg)
 }
 
-func (l *BlueLog) Warn(msg string) {
+func (l *blueLog) warn(msg string) {
 	l.l.Warn().Msg(msg)
 }
 
-func (l *BlueLog) Err(msg string) {
+func (l *blueLog) err(msg string) {
 	l.l.Error().Msg(msg)
 }

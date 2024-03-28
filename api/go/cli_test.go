@@ -7,11 +7,10 @@ import (
 
 func TestCli(t *testing.T) {
 	c, _ := NewClient(WithDefaultOpt())
-	fmt.Println(c.Select("0"))
-	kvs, err := c.Kvs()
-	if err != nil {
-		panic(err)
-	}
+	fmt.Println(c.Sadd("a", "1"))
+	fmt.Println(c.Sadd("a", "2"))
+	fmt.Println(c.Sadd("a", "3"))
+	fmt.Println(c.Sadd("a", "1"))
 
-	fmt.Println(kvs)
+	fmt.Println(c.Sget("a"))
 }

@@ -282,8 +282,8 @@ func (c *Cluster) getClient(addr string) (*g.Client, error) {
 }
 
 func (c *Cluster) Close() {
-	//addr := c.LocalAddr()
+	addr := c.LocalAddr()
 
-	//c.offline(addr)
+	c.offline(addr)
 	_ = c.listener.Close()
 }
