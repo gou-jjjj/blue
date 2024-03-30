@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"os"
 	"time"
 
 	"blue/config"
@@ -11,19 +9,10 @@ import (
 	"blue/log"
 )
 
-var title = `
-  _       _                
- | |__   | |  _   _    ___ 
- | '_ \  | | | | | |  / _ \
- | |_) | | | | |_| | | |__/
- |_.__/  |_|  \__,_|  \___|
-                           `
-
 var confPath = flag.String("c", "./blue-server.json", "config file path")
 
 func init() {
-	fmt.Printf("\033[34m%s\033[0m\n", title)
-	fmt.Println(os.Getpid(), os.Getuid())
+	config.PrintTitle()
 }
 
 func main() {

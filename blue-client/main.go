@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strconv"
@@ -15,14 +16,6 @@ var (
 	conn *g.Client
 )
 
-func init() {
-	var err error
-	conn, err = Connect()
-	if err != nil {
-		panic(err)
-	}
-}
-
 func Connect() (*g.Client, error) {
 	return g.NewClient(func(c *g.Config) {
 		c.Addr = BC.Addr
@@ -32,8 +25,22 @@ func Connect() (*g.Client, error) {
 	})
 }
 
-// num get a
+var defaultConf = `./blue-cli.conf`
+var defaultAddr = `127.0.0.1:13140`
+var addr = flag.String("a", defaultAddr, "server address")
+var conf = flag.String("c", defaultConf, "config file path")
+
 func main() {
+	flag.Parse()
+
+	if defaultAddr != *addr {
+		BC.Addr = *addr
+	}
+	var err error
+	conn, err = Connect()
+	if err != nil {
+		panic(err)
+	}
 	// 从标准输入创建一个新的 bufio.Reader
 	reader := bufio.NewReader(os.Stdin)
 

@@ -1,25 +1,40 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
+
+var title = `
+  _       _                
+ | |__   | |  _   _    ___ 
+ | '_ \  | | | | | |  / _ \
+ | |_) | | | | |_| | | |__/
+ |_.__/  |_|  \__,_|  \___|
+                           `
+
+func PrintTitle() {
+	fmt.Printf("\033[34m%s\033[0m\n", title)
+}
 
 func LogInitSuccess() {
-	fmt.Println("log init success ...")
+	log.Println("log init success ...")
 }
 
 func ConfigInitSuccess() {
-	fmt.Println("config init success ...")
+	log.Println("config init success ...")
 }
 
 func ClusterInitSuccess() {
-	fmt.Println("cluster init success ...")
+	log.Println("cluster init success ...")
 }
 
 func StorageInitSuccess() {
-	fmt.Println("storage init success ...")
+	log.Println("storage init success ...")
 }
 
 func ServerInitSuccess() {
-	fmt.Println("Server init success ...")
+	log.Println("Server init success ...")
 }
 
 func ErrPanic(err error, data ...string) {

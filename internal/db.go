@@ -1,10 +1,12 @@
 package internal
 
 import (
+	"blue/common/timewheel"
 	"blue/config"
 	"blue/log"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -181,6 +183,23 @@ func (db *DB) del(ctx *bsp.BspProto) bsp.Reply {
 }
 
 func (db *DB) expire(ctx *bsp.BspProto) bsp.Reply {
+	key := ctx.Key()
+	ttl := ctx.ValueStr()
+
+	if _, ok := db.data.Get(key); !ok {
+		return bsp.NewInfo(bsp.NULL)
+	}
+
+	ttlInt, err := strconv.Atoi(ttl)
+	if err != nil {
+		return bsp.NewErr(bsp.ErrRequestParameter, ttl)
+	}
+	timewheel.Delay(time.Duration(ttlInt)*time.Second, key, func() {
+		if db != nil {
+			db.data.Remove(key)
+		}
+	})
+
 	return bsp.NewInfo(bsp.OK)
 }
 
