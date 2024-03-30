@@ -209,3 +209,13 @@ func (c *Client) Type(k string) (s string, err error) {
 	build := bsp.NewRequestBuilder(bsp.TYPE).WithKey(k).Build()
 	return c.exec(build)
 }
+
+func (c *Client) Auth(k ...string) (s string, err error) {
+	build := []byte{}
+	if len(k) == 0 {
+		build = bsp.NewRequestBuilder(bsp.AUTH).Build()
+	} else {
+		build = bsp.NewRequestBuilder(bsp.AUTH).WithKey(k[0]).Build()
+	}
+	return c.exec(build)
+}

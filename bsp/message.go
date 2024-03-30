@@ -69,4 +69,5 @@ var MessageMap = [...]string{
 	ErrReplication:      "ERR replication error",
 	ErrRequestParameter: "err request parameter",
 	ErrEnd:              "ERR end",
+	ErrPermissionDenied: "ERR permission denied",
 }

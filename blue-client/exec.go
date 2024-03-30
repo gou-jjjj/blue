@@ -22,6 +22,19 @@ func Exec(conn *g.Client, s []string) (string, error) {
 	return f(conn, s)
 }
 
+
+func Auth() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) == 2 {
+			return conn.Auth(s[1])
+		} else if len(s) == 1 {
+			return conn.Auth()
+		}
+		
+		return "", ErrArgu(s[0])
+	}
+}
+
 func Dbsize() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
 		if len(s) != 1 {
@@ -278,6 +291,7 @@ func Version() CmdFunc {
 }
 
 var funcMap = map[string]CmdFunc{
+	"auth": Auth(),
 	"dbsize": Dbsize(),
 	"del": Del(),
 	"exit": Exit(),

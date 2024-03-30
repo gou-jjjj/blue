@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"blue/log"
 	"context"
 	"errors"
 	"net"
@@ -13,6 +12,7 @@ import (
 	"blue/cluster"
 	"blue/common/timewheel"
 	"blue/config"
+	"blue/log"
 )
 
 const version_ = "blue v0.1"
@@ -183,4 +183,16 @@ func (svr *BlueServer) Close() {
 		client.Close()
 		return true
 	})
+}
+
+func (svr *BlueServer) auth(ctx *Context) {
+	if ctx.request.Key() == "" {
+		ctx.response = bsp.NewStr(ctx.cliToken)
+		return
+	}
+
+	ctx.cliToken = ctx.request.Key()
+
+	ctx.response = bsp.NewInfo(bsp.OK)
+	return
 }

@@ -33,7 +33,6 @@ type serverConfig struct {
 	TimeOut    int      `json:"time_out"`
 	DBSum      int      `json:"db_sum"`
 	GuestToken []string `json:"guest_token"`
-	AdminToken []string `json:"admin_token"`
 	RootToken  []string `json:"root_token"`
 }
 

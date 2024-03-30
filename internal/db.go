@@ -1,9 +1,6 @@
 package internal
 
 import (
-	"blue/common/timewheel"
-	"blue/config"
-	"blue/log"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,8 +9,11 @@ import (
 	"time"
 
 	"blue/bsp"
+	"blue/common/timewheel"
+	"blue/config"
 	"blue/datastruct"
 	"blue/datastruct/dict"
+	"blue/log"
 
 	"github.com/rosedblabs/rosedb/v2"
 )
@@ -122,7 +122,6 @@ func (db *DB) ExecChain(ctx *Context) {
 	case bsp.TypeJson:
 
 	default:
-		fmt.Printf("db:[%+b]", ctx.request.Type())
 		ctx.response = bsp.NewErr(bsp.ErrCommand)
 	}
 }

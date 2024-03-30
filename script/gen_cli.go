@@ -48,6 +48,21 @@ const select_ = `func Select() CmdFunc {
 
 `
 
+const auth = `
+func Auth() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) == 2 {
+			return conn.Auth(s[1])
+		} else if len(s) == 1 {
+			return conn.Auth()
+		}
+		
+		return "", ErrArgu(s[0])
+	}
+}
+
+`
+
 func main() {
 	// 读取 JSON 文件
 	files := make([]string, 0) // 添加更多文件名
@@ -100,6 +115,10 @@ func main() {
 			selectFunc(&code, cmd)
 			continue
 		}
+		if cmd.Name == "auth" {
+			authFunc(&code, cmd)
+			continue
+		}
 
 		writeFunc(&code, cmd)
 	}
@@ -148,4 +167,8 @@ func writeFunc(code *strings.Builder, cmd commands.Cmd) {
 
 func selectFunc(code *strings.Builder, cmd commands.Cmd) {
 	code.WriteString(select_)
+}
+
+func authFunc(code *strings.Builder, cmd commands.Cmd) {
+	code.WriteString(auth)
 }

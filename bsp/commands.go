@@ -6,25 +6,7 @@ package bsp
 
 import "blue/commands"
 
-const cmdLen = 28
-
-// system -----------------------------
-const (
-	EXIT Header = 1 + TypeSystem
-	HELP Header = 2 + TypeSystem
-	PING Header = 3 + TypeSystem
-	SELECT Header = 4 + TypeSystem
-	VERSION Header = 5 + TypeSystem
-)
-
-// db -----------------------------
-const (
-	DBSIZE Header = 1 + TypeDB
-	DEL Header = 2 + TypeDB
-	EXPIRE Header = 3 + TypeDB
-	KVS Header = 4 + TypeDB
-	TYPE Header = 5 + TypeDB
-)
+const cmdLen = 29
 
 // number -----------------------------
 const (
@@ -64,7 +46,27 @@ const (
 const (
 )
 
+// system -----------------------------
+const (
+	AUTH Header = 1 + TypeSystem
+	EXIT Header = 2 + TypeSystem
+	HELP Header = 3 + TypeSystem
+	PING Header = 4 + TypeSystem
+	SELECT Header = 5 + TypeSystem
+	VERSION Header = 6 + TypeSystem
+)
+
+// db -----------------------------
+const (
+	DBSIZE Header = 1 + TypeDB
+	DEL Header = 2 + TypeDB
+	EXPIRE Header = 3 + TypeDB
+	KVS Header = 4 + TypeDB
+	TYPE Header = 5 + TypeDB
+)
+
 var HandleMap = [...]string{
+	AUTH: "AUTH",
 	DBSIZE: "DBSIZE",
 	DEL: "DEL",
 	EXIT: "EXIT",
@@ -96,6 +98,7 @@ var HandleMap = [...]string{
 }
 
 var HandleMap2 = map[string]Header{
+	"AUTH": AUTH,
 	"DBSIZE": DBSIZE,
 	"DEL": DEL,
 	"EXIT": EXIT,
@@ -127,6 +130,7 @@ var HandleMap2 = map[string]Header{
 }
 
 var CommandsMap = [...]commands.Cmd{
+	AUTH: {Name:"AUTH",Summary: "add authentication to the application", Group: "system", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	DBSIZE: {Name:"DBSIZE",Summary: "Return the number of keys in the database", Group: "db", Arity: 0, Key: "string", Value: "", Arguments: []string{}},
 	DEL: {Name:"DEL",Summary: "Remove the specified keys", Group: "db", Arity: 1, Key: "list", Value: "", Arguments: []string{}},
 	EXIT: {Name:"EXIT",Summary: "Exit the blue", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
