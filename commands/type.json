@@ -1,0 +1,9 @@
+{
+  "name": "type",
+  "summary": "return key type",
+  "group": "db",
+  "key": "string",
+  "arity": 1,
+  "value": "",
+  "arguments": []
+}

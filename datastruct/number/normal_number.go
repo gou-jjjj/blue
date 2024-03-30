@@ -78,3 +78,7 @@ func (n *NorNum) Incr() int64 {
 func (n *NorNum) Decr() int64 {
 	return n.Sub(1)
 }
+
+func (n *NorNum) Type() string {
+	return n.GetType()
+}

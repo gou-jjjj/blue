@@ -4,6 +4,7 @@ const (
 	Number = iota
 	String
 	List
+	Set
 	Json
 )
 
@@ -13,6 +14,7 @@ var BlueTypes = map[uint8]string{
 	Number: "number",
 	String: "string",
 	List:   "list",
+	Set:    "set",
 	Json:   "json",
 }
 
@@ -20,6 +22,7 @@ var BlueTypes_ = map[string]uint8{
 	"number": Number,
 	"string": String,
 	"list":   List,
+	"set":    Set,
 	"json":   Json,
 }
 
@@ -42,4 +45,8 @@ func (obj *BlueObj) GetSubType() string {
 
 type Value interface {
 	Value() string
+}
+
+type Type interface {
+	Type() string
 }

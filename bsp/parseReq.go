@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"strings"
 )
@@ -26,7 +25,7 @@ func parse0(r io.Reader) (*BspProto, *ErrResp) {
 		if len(bs) < 2 {
 			return nil, SyntaxErr
 		}
-		fmt.Printf("bs: {%+b}\n", bs)
+
 		res := NewBspProto()
 		res.SetBuf(bs)
 		res.SetHeader(NewHeader(Header(bs[0])))
@@ -75,9 +74,7 @@ func parse0(r io.Reader) (*BspProto, *ErrResp) {
 
 func parseReq(ctx context.Context, reader io.Reader, bp chan *BspProto, err chan *ErrResp) {
 	defer func() {
-		if er := recover(); er != nil {
-			fmt.Printf("reco [%v]\n", er)
-		}
+		_ = recover()
 	}()
 
 	for {
@@ -90,7 +87,6 @@ func parseReq(ctx context.Context, reader io.Reader, bp chan *BspProto, err chan
 				bp <- proto
 				break
 			}
-			fmt.Printf("errResp [%v]\n", errResp)
 			err <- errResp
 			return
 		}

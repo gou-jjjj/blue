@@ -40,10 +40,14 @@ var bconnPool = sync.Pool{
 	},
 }
 
+func (c *Context) String() string {
+	return fmt.Sprintf("RemoteAddr:%s,cliToken:%s", c.conn.RemoteAddr().String(), c.cliToken)
+}
+
 func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn, ok := bconnPool.Get().(*Context)
 	if !ok {
-		return &Context{
+		nctx := &Context{
 			Context:  ctx,
 			conn:     conn,
 			db:       1,
@@ -52,6 +56,8 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 			maxActive: time.Duration(config.CliCfg.ClientActive) *
 				time.Second,
 		}
+		log.Info(bconn.String())
+		return nctx
 	}
 	bconn.Context = ctx
 	bconn.conn = conn
@@ -59,7 +65,7 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn.isclose = 0
 	bconn.cliToken = rand.RandString(TokenLen)
 	bconn.maxActive = time.Duration(config.CliCfg.ClientActive) * time.Second
-
+	log.Info(bconn.String())
 	return bconn
 }
 
@@ -68,7 +74,6 @@ func (c *Context) SetNext(next Exec) {
 }
 
 func (c *Context) GetDB() uint8 {
-	fmt.Println("db: ", c.db)
 	return c.db
 }
 

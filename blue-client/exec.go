@@ -22,6 +22,15 @@ func Exec(conn *g.Client, s []string) (string, error) {
 	return f(conn, s)
 }
 
+func Dbsize() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) != 1 {
+			return "", ErrArgu(s[0])
+		}
+		return conn.Dbsize()
+	}
+}
+
 func Del() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
 		if len(s) != 2 {
@@ -250,6 +259,15 @@ func Spop() CmdFunc {
 	}
 }
 
+func Type() CmdFunc {
+	return func(conn *g.Client, s []string) (string, error) {
+		if len(s) != 2 {
+			return "", ErrArgu(s[0])
+		}
+		return conn.Type(s[1])
+	}
+}
+
 func Version() CmdFunc {
 	return func(conn *g.Client, s []string) (string, error) {
 		if len(s) != 1 {
@@ -260,6 +278,7 @@ func Version() CmdFunc {
 }
 
 var funcMap = map[string]CmdFunc{
+	"dbsize": Dbsize(),
 	"del": Del(),
 	"exit": Exit(),
 	"expire": Expire(),
@@ -285,5 +304,6 @@ var funcMap = map[string]CmdFunc{
 	"sget": Sget(),
 	"sin": Sin(),
 	"spop": Spop(),
+	"type": Type(),
 	"version": Version(),
 }

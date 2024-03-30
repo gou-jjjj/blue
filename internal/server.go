@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"blue/log"
 	"context"
 	"errors"
 	"fmt"
@@ -12,6 +11,8 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"blue/log"
 )
 
 const (

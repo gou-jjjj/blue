@@ -199,3 +199,13 @@ func (c *Client) Exit() (s string, err error) {
 	c.exit(build)
 	return
 }
+
+func (c *Client) Dbsize() (s string, err error) {
+	build := bsp.NewRequestBuilder(bsp.DBSIZE).Build()
+	return c.exec(build)
+}
+
+func (c *Client) Type(k string) (s string, err error) {
+	build := bsp.NewRequestBuilder(bsp.TYPE).WithKey(k).Build()
+	return c.exec(build)
+}

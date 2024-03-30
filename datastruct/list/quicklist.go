@@ -411,3 +411,7 @@ func (ql *QuickList) Value() string {
 	res := builder.String()[:builder.Len()-1]
 	return res
 }
+
+func (ql *QuickList) Type() string {
+	return ql.GetType()
+}

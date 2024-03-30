@@ -6,11 +6,13 @@ import (
 )
 
 func TestCli(t *testing.T) {
-	c, _ := NewClient(WithDefaultOpt())
-	fmt.Println(c.Sadd("a", "1"))
-	fmt.Println(c.Sadd("a", "2"))
-	fmt.Println(c.Sadd("a", "3"))
-	fmt.Println(c.Sadd("a", "1"))
+	c, _ := NewClient(WithDefaultOpt(), func(c *Config) {
+		c.DefaultDB = true
+		c.DB = 0
+	})
 
-	fmt.Println(c.Sget("a"))
+	fmt.Println(c.Dbsize())
+	fmt.Println(c.Type("DBSum"))
+	fmt.Println(c.Nget("DBSum"))
+
 }

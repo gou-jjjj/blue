@@ -86,12 +86,13 @@ func main() {
 }
 
 func TidyInput(input string) []string {
-	input = strings.TrimSpace(input)
 	split := strings.Fields(input)
 	newSplit := make([]string, 0, len(split))
 
 	for i := range split {
-		split[i] = strings.ToLower(split[i])
+		if i == 0 {
+			split[i] = strings.ToLower(split[i])
+		}
 		if split[i] != "" {
 			newSplit = append(newSplit, split[i])
 		}

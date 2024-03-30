@@ -6,13 +6,24 @@ package bsp
 
 import "blue/commands"
 
-const cmdLen = 26
+const cmdLen = 28
+
+// system -----------------------------
+const (
+	EXIT Header = 1 + TypeSystem
+	HELP Header = 2 + TypeSystem
+	PING Header = 3 + TypeSystem
+	SELECT Header = 4 + TypeSystem
+	VERSION Header = 5 + TypeSystem
+)
 
 // db -----------------------------
 const (
-	DEL Header = 1 + TypeDB
-	EXPIRE Header = 2 + TypeDB
-	KVS Header = 3 + TypeDB
+	DBSIZE Header = 1 + TypeDB
+	DEL Header = 2 + TypeDB
+	EXPIRE Header = 3 + TypeDB
+	KVS Header = 4 + TypeDB
+	TYPE Header = 5 + TypeDB
 )
 
 // number -----------------------------
@@ -53,16 +64,8 @@ const (
 const (
 )
 
-// system -----------------------------
-const (
-	EXIT Header = 1 + TypeSystem
-	HELP Header = 2 + TypeSystem
-	PING Header = 3 + TypeSystem
-	SELECT Header = 4 + TypeSystem
-	VERSION Header = 5 + TypeSystem
-)
-
 var HandleMap = [...]string{
+	DBSIZE: "DBSIZE",
 	DEL: "DEL",
 	EXIT: "EXIT",
 	EXPIRE: "EXPIRE",
@@ -88,10 +91,12 @@ var HandleMap = [...]string{
 	SGET: "SGET",
 	SIN: "SIN",
 	SPOP: "SPOP",
+	TYPE: "TYPE",
 	VERSION: "VERSION",
 }
 
 var HandleMap2 = map[string]Header{
+	"DBSIZE": DBSIZE,
 	"DEL": DEL,
 	"EXIT": EXIT,
 	"EXPIRE": EXPIRE,
@@ -117,10 +122,12 @@ var HandleMap2 = map[string]Header{
 	"SGET": SGET,
 	"SIN": SIN,
 	"SPOP": SPOP,
+	"TYPE": TYPE,
 	"VERSION": VERSION,
 }
 
 var CommandsMap = [...]commands.Cmd{
+	DBSIZE: {Name:"DBSIZE",Summary: "Return the number of keys in the database", Group: "db", Arity: 0, Key: "string", Value: "", Arguments: []string{}},
 	DEL: {Name:"DEL",Summary: "Remove the specified keys", Group: "db", Arity: 1, Key: "list", Value: "", Arguments: []string{}},
 	EXIT: {Name:"EXIT",Summary: "Exit the blue", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
 	EXPIRE: {Name:"EXPIRE",Summary: "Set a key's time to live in seconds", Group: "db", Arity: 2, Key: "string", Value: "number", Arguments: []string{}},
@@ -146,6 +153,7 @@ var CommandsMap = [...]commands.Cmd{
 	SGET: {Name:"SGET",Summary: "Gets all the values in the set, if the set exists", Group: "set", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	SIN: {Name:"SIN",Summary: "Checks whether the given value is in the given set", Group: "set", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
 	SPOP: {Name:"SPOP",Summary: "Remove and return a random member from a set", Group: "set", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	TYPE: {Name:"TYPE",Summary: "return key type", Group: "db", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	VERSION: {Name:"VERSION",Summary: "Get the version of the system.", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
 }
 

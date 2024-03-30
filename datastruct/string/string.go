@@ -40,3 +40,7 @@ func (S *String_) Len() int {
 func (S *String_) Value() string {
 	return S.s
 }
+
+func (S *String_) Type() string {
+	return S.GetType()
+}

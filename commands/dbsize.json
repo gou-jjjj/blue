@@ -1,0 +1,9 @@
+{
+  "name": "dbsize",
+  "summary": "Return the number of keys in the database",
+  "group": "db",
+  "key": "string",
+  "arity": 0,
+  "value": "",
+  "arguments": []
+}

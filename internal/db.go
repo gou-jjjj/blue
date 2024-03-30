@@ -135,6 +135,10 @@ func (db *DB) ExecChainDB(ctx *Context) {
 		ctx.response = db.expire(ctx.request)
 	case bsp.KVS:
 		ctx.response = db.kvs(ctx.request)
+	case bsp.DBSIZE:
+		ctx.response = db.dbsize(ctx.request)
+	case bsp.TYPE:
+		ctx.response = db.type_(ctx.request)
 
 	default:
 		ctx.response = bsp.NewErr(bsp.ErrCommand)
@@ -211,4 +215,17 @@ func (db *DB) kvs(ctx *bsp.BspProto) bsp.Reply {
 	}
 
 	return bsp.NewStr(kv)
+}
+
+func (db *DB) dbsize(ctx *bsp.BspProto) bsp.Reply {
+	return bsp.NewNum(db.data.Len())
+}
+
+func (db *DB) type_(ctx *bsp.BspProto) bsp.Reply {
+	val, ok := db.data.Get(ctx.Key())
+	if !ok {
+		return bsp.NewInfo(bsp.NULL)
+	}
+
+	return bsp.NewStr(val.(datastruct.Type).Type())
 }
