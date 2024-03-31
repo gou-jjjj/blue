@@ -57,7 +57,8 @@ type clientConfig struct {
 }
 
 type storageConfig struct {
-	StoragePath string `json:"storage_path,omitempty"`
+	StorageSet  []string `json:"storage_set,omitempty"`
+	StoragePath string   `json:"storage_path,omitempty"`
 }
 
 type BlueConf struct {
@@ -182,4 +183,14 @@ func (c clusterConfig) OpenCluster() bool {
 	}
 
 	return true
+}
+
+func (c storageConfig) OpenStorage(idx string) bool {
+	for i := range c.StorageSet {
+		if c.StorageSet[i] == idx {
+			return true
+		}
+	}
+
+	return false
 }

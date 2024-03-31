@@ -4,6 +4,7 @@ import (
 	"flag"
 	"time"
 
+	"blue/common/filename"
 	"blue/config"
 	"blue/internal"
 	"blue/log"
@@ -23,17 +24,18 @@ func main() {
 
 	dbs := make([]*internal.DB, config.SvrCfg.DBSum+1)
 	dbs[0] = internal.NewDB(func(c *internal.DBConfig) {
-		c.SetStorage = false
 		c.DataDictSize = 1024
 		c.Index = 0
 		c.InitData = configDB
-	})
+	},
+	)
 
 	for i := 1; i <= config.SvrCfg.DBSum; i++ {
 		dbs[i] = internal.NewDB(func(c *internal.DBConfig) {
-			c.SetStorage = false
 			c.DataDictSize = 1024
 			c.Index = i
+			c.StorageOptions.DirPath = filename.StorageName(
+				config.StoCfg.StoragePath, i)
 		})
 	}
 

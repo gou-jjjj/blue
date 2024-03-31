@@ -1,6 +1,8 @@
 package internal
 
 import (
+	str "blue/datastruct/string"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -20,11 +22,9 @@ import (
 
 type DBConfig struct {
 	StorageOptions rosedb.Options
-
-	InitData     map[string]interface{}
-	SetStorage   bool
-	DataDictSize int
-	Index        int
+	InitData       map[string]interface{}
+	DataDictSize   int
+	Index          int
 }
 
 type DbOption func(*DBConfig)
@@ -62,18 +62,21 @@ func NewDB(opts ...DbOption) *DB {
 		}
 	}
 
-	db.InitStorage(dbConfig)
+	initLen := db.InitStorage(dbConfig)
 	log.Info(fmt.Sprintf("db{index[%d] initdata:[%v] initStorage[%v] }",
-		db.index, len(dbConfig.InitData) != 0, dbConfig.SetStorage))
+		db.index,
+		len(dbConfig.InitData) != 0 || (initLen != 0),
+		config.StoCfg.OpenStorage(strconv.Itoa(db.index))))
 	return db
 }
 
-func (db *DB) InitStorage(dbConfig DBConfig) {
-	if dbConfig.SetStorage {
+func (db *DB) InitStorage(dbConfig DBConfig) int {
+	var l int
+	if db.index != 0 && config.StoCfg.OpenStorage(strconv.Itoa(db.index)) {
 		options := dbConfig.StorageOptions
 
-		if _, err := os.Stat(dbConfig.StorageOptions.DirPath); err != nil {
-			err = os.Mkdir(dbConfig.StorageOptions.DirPath, 777)
+		if _, err := os.Stat(dbConfig.StorageOptions.DirPath); errors.Is(err, os.ErrNotExist) {
+			err = os.MkdirAll(dbConfig.StorageOptions.DirPath, os.ModePerm)
 			if err != nil {
 				panic(err)
 			}
@@ -87,24 +90,15 @@ func (db *DB) InitStorage(dbConfig DBConfig) {
 		db.storage = storage
 
 		storage.Ascend(func(k []byte, v []byte) (bool, error) {
-			ttl, err := storage.TTL(k)
-			if err != nil {
-				db.data.Put(string(k), DataEntity{
-					Val:    v,
-					Expire: 0,
-				})
-			}
-
-			db.data.Put(string(k), DataEntity{
-				Val:    v,
-				Expire: uint64(time.Now().Second()) + uint64(ttl),
-			})
-
+			l++
+			db.data.Put(string(k), str.NewString(string(v)))
 			return true, nil
 		})
 
-		config.StorageInitSuccess()
+		config.StorageInitSuccess(db.index)
 	}
+
+	return l
 }
 
 func (db *DB) ExecChain(ctx *Context) {
@@ -174,14 +168,12 @@ func (db *DB) RangeKV() string {
 }
 
 func (db *DB) del(ctx *bsp.BspProto) bsp.Reply {
-	key := ctx.Values()
-	for i := range key {
-		db.data.Remove(string(key[i]))
-		err := db.StorageDelete(key[i])
-		if err != nil {
-			return bsp.NewErr(bsp.ErrStorage)
-		}
+	db.data.Remove(ctx.Key())
+	err := db.StorageDelete(ctx.KeyBytes())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
 	}
+
 	return bsp.NewInfo(bsp.OK)
 }
 

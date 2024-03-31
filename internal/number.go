@@ -28,10 +28,10 @@ func (db *DB) nset(cmd *bsp.BspProto) bsp.Reply {
 	}
 
 	db.data.Put(cmd.Key(), newNumber)
-	err = db.StoragePut(cmd.KeyBytes(), cmd.ValueBytes())
-	if err != nil {
-		return bsp.NewErr(bsp.ErrStorage)
-	}
+	//err = db.StoragePut(cmd.KeyBytes(), cmd.ValueBytes())
+	//if err != nil {
+	//	return bsp.NewErr(bsp.ErrStorage)
+	//}
 
 	return bsp.NewInfo(bsp.OK)
 }

@@ -29,8 +29,8 @@ func ClusterInitSuccess() {
 	log.Println("cluster init success ...")
 }
 
-func StorageInitSuccess() {
-	log.Println("storage init success ...")
+func StorageInitSuccess(dbidx int) {
+	log.Printf("storage init success [%d]...", dbidx)
 }
 
 func ServerInitSuccess() {

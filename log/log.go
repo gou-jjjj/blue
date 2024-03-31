@@ -76,7 +76,7 @@ func newZeroLog(level zerolog.Level, outPath string) *blueLog {
 	} else {
 		var err error
 		if _, err = os.Stat(outPath); os.IsNotExist(err) {
-			err = os.MkdirAll(outPath, 0777)
+			err = os.MkdirAll(outPath, os.ModePerm)
 			if err != nil {
 				config.ErrPanic(err, outPath)
 			}
