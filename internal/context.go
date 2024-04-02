@@ -85,7 +85,7 @@ func (c *Context) Reply() (int, error) {
 	if c.response == nil {
 		return c.conn.Write(bsp.NewErr(bsp.ErrReplication).Bytes())
 	}
-	log.Info("reply", c.response.String())
+	log.Info(fmt.Sprintf("reply: %s", c.response.String()))
 	if c.isClose() {
 		return 0, errors.New("conn is close")
 	}

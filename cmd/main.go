@@ -20,7 +20,7 @@ func main() {
 	flag.Parse()
 
 	configDB := config.InitConfig(*confPath)
-	log.InitLog()
+	log.InitLog(config.LogCfg.LogLevel, config.LogCfg.LogOut)
 
 	dbs := make([]*internal.DB, config.SvrCfg.DBSum+1)
 	dbs[0] = internal.NewDB(func(c *internal.DBConfig) {

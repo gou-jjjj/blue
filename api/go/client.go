@@ -35,7 +35,7 @@ type Client struct {
 func WithDefaultOpt() Option {
 	return func(c *Config) {
 		c.Addr = "127.0.0.1:13140"
-		c.TimeOut = 5 * time.Second
+		c.TimeOut = 10 * time.Second
 		c.TryTimes = 3
 		c.DB = 1
 	}
@@ -92,6 +92,7 @@ func (c *Client) connect() error {
 		if err == nil {
 			return nil
 		}
+		time.Sleep(1 * time.Second)
 	}
 
 	return err

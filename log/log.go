@@ -1,124 +1,131 @@
 package log
 
 import (
+	"blue/common/filename"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
 
-	"blue/common/rand"
 	"blue/config"
+)
 
-	"github.com/rs/zerolog"
+const (
+	bufSize  = 10000
+	flushDef = EveySec
 )
 
 var (
-	blog *blueLog
+	blog *BlueLog
 
-	Info = func(msg ...string) {
-		blog.info(msg...)
+	Info = func(msg string) {
+		blog.info(msg)
 	}
 
-	Warn = func(msg ...string) {
-		blog.warn(msg...)
+	Warn = func(msg string) {
+		blog.warn(msg)
 	}
 
-	Error = func(msg ...string) {
-		blog.err(msg...)
+	Error = func(msg string) {
+		blog.err(msg)
 	}
 )
 
-var level = map[string]zerolog.Level{
-	"error":   zerolog.ErrorLevel,
-	"err":     zerolog.ErrorLevel,
-	"warn":    zerolog.WarnLevel,
-	"warning": zerolog.WarnLevel,
-	"info":    zerolog.InfoLevel,
-}
-
-func logLevel() zerolog.Level {
-	l, ok := level[config.LogCfg.LogLevel]
-	if !ok {
-		return zerolog.InfoLevel
-	}
-
-	return l
-}
-
-func InitLog() {
-	blog = newLog()
+func InitLog(level string, outPath string) {
+	i := logLevel(level)
+	blog = NewLog(i, outPath)
 	config.LogInitSuccess()
 }
 
-func newLog() *blueLog {
-	dir := config.LogCfg.LogOut
-
-	logx := newZeroLog(logLevel(), dir)
-	return logx
+type BlueLog struct {
+	of        *os.File
+	lLevel    _LogLevel
+	logCh     chan *Msg
+	bufSize   int
+	flushType FlushType
+	tk        *time.Ticker
+	nowWrite  chan struct{}
 }
 
-type blueLog struct {
-	l zerolog.Logger
-}
+func NewLog(level _LogLevel, outPath string) *BlueLog {
+	b := &BlueLog{
+		flushType: flushDef,
+		bufSize:   bufSize,
+		logCh:     make(chan *Msg, bufSize),
+		tk:        time.NewTicker(time.Second),
+		nowWrite:  make(chan struct{}),
+		lLevel:    level,
+	}
 
-func newZeroLog(level zerolog.Level, outPath string) *blueLog {
-	zerolog.TimestampFieldName = "T"
-	zerolog.MessageFieldName = "M"
-	zerolog.LevelFieldName = "L"
-
-	openFile := &os.File{}
+	var err error
 	if filepath.Ext(outPath) == ".log" {
-		var err error
-		openFile, err = os.Open(outPath)
+		b.of, err = os.Open(outPath)
 		if err != nil {
 			panic(err)
 		}
+
 	} else {
-		var err error
 		if _, err = os.Stat(outPath); os.IsNotExist(err) {
 			err = os.MkdirAll(outPath, os.ModePerm)
 			if err != nil {
 				config.ErrPanic(err, outPath)
 			}
 		}
-		r := rand.RandString(8)
-		addtime := fmt.Sprintf("%s-%s", time.Now().Format("2006:01:02-15:04:05"), r)
-		openFile, err = os.Create(fmt.Sprintf("%s/%s.log", outPath, addtime))
+
+		b.of, err = os.Create(fmt.Sprintf("%s/%s.log", outPath, filename.LogName()))
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	logger := zerolog.New(openFile).Level(level).With().Timestamp().Logger()
+	go b.sync()
 
-	return &blueLog{
-		l: logger,
+	return b
+}
+
+func (l *BlueLog) sync() {
+	var msg *Msg
+	for msg = range l.logCh {
+		_, err := l.of.WriteString(msg.String())
+		if err != nil {
+			return
+		}
+
+		putMsg(msg)
 	}
 }
 
-func (l *blueLog) info(msg ...string) {
-	if len(msg) == 0 {
-	} else if len(msg) == 1 {
-		l.l.Info().Msg(msg[0])
-	} else {
-		l.l.Info().Msgf("%s,%s", msg[0], msg[1])
+func (l *BlueLog) info(msg string) {
+	if l.lLevel == WarnLevel || l.lLevel == ErrorLevel {
+		return
 	}
+
+	m := l.getMsg()
+	m.data = msg
+	m.dataType = InfoLevel
+	l.logCh <- m
 }
 
-func (l *blueLog) warn(msg ...string) {
-	if len(msg) == 0 {
-	} else if len(msg) == 1 {
-		l.l.Warn().Msg(msg[0])
-	} else {
-		l.l.Warn().Msgf("%s,%s", msg[0], msg[1])
+func (l *BlueLog) warn(msg string) {
+	if l.lLevel == ErrorLevel {
+		return
 	}
+
+	m := l.getMsg()
+	m.data = msg
+	m.dataType = WarnLevel
+	l.logCh <- m
 }
 
-func (l *blueLog) err(msg ...string) {
-	if len(msg) == 0 {
-	} else if len(msg) == 1 {
-		l.l.Error().Msg(msg[0])
-	} else {
-		l.l.Error().Msgf("%s,%s", msg[0], msg[1])
-	}
+func (l *BlueLog) err(msg string) {
+	m := l.getMsg()
+	m.data = msg
+	m.dataType = ErrorLevel
+	l.logCh <- m
+}
+
+func (l *BlueLog) getMsg() *Msg {
+	m := getMsg()
+	m.dataTime = time.Now()
+	return m
 }

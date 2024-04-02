@@ -30,12 +30,13 @@ func TestAllCli(t *testing.T) {
 }
 
 func TestCli(t *testing.T) {
-	c, _ := NewClient(WithDefaultOpt(), func(c *Config) {
-		c.DefaultDB = true
-		c.DB = 0
+	c, err := NewClient(WithDefaultOpt(), func(c *Config) {
+		c.Addr = "39.101.169.250:7894"
 	})
 
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	fmt.Println(c.Dbsize())
-	fmt.Println(c.Type("DBSum"))
-	fmt.Println(c.Nget("DBSum"))
 }
