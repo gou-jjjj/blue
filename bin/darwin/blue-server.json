@@ -1,22 +1,18 @@
 {
   "server_config": {
     "ip": "127.0.0.1",
-    "port": 13140,
-    "time_out": 10,
+    "port": 4311,
+    "time_out": 5,
     "db_sum": 8,
-    "guest_token": [
-      "1",
-      "2",
-      "3"
-    ],
-    "root_token": [
-      "12"
-    ]
+    "guest_token": [],
+    "root_token": []
   },
   "cluster_config": {
-    "port": 13141,
+    "cluster": "yes",
+    "cluster_addr": "39.101.195.49:7891",
+    "port": 13142,
     "try_times": 3,
-    "dial_timeout": 10,
+    "dial_timeout": 5,
     "replicas": 1000,
     "consistent": 100
   },
@@ -29,10 +25,7 @@
     "client_limit": 1000
   },
   "storage_config": {
-    "storage_set": [
-      "1",
-      "2"
-    ],
+    "storage_set": [],
     "storage_path": "./storage"
   }
 }

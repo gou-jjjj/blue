@@ -1,7 +1,6 @@
 package internal
 
 import (
-	print2 "blue/common/print"
 	"context"
 	"errors"
 	"fmt"
@@ -12,6 +11,7 @@ import (
 
 	"blue/bsp"
 	"blue/cluster"
+	print2 "blue/common/print"
 	"blue/common/timewheel"
 	"blue/config"
 	"blue/log"
@@ -66,9 +66,9 @@ func (svr *BlueServer) initClu() {
 	svr.cc.Notify(svr.cc.LocalAddr())
 
 	// 获取集群地址
-	go func() {
-		svr.cc.GetClusterAddrs(config.CluCfg.ClusterAddr)
-	}()
+	//go func() {
+	svr.cc.GetClusterAddrs(config.CluCfg.ClusterAddr)
+	//}()
 
 	log.Info(fmt.Sprintf("cluster listen on %v ...", svr.cc.LocalAddr()))
 	print2.ClusterInitSuccess()

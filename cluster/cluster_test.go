@@ -7,21 +7,23 @@ import (
 )
 
 func TestNewCluster(t *testing.T) {
-	cluster := NewCluster(1, 8080, "1", 1)
 
-	cluster.Register(
-		"127.0.0.1:8080",
-		"127.0.0.1:8083")
-
-	fmt.Println(cluster.observers)
 	c := NewCluster(1, 8081, "1", 1)
+	fmt.Println(c.observers)
+	//c.GetClusterAddrs("39.101.195.49:7891")
 
-	c.GetClusterAddrs("10.16.101.0:8080")
+	c.Register("a", "b")
+	c.Register("a", "b")
+	c.Register("a", "b")
+	c.Register("a", "b", "c")
+	c.Register("a", "b")
+	c.Register("f")
 
-	cluster.Register("aa")
-	c.GetClusterAddrs("10.16.101.0:8080")
+	fmt.Println(c.observers)
 
-	cluster.Register("aa1")
-
+	c.Unregister("a", "b")
+	c.Unregister("a", "f")
+	c.Unregister("a", "b")
+	fmt.Println(c.observers)
 	time.Sleep(4 * time.Second)
 }

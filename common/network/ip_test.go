@@ -1,6 +1,8 @@
 package network
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestParseAddr(t *testing.T) {
 	type args struct {

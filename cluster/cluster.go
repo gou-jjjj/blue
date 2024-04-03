@@ -3,6 +3,7 @@ package cluster
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"net"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	g "blue/api/go"
 	"blue/bsp"
 	add "blue/common/network"
+	"blue/log"
 )
 
 const (
@@ -66,6 +68,7 @@ func NewCluster(try int, port int, token string, dialTimeout time.Duration) *Clu
 }
 
 func (c *Cluster) addLocalAddr() {
+	log.Info(fmt.Sprintf("add local addr: [%s]", c.LocalAddr()))
 	c.Register(c.LocalAddr())
 }
 
@@ -153,7 +156,7 @@ func (c *Cluster) GetClusterAddrs(addr string) {
 
 	res := string(byt)
 	addrs := strings.Fields(res)
-
+	log.Info(fmt.Sprintf("clster addrs %+v", addrs))
 	c.Register(addrs...)
 }
 
@@ -196,26 +199,47 @@ func (c *Cluster) handle(conn net.Conn) {
 func (c *Cluster) Register(addr ...string) {
 	c.rw.Lock()
 	defer c.rw.Unlock()
-	c.observers = append(c.observers, addr...)
+
+	for _, s := range addr {
+		flag := true
+		for _, observer := range c.observers {
+			if observer == s {
+				flag = false
+				continue
+			}
+		}
+		if flag {
+			c.observers = append(c.observers, s)
+			log.Info(fmt.Sprintf("register %+v", s))
+		}
+	}
+
 	for i := range addr {
 		c.c.Add(addr[i])
+		c.online(addr[i])
 	}
 }
 
 func (c *Cluster) Unregister(addr ...string) {
+	log.Info(fmt.Sprintf("unregister %+v", addr))
 	c.rw.Lock()
 	defer c.rw.Unlock()
+
+	idx := 0
 	for _, a := range addr {
 		for i, obs := range c.observers {
 			if obs == a {
-				c.observers = append(c.observers[:i], c.observers[i+1:]...)
+				c.observers[idx], c.observers[i] = c.observers[i], c.observers[idx]
+				idx++
 				break
 			}
 		}
 	}
 
+	c.observers = c.observers[idx:]
 	for i := range addr {
 		c.c.Remove(addr[i])
+		c.offline(addr[i])
 	}
 }
 
@@ -230,15 +254,14 @@ func (c *Cluster) Notify(addr string) {
 			if err != nil {
 				for i := 0; i < c.tryTimes; i++ {
 					conn, err = net.DialTimeout(network, observer, c.dialTimeout)
-					if err == nil {
-						break
-					} else {
+					if err != nil {
 						time.Sleep(time.Duration(sleep_) * time.Second)
 					}
 				}
 			}
 
 			if err != nil {
+				log.Warn(fmt.Sprintf("notify: %v", err))
 				return
 			}
 

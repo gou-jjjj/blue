@@ -12,7 +12,7 @@ func LocalIpEn0() string {
 	}
 
 	for _, iface := range interfaces {
-		if iface.Name == "en0" {
+		if iface.Name == "en0" || iface.Name == "eth0" {
 			addrs, err := iface.Addrs()
 			if err != nil {
 				panic(err)

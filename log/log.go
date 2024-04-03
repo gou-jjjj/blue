@@ -95,6 +95,9 @@ func (l *BlueLog) sync() {
 }
 
 func (l *BlueLog) info(msg string) {
+	if l == nil {
+		return
+	}
 	if l.lLevel == WarnLevel || l.lLevel == ErrorLevel {
 		return
 	}
@@ -106,6 +109,9 @@ func (l *BlueLog) info(msg string) {
 }
 
 func (l *BlueLog) warn(msg string) {
+	if l == nil {
+		return
+	}
 	if l.lLevel == ErrorLevel {
 		return
 	}
@@ -117,6 +123,9 @@ func (l *BlueLog) warn(msg string) {
 }
 
 func (l *BlueLog) err(msg string) {
+	if l == nil {
+		return
+	}
 	m := l.getMsg()
 	m.data = msg
 	m.dataType = ErrorLevel
