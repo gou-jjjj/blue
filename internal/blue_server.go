@@ -67,10 +67,8 @@ func (svr *BlueServer) initClu() {
 	svr.cc.Notify(svr.cc.LocalAddr())
 
 	// 获取集群地址
-	addrs := svr.cc.GetClusterAddrs(clusterConf.ClusterAddr)
+	svr.cc.GetClusterAddrs(clusterConf.ClusterAddr)
 
-	// 注册集群地址
-	svr.cc.Register(addrs...)
 	config.ClusterInitSuccess()
 }
 

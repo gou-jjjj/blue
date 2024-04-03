@@ -33,7 +33,7 @@ func (db *DB) len(cmd *bsp.BspProto) bsp.Reply {
 }
 
 func (db *DB) set(cmd *bsp.BspProto) bsp.Reply {
-	db.data.RemoveWithLock(cmd.ValueStr())
+
 	db.data.Put(cmd.Key(), str.NewString(cmd.ValueStr()))
 	err := db.StoragePut(cmd.KeyBytes(), cmd.ValueBytes())
 	if err != nil {

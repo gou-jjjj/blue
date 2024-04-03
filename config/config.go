@@ -3,6 +3,7 @@ package config
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 	"os"
@@ -37,7 +38,8 @@ type serverConfig struct {
 }
 
 type clusterConfig struct {
-	ClusterAddr string `json:"cluster,omitempty"`
+	Cluster     string `json:"cluster,omitempty"`
+	ClusterAddr string `json:"cluster_addr,omitempty"`
 	Ip          string `json:"ip,omitempty"`
 	Port        int    `json:"port,omitempty"`
 	TryTimes    int    `json:"try_times,omitempty"`
@@ -163,11 +165,13 @@ func InitConfig(path string) map[string]interface{} {
 
 	ConfigInitSuccess()
 
+	fmt.Printf("%+v\n", blueConf)
+
 	return blueConf.Entries()
 }
 
 func (c clusterConfig) OpenCluster() bool {
-	if c.ClusterAddr == "" {
+	if c.Cluster != "yes" {
 		return false
 	}
 

@@ -124,6 +124,40 @@ var (
 		}
 
 	}
+
+	bluetest1e5 = func(b *testing.B) {
+		c, err := blue.NewClient(blue.WithDefaultOpt(), func(c *blue.Config) {
+			c.Addr = "39.101.169.250:7894"
+		})
+		if err != nil {
+			b.Fatal(err)
+		}
+		defer c.Close()
+
+		for i := 0; i < 1e1; i++ {
+			vv := strconv.Itoa(i)
+			_, err = c.Set(vv, vv)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	}
+
+	redistest1e5 = func(b *testing.B) {
+		rdb := redis.NewClient(&redis.Options{
+			Addr: "39.101.169.250:7893",
+		})
+		defer rdb.Close()
+		ctx := context.Background()
+		for i := 0; i < 1e1; i++ {
+			vv := strconv.Itoa(i)
+			err := rdb.Set(ctx, vv, vv, 0).Err()
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+
+	}
 )
 
 func BenchmarkSingleThreadSingleKey(b *testing.B) {
@@ -225,6 +259,51 @@ func BenchmarkSingleThreadMultiKey(b *testing.B) {
 	b.Run("BenchmarkBlue", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			bluetestn(b)
+		}
+	})
+}
+
+func BenchmarkMultiThreadMultiKey(b *testing.B) {
+	b.Run("BenchmarkRedis", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			wg := new(sync.WaitGroup)
+			for j := 0; j < 100; j++ {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					redistestn(b)
+				}()
+			}
+			wg.Wait()
+
+		}
+	})
+
+	b.Run("BenchmarkBlue", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			wg := new(sync.WaitGroup)
+			for j := 0; j < 100; j++ {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					bluetestn(b)
+				}()
+			}
+			wg.Wait()
+		}
+	})
+}
+
+func BenchmarkSet1e5(b *testing.B) {
+	b.Run("BenchmarkRedis", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			redistest1e5(b)
+		}
+	})
+
+	b.Run("BenchmarkBlue", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			bluetest1e5(b)
 		}
 	})
 }

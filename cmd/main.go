@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blue/common/network"
 	"flag"
 	"time"
 
@@ -10,19 +11,44 @@ import (
 	"blue/log"
 )
 
-var confPath = flag.String("c", "./blue-server.json", "config file path")
+var defCluster = "127.0.0.1:13141"
+var defConfPath = "./blue-server.json"
+
+var confPath = flag.String("c", defConfPath, "config file path")
+var clusterPath = flag.String("p", defCluster, "cluster path")
 
 func init() {
 	config.PrintTitle()
 }
 
+func clusterAddr() string {
+	if *clusterPath != defCluster {
+		if !network.ParseAddr(*clusterPath) {
+			panic("cluster path is not valid")
+		}
+		return *clusterPath
+	}
+
+	if config.CluCfg.ClusterAddr != "" {
+		if !network.ParseAddr(config.CluCfg.ClusterAddr) {
+			panic("cluster path is not valid")
+		}
+		return config.CluCfg.ClusterAddr
+	}
+
+	return ""
+}
+
 func main() {
 	flag.Parse()
-
+	// init config
 	configDB := config.InitConfig(*confPath)
+	
+	// init log
 	log.InitLog(config.LogCfg.LogLevel, config.LogCfg.LogOut)
 
 	dbs := make([]*internal.DB, config.SvrCfg.DBSum+1)
+	// init db0
 	dbs[0] = internal.NewDB(func(c *internal.DBConfig) {
 		c.DataDictSize = 1024
 		c.Index = 0
@@ -30,6 +56,7 @@ func main() {
 	},
 	)
 
+	// init db1-8
 	for i := 1; i <= config.SvrCfg.DBSum; i++ {
 		dbs[i] = internal.NewDB(func(c *internal.DBConfig) {
 			c.DataDictSize = 1024
@@ -39,8 +66,10 @@ func main() {
 		})
 	}
 
+	// init handler
 	handler := internal.NewBlueServer(dbs...)
 
+	// init server
 	internal.NewServer(
 		func(c *internal.Config) {
 			c.Ip = config.SvrCfg.Ip

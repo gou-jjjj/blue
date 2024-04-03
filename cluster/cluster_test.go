@@ -16,16 +16,12 @@ func TestNewCluster(t *testing.T) {
 	fmt.Println(cluster.observers)
 	c := NewCluster(1, 8081, "1", 1)
 
-	fmt.Printf("%+v\n", c.GetClusterAddrs("10.16.101.0:8080"))
+	c.GetClusterAddrs("10.16.101.0:8080")
 
 	cluster.Register("aa")
-	fmt.Printf("%+v\n", c.GetClusterAddrs("10.16.101.0:8080"))
+	c.GetClusterAddrs("10.16.101.0:8080")
 
 	cluster.Register("aa1")
-	fmt.Printf("%+v\n", c.GetClusterAddrs("10.16.101.0:8080"))
-
-	cluster.Unregister("aa1")
-	fmt.Printf("%+v\n", c.GetClusterAddrs("10.16.101.0:8080"))
 
 	time.Sleep(4 * time.Second)
 }

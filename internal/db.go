@@ -1,7 +1,6 @@
 package internal
 
 import (
-	str "blue/datastruct/string"
 	"errors"
 	"fmt"
 	"os"
@@ -15,6 +14,7 @@ import (
 	"blue/config"
 	"blue/datastruct"
 	"blue/datastruct/dict"
+	str "blue/datastruct/string"
 	"blue/log"
 
 	"github.com/rosedblabs/rosedb/v2"

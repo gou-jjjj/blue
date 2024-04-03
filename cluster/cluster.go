@@ -128,11 +128,11 @@ W:
 	return exec, true
 }
 
-func (c *Cluster) GetClusterAddrs(addr string) []string {
+func (c *Cluster) GetClusterAddrs(addr string) {
 	conn, err := net.Dial(network, addr)
 	if err != nil {
 		println(err.Error())
-		return []string{}
+		return
 	}
 	defer func() {
 		_ = conn.Close()
@@ -141,19 +141,20 @@ func (c *Cluster) GetClusterAddrs(addr string) []string {
 	_, err = conn.Write([]byte("=\n"))
 	if err != nil {
 		println(err.Error())
-		return []string{}
+		return
 	}
 
 	time.Sleep(1 * time.Second)
 	red := bufio.NewReader(conn)
 	byt, err := red.ReadBytes(done)
 	if err != nil || len(byt) == 0 {
-
-		return []string{}
+		return
 	}
 
 	res := string(byt)
-	return strings.Fields(res)
+	addrs := strings.Fields(res)
+
+	c.Register(addrs...)
 }
 
 func (c *Cluster) handle(conn net.Conn) {

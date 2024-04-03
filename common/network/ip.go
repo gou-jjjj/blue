@@ -28,3 +28,27 @@ func LocalIpEn0() string {
 
 	return ""
 }
+
+func ParseAddr(addr string) bool {
+
+	if addr == "" {
+		return false
+	}
+
+	addrs := strings.Split(addr, ":")
+
+	if len(addrs) != 2 {
+		return false
+	}
+
+	ip := net.ParseIP(addrs[0])
+	if ip == nil {
+		return false
+	}
+
+	_, err := net.ResolveTCPAddr("tcp", ":"+addrs[1])
+	if err != nil {
+		return false
+	}
+	return true
+}

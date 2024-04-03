@@ -8,6 +8,8 @@
     "root_token": []
   },
   "cluster_config": {
+    "cluster": "yes",
+    "cluster_addr": "39.101.169.250:7894",
     "port": 13141,
     "try_times": 3,
     "dial_timeout": 10,

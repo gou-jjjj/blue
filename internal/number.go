@@ -3,6 +3,7 @@ package internal
 import (
 	"blue/bsp"
 	"blue/datastruct/number"
+	"strconv"
 )
 
 func (db *DB) ExecChainNumber(ctx *Context) {
@@ -20,7 +21,6 @@ func (db *DB) ExecChainNumber(ctx *Context) {
 }
 
 func (db *DB) nset(cmd *bsp.BspProto) bsp.Reply {
-	db.data.RemoveWithLock(cmd.ValueStr())
 
 	newNumber, err := number.NewNumber(cmd.ValueBytes())
 	if err != nil {
@@ -28,10 +28,10 @@ func (db *DB) nset(cmd *bsp.BspProto) bsp.Reply {
 	}
 
 	db.data.Put(cmd.Key(), newNumber)
-	//err = db.StoragePut(cmd.KeyBytes(), cmd.ValueBytes())
-	//if err != nil {
-	//	return bsp.NewErr(bsp.ErrStorage)
-	//}
+	err = db.StoragePut(cmd.KeyBytes(), cmd.ValueBytes())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
+	}
 
 	return bsp.NewInfo(bsp.OK)
 }
@@ -61,5 +61,12 @@ func (db *DB) incr(cmd *bsp.BspProto) bsp.Reply {
 		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
 	}
 
-	return bsp.NewNum(n.Incr())
+	incr := n.Incr()
+
+	err := db.StoragePut(cmd.KeyBytes(), []byte(strconv.FormatInt(incr, 10)))
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
+	}
+
+	return bsp.NewNum(incr)
 }
