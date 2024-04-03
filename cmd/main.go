@@ -1,11 +1,12 @@
 package main
 
 import (
-	"blue/common/network"
 	"flag"
 	"time"
 
 	"blue/common/filename"
+	"blue/common/network"
+	print2 "blue/common/print"
 	"blue/config"
 	"blue/internal"
 	"blue/log"
@@ -18,7 +19,7 @@ var confPath = flag.String("c", defConfPath, "config file path")
 var clusterPath = flag.String("p", defCluster, "cluster path")
 
 func init() {
-	config.PrintTitle()
+	print2.PrintTitle()
 }
 
 func clusterAddr() string {
@@ -43,7 +44,7 @@ func main() {
 	flag.Parse()
 	// init config
 	configDB := config.InitConfig(*confPath)
-	
+
 	// init log
 	log.InitLog(config.LogCfg.LogLevel, config.LogCfg.LogOut)
 

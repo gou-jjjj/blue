@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"blue/bsp"
+	print2 "blue/common/print"
 	"blue/common/timewheel"
 	"blue/config"
 	"blue/datastruct"
@@ -74,6 +75,7 @@ func (db *DB) InitStorage(dbConfig DBConfig) int {
 	var l int
 	if db.index != 0 && config.StoCfg.OpenStorage(strconv.Itoa(db.index)) {
 		options := dbConfig.StorageOptions
+		options.Sync = true
 
 		if _, err := os.Stat(dbConfig.StorageOptions.DirPath); errors.Is(err, os.ErrNotExist) {
 			err = os.MkdirAll(dbConfig.StorageOptions.DirPath, os.ModePerm)
@@ -95,7 +97,7 @@ func (db *DB) InitStorage(dbConfig DBConfig) int {
 			return true, nil
 		})
 
-		config.StorageInitSuccess(db.index)
+		print2.StorageInitSuccess(db.index)
 	}
 
 	return l

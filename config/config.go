@@ -1,13 +1,13 @@
 package config
 
 import (
+	print2 "blue/common/print"
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"io"
-	"net"
 	"os"
 	"reflect"
+	"strings"
 
 	"blue/datastruct/list"
 	"blue/datastruct/number"
@@ -163,33 +163,19 @@ func InitConfig(path string) map[string]interface{} {
 	CliCfg = blueConf.ClientConfig
 	StoCfg = blueConf.StorageConfig
 
-	ConfigInitSuccess()
-
-	fmt.Printf("%+v\n", blueConf)
+	print2.ConfigInitSuccess()
 
 	return blueConf.Entries()
 }
 
-func (c clusterConfig) OpenCluster() bool {
-	if c.Cluster != "yes" {
+func OpenCluster() bool {
+	if strings.ToLower(blueConf.ClusterConfig.Cluster) != "yes" {
 		return false
 	}
-
-	ip, _, err := net.SplitHostPort(c.ClusterAddr)
-	if err != nil {
-		return false
-	}
-
-	// 解析IP地址
-	ipAddress := net.ParseIP(ip)
-	if ipAddress == nil {
-		return false
-	}
-
 	return true
 }
 
-func (c storageConfig) OpenStorage(idx string) bool {
+func (c *storageConfig) OpenStorage(idx string) bool {
 	for i := range c.StorageSet {
 		if c.StorageSet[i] == idx {
 			return true

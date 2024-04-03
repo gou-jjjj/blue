@@ -30,13 +30,16 @@ func TestAllCli(t *testing.T) {
 }
 
 func TestCli(t *testing.T) {
-	c, err := NewClient(WithDefaultOpt(), func(c *Config) {
-		c.Addr = "39.101.169.250:7894"
-	})
+	c, err := NewClient(WithDefaultOpt())
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fmt.Println(c.Dbsize())
+	for i := 0; i < 1e3; i++ {
+		_, err = c.Set(fmt.Sprintf("a1"), fmt.Sprintf("aaaaaa%d", i))
+		if err != nil {
+			panic(err)
+		}
+	}
 }

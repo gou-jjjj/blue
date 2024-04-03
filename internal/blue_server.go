@@ -1,6 +1,7 @@
 package internal
 
 import (
+	print2 "blue/common/print"
 	"context"
 	"errors"
 	"fmt"
@@ -17,8 +18,6 @@ import (
 )
 
 const version_ = "blue v0.1"
-
-var clusterConf = config.CluCfg
 
 type Exec interface {
 	ExecChain(*Context)
@@ -48,28 +47,31 @@ func NewBlueServer(dbs ...*DB) *BlueServer {
 		b.db[i] = dbs[i]
 	}
 
-	if clusterConf.OpenCluster() {
+	if config.OpenCluster() {
 		b.initClu()
 	}
 
-	config.ServerInitSuccess()
+	print2.ServerInitSuccess()
 	return b
 }
 
 func (svr *BlueServer) initClu() {
 	svr.cc = cluster.NewCluster(
-		clusterConf.TryTimes,
-		clusterConf.Port,
+		config.CluCfg.TryTimes,
+		config.CluCfg.Port,
 		"",
-		time.Duration(clusterConf.DialTimeout)*time.Second)
+		time.Duration(config.CluCfg.DialTimeout)*time.Second)
 
 	// 发送本地地址到集群
 	svr.cc.Notify(svr.cc.LocalAddr())
 
 	// 获取集群地址
-	svr.cc.GetClusterAddrs(clusterConf.ClusterAddr)
+	go func() {
+		svr.cc.GetClusterAddrs(config.CluCfg.ClusterAddr)
+	}()
 
-	config.ClusterInitSuccess()
+	log.Info(fmt.Sprintf("cluster listen on %v ...", svr.cc.LocalAddr()))
+	print2.ClusterInitSuccess()
 }
 
 // Handle receives and executes redis commands

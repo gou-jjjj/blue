@@ -122,7 +122,7 @@ func (s *Server) Start() {
 		s.close()
 	}()
 
-	log.Info(fmt.Sprintf("listen on %v ...", s.c.Addr()))
+	log.Info(fmt.Sprintf("server listen on %v ...", s.c.Addr()))
 	s.server()
 }
 

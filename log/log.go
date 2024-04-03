@@ -2,12 +2,11 @@ package log
 
 import (
 	"blue/common/filename"
+	pri "blue/common/print"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
-
-	"blue/config"
 )
 
 const (
@@ -34,7 +33,7 @@ var (
 func InitLog(level string, outPath string) {
 	i := logLevel(level)
 	blog = NewLog(i, outPath)
-	config.LogInitSuccess()
+	pri.LogInitSuccess()
 }
 
 type BlueLog struct {
@@ -68,7 +67,7 @@ func NewLog(level _LogLevel, outPath string) *BlueLog {
 		if _, err = os.Stat(outPath); os.IsNotExist(err) {
 			err = os.MkdirAll(outPath, os.ModePerm)
 			if err != nil {
-				config.ErrPanic(err, outPath)
+				pri.ErrPanic(err, outPath)
 			}
 		}
 

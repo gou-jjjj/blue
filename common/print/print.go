@@ -1,4 +1,4 @@
-package config
+package print
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ func StorageInitSuccess(dbidx int) {
 }
 
 func ServerInitSuccess() {
-	log.Println("Server init success ...")
+	log.Println("server init success ...")
 }
 
 func ErrPanic(err error, data ...string) {
