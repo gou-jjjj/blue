@@ -15,14 +15,17 @@ import (
 	"blue/log"
 )
 
+// 定义服务器网络类型、最大客户端限制和超时时间
 const (
 	NetWork        = "tcp"
 	MaxClientLimit = 1<<16 - 1
 	TimeOut        = 10 * time.Second
 )
 
+// 配置函数类型，用于配置服务器
 type ConfigFunc func(*Config)
 
+// 服务器配置结构体
 type Config struct {
 	Ip          string
 	Timeout     time.Duration
@@ -31,10 +34,12 @@ type Config struct {
 	HandlerFunc ServerInter
 }
 
+// 获取服务器地址的字符串表示
 func (c Config) Addr() string {
 	return fmt.Sprintf("%s:%d", c.Ip, c.Port)
 }
 
+// 默认服务器配置
 var defaultConfig = Config{
 	Ip:          "127.0.0.1",
 	Port:        8080,
@@ -42,18 +47,20 @@ var defaultConfig = Config{
 	Timeout:     10 * time.Second,
 }
 
+// 服务器结构体，包含配置、监听器和客户端管理信息
 type Server struct {
 	c Config
 
 	listen net.Listener
 
-	cliOnlineTime sync.Map
+	cliOnlineTime sync.Map // 存储客户端在线时间
 	waitClient    sync.WaitGroup
-	currentClient int32
-	isClo         bool
-	errClo        chan error
+	currentClient int32      // 当前在线客户端数
+	isClo         bool       // 服务器是否关闭
+	errClo        chan error // 用于传递错误信息的通道
 }
 
+// 校验配置项的有效性
 func checkConfig(c *Config) error {
 	ip := net.ParseIP(c.Ip)
 	if ip == nil {
@@ -76,6 +83,7 @@ func checkConfig(c *Config) error {
 	return nil
 }
 
+// 创建新的服务器实例
 func NewServer(fs ...ConfigFunc) *Server {
 	c := defaultConfig
 	for _, f := range fs {
@@ -94,6 +102,7 @@ func NewServer(fs ...ConfigFunc) *Server {
 	}
 }
 
+// 关闭服务器
 func (s *Server) close() {
 	_ = s.listen.Close()
 	s.isClo = true
@@ -101,6 +110,7 @@ func (s *Server) close() {
 	log.Info("server start closing ...")
 }
 
+// 启动服务器
 func (s *Server) Start() {
 	var err error
 	s.listen, err = net.Listen(NetWork, s.c.Addr())
@@ -108,6 +118,7 @@ func (s *Server) Start() {
 		panic(err)
 	}
 
+	// 监听关闭信号
 	sigclo := make(chan os.Signal)
 	signal.Notify(sigclo, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
@@ -126,6 +137,7 @@ func (s *Server) Start() {
 	s.server()
 }
 
+// 限制客户端连接数量
 func (s *Server) limit(conn net.Conn) bool {
 	if s.currentClient == int32(s.c.ClientLimit) {
 		_, _ = conn.Write([]byte("too many client ,try again later ..."))
@@ -135,6 +147,7 @@ func (s *Server) limit(conn net.Conn) bool {
 	return false
 }
 
+// 服务器主循环，处理客户端连接
 func (s *Server) server() {
 	for !s.isClo {
 		conn, err := s.listen.Accept()
