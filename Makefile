@@ -12,6 +12,7 @@ cmdJson="{ \
 ] \
 }"
 
+testAddr="root@39.101.195.49:/root/blue/linux"
 
 .server:
 	@rm -rf ./bin
@@ -42,7 +43,7 @@ commands:
 	@go generate ./script/gen_cmds.go
 
 run:
-	@go run ./cmd/main.go
+	@go run ./cmd/*
 
 
 req:run
@@ -54,3 +55,16 @@ mkcmd:
 	read name; \
 	echo "${cmdJson}" > ./commands/"$$name.json"; \
 	echo "Command created successfully"
+
+scp:bin
+	scp  ./bin/linux/blue-server $(testAddr)
+
+
+testClu1:
+	@go run ./cmd/* -c ./benchmark/testclu/blue-server1.json
+
+
+testClu2:
+	@go run ./cmd/* -c ./benchmark/testclu/blue-server2.json
+
+

@@ -1,0 +1,35 @@
+{
+  "server_config": {
+    "ip": "127.0.0.1",
+    "port": 7893,
+    "time_out": 5,
+    "db_sum": 8,
+    "guest_token": [],
+    "root_token": []
+  },
+  "cluster_config": {
+    "cluster": "yes",
+    "cluster_addr": "",
+    "my_cluster_addr": "127.0.0.1:7892",
+    "ip": "127.0.0.1",
+    "port": 7892,
+    "try_times": 3,
+    "dial_timeout": 10,
+    "replicas": 1000,
+    "consistent": 100
+  },
+  "log_config": {
+    "output": "",
+    "log_level": "info",
+    "log_out": "./logs"
+  },
+  "client_config": {
+    "client_active": 300,
+    "client_limit": 1000
+  },
+  "storage_config": {
+    "storage_set": [],
+    "storage_path": "./storage"
+  }
+}
+

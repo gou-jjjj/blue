@@ -1,6 +1,7 @@
 package internal
 
 import (
+	add "blue/common/network"
 	"context"
 	"errors"
 	"fmt"
@@ -58,19 +59,23 @@ func NewBlueServer(dbs ...*DB) *BlueServer {
 func (svr *BlueServer) initClu() {
 	svr.cc = cluster.NewCluster(
 		config.CluCfg.TryTimes,
+		config.CluCfg.Ip,
 		config.CluCfg.Port,
-		"",
+		config.CluCfg.MyClusterAddr,
+		config.SvrCfg.SvrAddr(),
 		time.Duration(config.CluCfg.DialTimeout)*time.Second)
 
-	// 发送本地地址到集群
-	svr.cc.Notify(svr.cc.LocalAddr())
+	if add.ParseAddr(config.CluCfg.ClusterAddr) {
+		// 获取集群地址
+		addrs := svr.cc.GetClusterAddr(config.CluCfg.ClusterAddr)
 
-	// 获取集群地址
-	//go func() {
-	svr.cc.GetClusterAddrs(config.CluCfg.ClusterAddr)
-	//}()
+		// 初始化集群
+		svr.cc.InitClusterAddr(addrs...)
 
-	log.Info(fmt.Sprintf("cluster listen on %v ...", svr.cc.LocalAddr()))
+		// 发送本地地址到集群
+		svr.cc.Online(add.CombineAddr(svr.cc.LocalAddr(), config.SvrCfg.SvrAddr()))
+	}
+
 	print2.ClusterInitSuccess()
 }
 

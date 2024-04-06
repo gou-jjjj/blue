@@ -1,6 +1,7 @@
 package network
 
 import (
+	"fmt"
 	"net"
 	"strings"
 )
@@ -51,4 +52,18 @@ func ParseAddr(addr string) bool {
 		return false
 	}
 	return true
+}
+
+const space = "|"
+
+func CombineAddr(cluAddr, cliAddr string) string {
+	return fmt.Sprintf("%s%s%s", cluAddr, space, cliAddr)
+}
+
+func SplitAddr(addr string) []string {
+	if addr[0] == '+' && addr[len(addr)-1] == '\n' {
+		return strings.Split(addr[1:len(addr)-1], space)
+	}
+
+	return strings.Split(addr, space)
 }

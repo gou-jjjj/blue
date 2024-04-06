@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"strings"
 )
@@ -18,7 +19,8 @@ func parse0(r io.Reader) (*BspProto, *ErrResp) {
 			if normalErr(err) {
 				return nil, RequestEnd
 			}
-
+			fmt.Printf("[%+v]\n", err)
+			fmt.Printf("[%+v]\n", bs)
 			return nil, SyntaxErr
 		}
 
@@ -95,6 +97,10 @@ func parseReq(ctx context.Context, reader io.Reader, bp chan *BspProto, err chan
 
 func normalErr(err error) bool {
 	if strings.Contains(err.Error(), "An existing connection was forcibly closed by the remote host.") {
+		return true
+	}
+
+	if strings.Contains(err.Error(), "EOF") {
 		return true
 	}
 	return false

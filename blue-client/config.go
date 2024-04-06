@@ -19,8 +19,8 @@ type BlueConf struct {
 	LogOut   string
 }
 
-func init() {
-	conf, err := os.Open("./blue-cli.conf")
+func InitConfig() {
+	conf, err := os.Open(defaultConf)
 	if err != nil {
 		panic(err)
 	}

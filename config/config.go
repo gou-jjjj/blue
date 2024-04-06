@@ -4,6 +4,7 @@ import (
 	print2 "blue/common/print"
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"reflect"
@@ -37,18 +38,24 @@ type serverConfig struct {
 	RootToken  []string `json:"root_token"`
 }
 
+func (s *serverConfig) SvrAddr() string {
+	return fmt.Sprintf("%s:%d", s.Ip, s.Port)
+}
+
 type clusterConfig struct {
-	Cluster     string `json:"cluster,omitempty"`
-	ClusterAddr string `json:"cluster_addr,omitempty"`
-	Ip          string `json:"ip,omitempty"`
-	Port        int    `json:"port,omitempty"`
-	TryTimes    int    `json:"try_times,omitempty"`
-	DialTimeout int    `json:"dial_timeout,omitempty"`
-	Replicas    int    `json:"replicas,omitempty"`
-	Consistent  int    `json:"consistent,omitempty"`
+	Cluster       string `json:"cluster,omitempty"`
+	ClusterAddr   string `json:"cluster_addr,omitempty"`
+	MyClusterAddr string `json:"my_cluster_addr,omitempty"`
+	Ip            string `json:"ip,omitempty"`
+	Port          int    `json:"port,omitempty"`
+	TryTimes      int    `json:"try_times,omitempty"`
+	DialTimeout   int    `json:"dial_timeout,omitempty"`
+	Replicas      int    `json:"replicas,omitempty"`
+	Consistent    int    `json:"consistent,omitempty"`
 }
 
 type logConfig struct {
+	Output   string `json:"output"`
 	LogOut   string `json:"log_out,omitempty"`
 	LogLevel string `json:"log_level,omitempty"`
 }
@@ -175,9 +182,9 @@ func OpenCluster() bool {
 	return true
 }
 
-func (c *storageConfig) OpenStorage(idx string) bool {
-	for i := range c.StorageSet {
-		if c.StorageSet[i] == idx {
+func OpenStorage(idx string) bool {
+	for i := range StoCfg.StorageSet {
+		if StoCfg.StorageSet[i] == idx {
 			return true
 		}
 	}

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io"
 	"net"
-	"os"
 	"strconv"
 	"time"
 )
@@ -133,7 +132,6 @@ func (c *Client) exit(buf []byte) {
 	if err != nil {
 		c.conn.Write(buf)
 	}
-	os.Exit(0)
 }
 
 func (c *Client) execPipeline(buf [][]byte) (s []string, err error) {
@@ -174,5 +172,6 @@ func (c *Client) execPipeline(buf [][]byte) (s []string, err error) {
 }
 
 func (c *Client) Close() {
-	c.conn.Close()
+	c.Exit()
+	_ = c.conn.Close()
 }

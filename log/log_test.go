@@ -1,33 +1,65 @@
 package log
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
 
-func TestLog(t *testing.T) {
-	log := NewLog(InfoLevel, "./testlog/info")
+func TestFileLog(t *testing.T) {
+	InitLog("file", "info", "./testlog/info")
 
 	for i := 0; i < 100; i++ {
-		log.info("1")
-		log.warn("2")
-		log.err("3")
+		Info("1")
+		Warn("2")
+		Error("3")
 	}
 
-	log1 := NewLog(WarnLevel, "./testlog/warn")
+	InitLog("file", "warn", "./testlog/warn")
 
 	for i := 0; i < 100; i++ {
-		log1.info("1")
-		log1.warn("2")
-		log1.err("3")
+		Info("1")
+		Warn("2")
+		Error("3")
 	}
-	log2 := NewLog(ErrorLevel, "./testlog/err")
+
+	InitLog("file", "err", "./testlog/err")
 
 	for i := 0; i < 100; i++ {
-		log2.info("1")
-		log2.warn("2")
-		log2.err("3")
+		Info("1")
+		Warn("2")
+		Error("3")
 	}
 
 	time.Sleep(4 * time.Second)
+}
+
+func TestStdioLog(t *testing.T) {
+	InitLog("notfile", "info", "./testlog/info")
+
+	for i := 0; i < 2; i++ {
+		Info("1")
+		Warn("2")
+		Error("3")
+	}
+
+	fmt.Println()
+	InitLog("notfile", "warn", "./testlog/warn")
+
+	for i := 0; i < 2; i++ {
+		Info("1")
+		Warn("2")
+		Error("3")
+	}
+
+	fmt.Println()
+
+	InitLog("notfile", "error", "./testlog/err")
+	for i := 0; i < 2; i++ {
+		Info("1")
+		Warn("2")
+		Error("3")
+	}
+
+	fmt.Println()
 }

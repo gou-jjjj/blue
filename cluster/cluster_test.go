@@ -6,24 +6,12 @@ import (
 	"time"
 )
 
-func TestNewCluster(t *testing.T) {
+func TestGetAddrs(t *testing.T) {
+	c := NewCluster(1, "127.0.0.1", 8081, "127.0.0.1:8080", "127.0.0.1:8082", 1*time.Minute)
 
-	c := NewCluster(1, 8081, "1", 1)
-	fmt.Println(c.observers)
-	//c.GetClusterAddrs("39.101.195.49:7891")
+	addrs := c.GetClusterAddr("127.0.0.1:7892")
 
-	c.Register("a", "b")
-	c.Register("a", "b")
-	c.Register("a", "b")
-	c.Register("a", "b", "c")
-	c.Register("a", "b")
-	c.Register("f")
+	c.Register(addrs...)
+	fmt.Printf("%+v\n", c.observers)
 
-	fmt.Println(c.observers)
-
-	c.Unregister("a", "b")
-	c.Unregister("a", "f")
-	c.Unregister("a", "b")
-	fmt.Println(c.observers)
-	time.Sleep(4 * time.Second)
 }

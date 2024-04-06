@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"blue/config"
-	"blue/log"
 	"context"
 	"errors"
 	"fmt"
@@ -12,6 +10,8 @@ import (
 
 	"blue/bsp"
 	"blue/common/rand"
+	"blue/config"
+	"blue/log"
 )
 
 const (
@@ -67,10 +67,6 @@ func NewContext(ctx context.Context, conn net.Conn) *Context {
 	bconn.maxActive = time.Duration(config.CliCfg.ClientActive) * time.Second
 	log.Info(bconn.String())
 	return bconn
-}
-
-func (c *Context) SetNext(next Exec) {
-	c.nextExec = next
 }
 
 func (c *Context) GetDB() uint8 {

@@ -10,50 +10,110 @@ import (
 )
 
 const (
-	bufSize  = 10000
-	flushDef = EveySec
+	bufSize = 10000
 )
 
 var (
 	blog *BlueLog
 
+	stdio = Stdio{
+		blog:   blog,
+		lLevel: InfoLevel,
+		null:   true,
+	}
+
 	Info = func(msg string) {
-		blog.info(msg)
+		stdio.info(msg)
 	}
 
 	Warn = func(msg string) {
-		blog.warn(msg)
+		stdio.warn(msg)
 	}
 
 	Error = func(msg string) {
-		blog.err(msg)
+		stdio.err(msg)
 	}
 )
 
-func InitLog(level string, outPath string) {
+type BIter interface {
+	info(msg string)
+	err(msg string)
+	warn(msg string)
+}
+
+type Stdio struct {
+	blog   BIter
+	lLevel _LogLevel
+	null   bool
+}
+
+func (s *Stdio) info(msg string) {
+	if s.lLevel == WarnLevel || s.lLevel == ErrorLevel {
+		return
+	}
+
+	m := _LogMsg(msg, InfoLevel)
+	if !s.null {
+		s.blog.info(m.String())
+	} else {
+		fmt.Print(m.String())
+	}
+
+	putMsg(m)
+}
+
+func (s *Stdio) warn(msg string) {
+	if s.lLevel == ErrorLevel {
+		return
+	}
+
+	m := _LogMsg(msg, WarnLevel)
+	if !s.null {
+		s.blog.warn(m.String())
+	} else {
+		fmt.Print(m.String())
+	}
+	putMsg(m)
+}
+
+func (s *Stdio) err(msg string) {
+	m := _LogMsg(msg, ErrorLevel)
+	if !s.null {
+		s.blog.err(m.String())
+	} else {
+		fmt.Print(m.String())
+	}
+
+	putMsg(m)
+}
+
+func InitLog(output string, level string, outPath string) {
 	i := logLevel(level)
-	blog = NewLog(i, outPath)
+	blog = NewBlueLog(output, outPath)
+
+	stdio = Stdio{
+		blog:   blog,
+		lLevel: i,
+		null:   blog == nil,
+	}
+
 	pri.LogInitSuccess()
 }
 
 type BlueLog struct {
-	of        *os.File
-	lLevel    _LogLevel
-	logCh     chan *Msg
-	bufSize   int
-	flushType FlushType
-	tk        *time.Ticker
-	nowWrite  chan struct{}
+	of      *os.File
+	logCh   chan string
+	bufSize int
 }
 
-func NewLog(level _LogLevel, outPath string) *BlueLog {
+func NewBlueLog(output string, outPath string) *BlueLog {
+	if output != "file" {
+		return nil
+	}
+
 	b := &BlueLog{
-		flushType: flushDef,
-		bufSize:   bufSize,
-		logCh:     make(chan *Msg, bufSize),
-		tk:        time.NewTicker(time.Second),
-		nowWrite:  make(chan struct{}),
-		lLevel:    level,
+		bufSize: bufSize,
+		logCh:   make(chan string, bufSize),
 	}
 
 	var err error
@@ -83,57 +143,31 @@ func NewLog(level _LogLevel, outPath string) *BlueLog {
 }
 
 func (l *BlueLog) sync() {
-	var msg *Msg
+	var msg string
 	for msg = range l.logCh {
-		_, err := l.of.WriteString(msg.String())
+		_, err := l.of.WriteString(msg)
 		if err != nil {
 			return
 		}
-
-		putMsg(msg)
 	}
 }
 
 func (l *BlueLog) info(msg string) {
-	if l == nil {
-		return
-	}
-	if l.lLevel == WarnLevel || l.lLevel == ErrorLevel {
-		return
-	}
-
-	m := l.getMsg()
-	m.data = msg
-	m.dataType = InfoLevel
-	l.logCh <- m
+	l.logCh <- msg
 }
 
 func (l *BlueLog) warn(msg string) {
-	if l == nil {
-		return
-	}
-	if l.lLevel == ErrorLevel {
-		return
-	}
-
-	m := l.getMsg()
-	m.data = msg
-	m.dataType = WarnLevel
-	l.logCh <- m
+	l.logCh <- msg
 }
 
 func (l *BlueLog) err(msg string) {
-	if l == nil {
-		return
-	}
-	m := l.getMsg()
-	m.data = msg
-	m.dataType = ErrorLevel
-	l.logCh <- m
+	l.logCh <- msg
 }
 
-func (l *BlueLog) getMsg() *Msg {
+func _LogMsg(msg string, level _LogLevel) *Msg {
 	m := getMsg()
+	m.data = msg
+	m.dataType = level
 	m.dataTime = time.Now()
 	return m
 }

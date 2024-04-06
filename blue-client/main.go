@@ -32,7 +32,7 @@ var conf = flag.String("c", defaultConf, "config file path")
 
 func main() {
 	flag.Parse()
-
+	InitConfig()
 	if defaultAddr != *addr {
 		BC.Addr = *addr
 	}

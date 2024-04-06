@@ -3,6 +3,7 @@ package blue
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func handleErr(s string, err error) {
@@ -30,16 +31,19 @@ func TestAllCli(t *testing.T) {
 }
 
 func TestCli(t *testing.T) {
-	c, err := NewClient(WithDefaultOpt())
+	c, err := NewClient(WithDefaultOpt(), func(config *Config) {
+		config.Addr = "127.0.0.1:7890"
+	})
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for i := 0; i < 1e3; i++ {
-		_, err = c.Set(fmt.Sprintf("a1"), fmt.Sprintf("aaaaaa%d", i))
+		_, err = c.Set(fmt.Sprintf("aaaaaa%d", i), fmt.Sprintf("aaaaaa%d", i))
 		if err != nil {
 			panic(err)
 		}
+		time.Sleep(time.Millisecond * 1000)
 	}
 }

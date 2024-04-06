@@ -5,13 +5,6 @@ import (
 	"time"
 )
 
-type FlushType time.Duration
-
-const (
-	EveySec = FlushType(time.Second)
-	EverMin = FlushType(time.Minute)
-)
-
 type _LogLevel uint8
 
 const (
@@ -22,7 +15,7 @@ const (
 
 var level = map[string]_LogLevel{
 	"error":   ErrorLevel,
-	"err":     WarnLevel,
+	"err":     ErrorLevel,
 	"warn":    WarnLevel,
 	"warning": WarnLevel,
 	"info":    InfoLevel,

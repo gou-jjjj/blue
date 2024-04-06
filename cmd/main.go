@@ -12,12 +12,6 @@ import (
 	"blue/log"
 )
 
-var defCluster = "127.0.0.1:13141"
-var defConfPath = "./blue-server.json"
-
-var confPath = flag.String("c", defConfPath, "config file path")
-var clusterPath = flag.String("p", defCluster, "cluster path")
-
 func init() {
 	print2.PrintTitle()
 }
@@ -46,7 +40,7 @@ func main() {
 	configDB := config.InitConfig(*confPath)
 
 	// init log
-	log.InitLog(config.LogCfg.LogLevel, config.LogCfg.LogOut)
+	log.InitLog(config.LogCfg.Output, config.LogCfg.LogLevel, config.LogCfg.LogOut)
 
 	dbs := make([]*internal.DB, config.SvrCfg.DBSum+1)
 	// init db0

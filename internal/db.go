@@ -67,13 +67,13 @@ func NewDB(opts ...DbOption) *DB {
 	log.Info(fmt.Sprintf("db{index[%d] initdata:[%v] initStorage[%v] }",
 		db.index,
 		len(dbConfig.InitData) != 0 || (initLen != 0),
-		config.StoCfg.OpenStorage(strconv.Itoa(db.index))))
+		config.OpenStorage(strconv.Itoa(db.index))))
 	return db
 }
 
 func (db *DB) InitStorage(dbConfig DBConfig) int {
 	var l int
-	if db.index != 0 && config.StoCfg.OpenStorage(strconv.Itoa(db.index)) {
+	if db.index != 0 && config.OpenStorage(strconv.Itoa(db.index)) {
 		options := dbConfig.StorageOptions
 		options.Sync = true
 

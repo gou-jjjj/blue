@@ -1,7 +1,7 @@
 {
   "server_config": {
-    "ip": "127.0.0.1",
-    "port": 4311,
+    "ip": "0.0.0.0",
+    "port": 13140,
     "time_out": 5,
     "db_sum": 8,
     "guest_token": [],
@@ -9,14 +9,17 @@
   },
   "cluster_config": {
     "cluster": "yes",
-    "cluster_addr": "39.101.195.49:7891",
-    "port": 13142,
+    "cluster_addr": "127.0.0.1:7891",
+    "my_cluster_addr": "0.0.0.0:13141",
+    "ip": "0.0.0.0",
+    "port": 13141,
     "try_times": 3,
     "dial_timeout": 5,
     "replicas": 1000,
     "consistent": 100
   },
   "log_config": {
+    "output": "file",
     "log_level": "info",
     "log_out": "./logs"
   },
