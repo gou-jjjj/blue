@@ -29,6 +29,8 @@ func (db *DB) ExecChainList(ctx *Context) {
 func (db *DB) lset(cmd *bsp.BspProto) bsp.Reply {
 	newlist := list.NewQuickList()
 	db.data.Put(cmd.Key(), newlist)
+
+	db.dataCountIncr()
 	return bsp.NewInfo(bsp.OK)
 }
 

@@ -31,6 +31,7 @@ func (db *DB) ExecChainSet(ctx *Context) {
 func (db *DB) sadd(cmd *bsp.BspProto) bsp.Reply {
 	val, ok := db.data.Get(cmd.Key())
 	if !ok {
+		db.dataCountIncr()
 		db.data.Put(cmd.Key(), set.NewSet())
 		val, _ = db.data.Get(cmd.Key())
 	}

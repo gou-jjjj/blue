@@ -40,6 +40,7 @@ func (db *DB) set(cmd *bsp.BspProto) bsp.Reply {
 		return bsp.NewErr(bsp.ErrStorage)
 	}
 
+	db.dataCountIncr()
 	return bsp.NewInfo(bsp.OK)
 }
 

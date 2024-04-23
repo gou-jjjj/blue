@@ -21,7 +21,7 @@ RUN go mod tidy
 RUN  make bin
 
 # 使用 alpine 作为运行时镜像的基础
-FROM alpine:latest
+FROM centos
 
 # 复制构建出的二进制文件从构建镜像到运行时镜像
 COPY --from=builder /build/bin/linux/blue-server /blue-server
@@ -29,6 +29,10 @@ COPY --from=builder /build/bin/linux/blue-client /blue-client
 COPY --from=builder /build/bin/linux/blue-cli.conf /blue-cli.conf
 COPY --from=builder /build/bin/linux/blue-server.json /blue-server.json
 
+WORKDIR /
+
 EXPOSE 13140
+EXPOSE 13141
+
 # 设置容器启动时执行的命令
 CMD ["./blue-server"]

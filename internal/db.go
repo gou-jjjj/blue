@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"blue/bsp"
@@ -42,9 +43,10 @@ var defaultDBConfig = DBConfig{
 type DB struct {
 	index int
 
-	data    *dict.ConcurrentDict
-	storage *rosedb.DB
-	rw      *sync.RWMutex
+	data      *dict.ConcurrentDict
+	storage   *rosedb.DB
+	rw        *sync.RWMutex
+	dataCount atomic.Int64
 }
 
 // NewDB 创建一个新的数据库实例
@@ -57,9 +59,10 @@ func NewDB(opts ...DbOption) *DB {
 	}
 
 	db := &DB{
-		index: dbConfig.Index,
-		data:  dict.MakeConcurrent(dbConfig.DataDictSize),
-		rw:    &sync.RWMutex{},
+		index:     dbConfig.Index,
+		data:      dict.MakeConcurrent(dbConfig.DataDictSize),
+		rw:        &sync.RWMutex{},
+		dataCount: atomic.Int64{},
 	}
 
 	// 如果提供了初始化数据，则加载到内存中
@@ -105,6 +108,7 @@ func (db *DB) InitStorage(dbConfig DBConfig) int {
 		// 从存储中加载数据到内存
 		storage.Ascend(func(k []byte, v []byte) (bool, error) {
 			l++
+			db.dataCountIncr()
 			db.data.Put(string(k), str.NewString(string(v)))
 			return true, nil
 		})
@@ -200,6 +204,7 @@ func (db *DB) del(ctx *bsp.BspProto) bsp.Reply {
 		return bsp.NewErr(bsp.ErrStorage)
 	}
 
+	db.dataCountDecr()
 	return bsp.NewInfo(bsp.OK)
 }
 
@@ -217,8 +222,10 @@ func (db *DB) expire(ctx *bsp.BspProto) bsp.Reply {
 	if err != nil {
 		return bsp.NewErr(bsp.ErrRequestParameter, ttl)
 	}
+
 	timewheel.Delay(time.Duration(ttlInt)*time.Second, key, func() {
 		if db != nil {
+			db.dataCountDecr()
 			db.data.Remove(key)
 		}
 	})
@@ -241,7 +248,9 @@ func (db *DB) kvs(ctx *bsp.BspProto) bsp.Reply {
 // dbsize 返回数据库中键值对的数量
 // ctx: 操作上下文
 func (db *DB) dbsize(ctx *bsp.BspProto) bsp.Reply {
-	return bsp.NewNum(db.data.Len())
+	count := db.dataCountLoad()
+	s := strconv.Itoa(count)
+	return bsp.NewStr(s)
 }
 
 // type_ 返回键的数据类型
@@ -253,4 +262,16 @@ func (db *DB) type_(ctx *bsp.BspProto) bsp.Reply {
 	}
 
 	return bsp.NewStr(val.(datastruct.Type).Type())
+}
+
+func (db *DB) dataCountIncr() {
+	db.dataCount.Add(1)
+}
+
+func (db *DB) dataCountDecr() {
+	db.dataCount.Add(-1)
+}
+
+func (db *DB) dataCountLoad() int {
+	return int(db.dataCount.Load())
 }

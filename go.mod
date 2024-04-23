@@ -4,7 +4,6 @@ go 1.21
 
 require (
 	github.com/deckarep/golang-set/v2 v2.6.0
-	github.com/panjf2000/ants/v2 v2.9.0
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/rosedblabs/rosedb/v2 v2.3.5
 )
@@ -20,6 +19,5 @@ require (
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rosedblabs/wal v1.3.6 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 )
