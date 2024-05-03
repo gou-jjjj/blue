@@ -23,8 +23,8 @@ func NewBspProto() *BspProto {
 func PutBspProto(b *BspProto) {
 	b.Header = 0
 	b.key = ""
-	b.value = nil
-	b.buf = nil
+	clear(b.value)
+	clear(b.buf)
 	bspPool.Put(b)
 }
 

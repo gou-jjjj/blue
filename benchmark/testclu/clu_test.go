@@ -11,7 +11,6 @@ import (
 
 var localclu1 = "127.0.0.1:7891"
 var localclu2 = "127.0.0.1:7892"
-
 var localclu3 = "127.0.0.1:7893"
 
 func TestGetClu(t *testing.T) {
@@ -22,15 +21,14 @@ func TestGetClu(t *testing.T) {
 	defer blu.Close()
 
 	for i := 0; i < 10000; i++ {
-		v, err := blu.Get(strconv.Itoa(i))
+		v, err := blu.Set(strconv.Itoa(i), strconv.Itoa(i))
 		if err != nil {
 			t.Error(err)
 		}
 
-		if v != "b" {
-			t.Error("bbb", v)
+		if v != "ok" {
+			t.Error("ok")
 		}
-
 	}
 }
 
