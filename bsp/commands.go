@@ -4,23 +4,17 @@
 
 package bsp
 
-import "blue/commands"
+type Cmd struct {
+	Name      string   `json:"name"`      // 命令的名称
+	Summary   string   `json:"summary"`   // 命令的简要说明
+	Group     string   `json:"group"`     // 命令所属的组
+	Arity     int      `json:"arity"`     // 命令的参数个数
+	Key       string   `json:"key"`       // 命令的关键字
+	Value     string   `json:"value"`     // 命令的值
+	Arguments []string `json:"arguments"` // 命令的参数列表
+}
 
 const cmdLen = 29
-
-// number -----------------------------
-const (
-	INCR Header = 1 + TypeNumber
-	NGET Header = 2 + TypeNumber
-	NSET Header = 3 + TypeNumber
-)
-
-// string -----------------------------
-const (
-	GET Header = 1 + TypeString
-	LEN Header = 2 + TypeString
-	SET Header = 3 + TypeString
-)
 
 // list -----------------------------
 const (
@@ -63,6 +57,20 @@ const (
 	EXPIRE Header = 3 + TypeDB
 	KVS Header = 4 + TypeDB
 	TYPE Header = 5 + TypeDB
+)
+
+// number -----------------------------
+const (
+	INCR Header = 1 + TypeNumber
+	NGET Header = 2 + TypeNumber
+	NSET Header = 3 + TypeNumber
+)
+
+// string -----------------------------
+const (
+	GET Header = 1 + TypeString
+	LEN Header = 2 + TypeString
+	SET Header = 3 + TypeString
 )
 
 var HandleMap = [...]string{
@@ -129,7 +137,7 @@ var HandleMap2 = map[string]Header{
 	"VERSION": VERSION,
 }
 
-var CommandsMap = [...]commands.Cmd{
+var CommandsMap = [...]Cmd{
 	AUTH: {Name:"AUTH",Summary: "add authentication to the application", Group: "system", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
 	DBSIZE: {Name:"DBSIZE",Summary: "Return the number of keys in the database", Group: "db", Arity: 0, Key: "string", Value: "", Arguments: []string{}},
 	DEL: {Name:"DEL",Summary: "Remove the specified keys", Group: "db", Arity: 1, Key: "list", Value: "", Arguments: []string{}},

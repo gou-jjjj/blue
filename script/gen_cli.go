@@ -3,7 +3,6 @@
 package main
 
 import (
-	"blue/commands"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -66,6 +65,17 @@ func Auth() CmdFunc {
 
 `
 
+type Cmd struct {
+	Name      string   `json:"name"`      // 命令的名称
+	Summary   string   `json:"summary"`   // 命令的简要说明
+	Group     string   `json:"group"`     // 命令所属的组
+	Arity     int      `json:"arity"`     // 命令的参数个数
+	Key       string   `json:"key"`       // 命令的关键字
+	Value     string   `json:"value"`     // 命令的值
+	Arguments []string `json:"arguments"` // 命令的参数列表
+}
+
+
 // main 函数是程序的入口点
 func main() {
 	// 遍历命令目录下所有.json文件，收集文件路径
@@ -89,7 +99,7 @@ func main() {
 		return
 	}
 
-	var cmds []commands.Cmd
+	var cmds []Cmd
 	for _, file := range files {
 		data, err := os.ReadFile(file)
 		if err != nil {
@@ -98,7 +108,7 @@ func main() {
 		}
 
 		// 解析命令文件
-		var fileCommands commands.Cmd
+		var fileCommands Cmd
 		err = json.Unmarshal(data, &fileCommands)
 		if err != nil {
 			fmt.Println("Error unmarshalling JSON:", err)
@@ -150,7 +160,7 @@ func main() {
 }
 
 // writeFunc 为指定命令生成执行函数
-func writeFunc(code *strings.Builder, cmd commands.Cmd) {
+func writeFunc(code *strings.Builder, cmd Cmd) {
 	para := ""
 	for i := 0; i < cmd.Arity; i++ {
 		para += fmt.Sprintf("s[%d],", i+1)
@@ -174,11 +184,11 @@ func writeFunc(code *strings.Builder, cmd commands.Cmd) {
 }
 
 // selectFunc 生成 "select" 命令的函数代码
-func selectFunc(code *strings.Builder, cmd commands.Cmd) {
+func selectFunc(code *strings.Builder, cmd Cmd) {
 	code.WriteString(select_)
 }
 
 // authFunc 生成 "auth" 命令的函数代码
-func authFunc(code *strings.Builder, cmd commands.Cmd) {
+func authFunc(code *strings.Builder, cmd Cmd) {
 	code.WriteString(auth)
 }
