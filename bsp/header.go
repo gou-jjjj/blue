@@ -1,9 +1,6 @@
 // 定义一个包，名为bsp，用于处理头部信息和指令。
 package bsp
 
-// 导入blue/commands包，用于处理命令信息。
-import "blue/commands"
-
 // HeaderInter 接口定义了头部信息处理的方法集合。
 type HeaderInter interface {
 	// Type 方法返回头部的类型。
@@ -12,7 +9,7 @@ type HeaderInter interface {
 	Handle() Header
 
 	// HandleInfo 方法返回与头部关联的命令信息。
-	HandleInfo() commands.Cmd
+	HandleInfo() Cmd
 	// Bytes 方法返回头部的字节表示。
 	Bytes() []byte
 }
@@ -65,6 +62,6 @@ func (h Header) Bytes() []byte {
 }
 
 // HandleInfo 返回与头部关联的命令信息。
-func (h Header) HandleInfo() commands.Cmd {
+func (h Header) HandleInfo() Cmd {
 	return CommandsMap[h]
 }
