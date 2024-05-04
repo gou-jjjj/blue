@@ -151,8 +151,8 @@ var defaultConfig = BlueConf{
 	},
 }
 
-// InitConfig 从指定路径初始化配置
-func InitConfig(path string) map[string]interface{} {
+// Init 从指定路径初始化配置
+func Init(path string) map[string]interface{} {
 	configFile, err := os.Open(path)
 	if err != nil {
 		panic(err)

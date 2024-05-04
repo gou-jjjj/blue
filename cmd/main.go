@@ -21,10 +21,10 @@ func main() {
 	flag.Parse() // 解析命令行参数
 
 	// 初始化配置
-	configDB := config.InitConfig(*confPath)
+	configDB := config.Init(*confPath)
 
 	// 初始化日志系统
-	log.InitLog(config.LogCfg.Output, config.LogCfg.LogLevel, config.LogCfg.LogOut)
+	log.Init(config.LogCfg.Output, config.LogCfg.LogLevel, config.LogCfg.LogOut)
 
 	// 创建DB实例数组
 	dbs := make([]*internal.DB, config.SvrCfg.DBSum+1)

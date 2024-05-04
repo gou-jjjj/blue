@@ -77,3 +77,7 @@ testClu1:
 
 testClu2:
 	@go run ./cmd/* -c ./benchmark/testclu/blue-server2.json
+
+t:
+	@rm -rf ./storage
+	@go run ./cmd/*

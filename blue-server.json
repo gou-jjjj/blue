@@ -28,7 +28,7 @@
     "client_limit": 1000
   },
   "storage_config": {
-    "storage_set": [],
+    "storage_set": ["1"],
     "storage_path": "./storage"
   }
 }

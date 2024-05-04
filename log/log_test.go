@@ -7,7 +7,7 @@ import (
 )
 
 func TestFileLog(t *testing.T) {
-	InitLog("file", "info", "./testlog/info")
+	Init("file", "info", "./testlog/info")
 
 	for i := 0; i < 100; i++ {
 		Info("1")
@@ -15,7 +15,7 @@ func TestFileLog(t *testing.T) {
 		Error("3")
 	}
 
-	InitLog("file", "warn", "./testlog/warn")
+	Init("file", "warn", "./testlog/warn")
 
 	for i := 0; i < 100; i++ {
 		Info("1")
@@ -23,7 +23,7 @@ func TestFileLog(t *testing.T) {
 		Error("3")
 	}
 
-	InitLog("file", "err", "./testlog/err")
+	Init("file", "err", "./testlog/err")
 
 	for i := 0; i < 100; i++ {
 		Info("1")
@@ -35,7 +35,7 @@ func TestFileLog(t *testing.T) {
 }
 
 func TestStdioLog(t *testing.T) {
-	InitLog("notfile", "info", "./testlog/info")
+	Init("notfile", "info", "./testlog/info")
 
 	for i := 0; i < 2; i++ {
 		Info("1")
@@ -44,7 +44,7 @@ func TestStdioLog(t *testing.T) {
 	}
 
 	fmt.Println()
-	InitLog("notfile", "warn", "./testlog/warn")
+	Init("notfile", "warn", "./testlog/warn")
 
 	for i := 0; i < 2; i++ {
 		Info("1")
@@ -54,7 +54,7 @@ func TestStdioLog(t *testing.T) {
 
 	fmt.Println()
 
-	InitLog("notfile", "error", "./testlog/err")
+	Init("notfile", "error", "./testlog/err")
 	for i := 0; i < 2; i++ {
 		Info("1")
 		Warn("2")

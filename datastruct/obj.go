@@ -8,22 +8,30 @@ const (
 	Json
 )
 
+const (
+	NumberType = "number"
+	StringType = "string"
+	ListType   = "list"
+	SetType    = "set"
+	JsonType   = "json"
+)
+
 type BlueType uint8
 
 var BlueTypes = map[uint8]string{
-	Number: "number",
-	String: "string",
-	List:   "list",
-	Set:    "set",
-	Json:   "json",
+	Number: NumberType,
+	String: StringType,
+	List:   ListType,
+	Set:    SetType,
+	Json:   JsonType,
 }
 
 var BlueTypes_ = map[string]uint8{
-	"number": Number,
-	"string": String,
-	"list":   List,
-	"set":    Set,
-	"json":   Json,
+	NumberType: Number,
+	StringType: String,
+	ListType:   List,
+	SetType:    Set,
+	JsonType:   Json,
 }
 
 const (

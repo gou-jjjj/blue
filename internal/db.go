@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -16,10 +17,20 @@ import (
 	"blue/config"
 	"blue/datastruct"
 	"blue/datastruct/dict"
+	"blue/datastruct/list"
+	"blue/datastruct/number"
+	"blue/datastruct/set"
 	str "blue/datastruct/string"
 	"blue/log"
 
 	"github.com/rosedblabs/rosedb/v2"
+)
+
+const (
+	StorageNum  = ":1"
+	StorageStr  = ":2"
+	StorageList = ":3"
+	StorageSet  = ":4"
 )
 
 // DBConfig 存储数据库配置
@@ -74,10 +85,10 @@ func NewDB(opts ...DbOption) *DB {
 
 	// 初始化存储
 	initLen := db.InitStorage(dbConfig)
-	log.Info(fmt.Sprintf("db{index[%d] initdata:[%v] initStorage[%v] }",
+	log.Info(fmt.Sprintf("db{index[%d] initdata:[%v] initStorage[%v]{%d} }",
 		db.index,
 		len(dbConfig.InitData) != 0 || (initLen != 0),
-		config.OpenStorage(strconv.Itoa(db.index))))
+		config.OpenStorage(strconv.Itoa(db.index)), initLen))
 	return db
 }
 
@@ -109,7 +120,7 @@ func (db *DB) InitStorage(dbConfig DBConfig) int {
 		storage.Ascend(func(k []byte, v []byte) (bool, error) {
 			l++
 			db.dataCountIncr()
-			db.data.Put(string(k), str.NewString(string(v)))
+			db.loadMem(k, v)
 			return true, nil
 		})
 
@@ -117,6 +128,43 @@ func (db *DB) InitStorage(dbConfig DBConfig) int {
 	}
 
 	return l
+}
+
+func (db *DB) loadMem(k []byte, v []byte) {
+	slt := len(k) - 2
+	ty := k[slt:]
+	k1 := string(k[:slt])
+
+	switch string(ty) {
+	case StorageNum:
+		newNumber, _ := number.NewNumber(v)
+		db.data.Put(k1, newNumber)
+
+	case StorageList:
+		newList := list.NewQuickList()
+		by := bytes.Split(v, []byte{' '})
+		for i := range by {
+			newList.Add(string(by[i]))
+		}
+
+		db.data.Put(k1, newList)
+
+	case StorageStr:
+		newStr := str.NewString(string(v))
+		db.data.Put(k1, newStr)
+
+	case StorageSet:
+		newSet := set.NewSet()
+
+		by := bytes.Split(v, []byte{' '})
+		for i := range by {
+			newSet.Add(string(by[i]))
+		}
+		db.data.Put(k1, newSet)
+
+	default:
+		panic("init storage unknown type")
+	}
 }
 
 // ExecChain 执行链式操作
@@ -160,27 +208,6 @@ func (db *DB) ExecChainDB(ctx *Context) {
 	}
 }
 
-// StoragePut 存储数据
-// key: 键
-// value: 值
-func (db *DB) StoragePut(key []byte, value []byte) error {
-	if db.storage == nil {
-		return nil
-	}
-
-	return db.storage.Put(key, value)
-}
-
-// StorageDelete 删除存储的数据
-// key: 键
-func (db *DB) StorageDelete(key []byte) error {
-	if db.storage == nil {
-		return nil
-	}
-
-	return db.storage.Delete(key)
-}
-
 // RangeKV 获取所有键值对的字符串表示
 func (db *DB) RangeKV() string {
 	if db.data.Len() == 0 {
@@ -198,12 +225,18 @@ func (db *DB) RangeKV() string {
 // del 删除键值对
 // ctx: 操作上下文
 func (db *DB) del(ctx *bsp.BspProto) bsp.Reply {
-	db.data.Remove(ctx.Key())
-	err := db.StorageDelete(ctx.KeyBytes())
+	v, ok := db.data.Get(ctx.Key())
+	if !ok {
+		return bsp.NewInfo(bsp.NULL)
+	}
+
+	objType := v.(datastruct.Type)
+	err := db.StorageDelete(objType.Type(), ctx.KeyBytes())
 	if err != nil {
 		return bsp.NewErr(bsp.ErrStorage)
 	}
 
+	db.data.Remove(ctx.Key())
 	db.dataCountDecr()
 	return bsp.NewInfo(bsp.OK)
 }
@@ -260,8 +293,12 @@ func (db *DB) type_(ctx *bsp.BspProto) bsp.Reply {
 	if !ok {
 		return bsp.NewInfo(bsp.NULL)
 	}
+	obj, ok := val.(datastruct.BlueObj)
+	if !ok {
+		return bsp.NewErr(bsp.ErrWrongType)
+	}
 
-	return bsp.NewStr(val.(datastruct.Type).Type())
+	return bsp.NewStr(obj.GetType())
 }
 
 func (db *DB) dataCountIncr() {
@@ -274,4 +311,81 @@ func (db *DB) dataCountDecr() {
 
 func (db *DB) dataCountLoad() int {
 	return int(db.dataCount.Load())
+}
+
+// storagePut 存储数据
+// key: 键
+// value: 值
+func (db *DB) storagePut(key []byte, value []byte) error {
+
+	return db.storage.Put(key, value)
+}
+
+// StorageDelete 删除存储的数据
+// key: 键
+func (db *DB) StorageDelete(ty string, key []byte) error {
+	if db.storage == nil {
+		return nil
+	}
+
+	switch ty {
+	case datastruct.StringType:
+		key = append(key, StorageStr...)
+	case datastruct.NumberType:
+		key = append(key, StorageNum...)
+	case datastruct.ListType:
+		key = append(key, StorageList...)
+	case datastruct.SetType:
+		key = append(key, StorageSet...)
+
+	default:
+
+	}
+
+	err := db.storage.Delete(key)
+	if err != nil {
+		return err
+	}
+
+	return db.storage.Sync()
+}
+
+// StorageNum 存储数字
+func (db *DB) StorageNum(key []byte, value int64) error {
+	if db.storage == nil {
+		return nil
+	}
+	key = append(key, StorageNum...)
+
+	return db.storagePut(key, []byte(strconv.FormatInt(value, 10)))
+}
+
+// StorageStr 存储字符串
+func (db *DB) StorageStr(key []byte, value string) error {
+	if db.storage == nil {
+		return nil
+	}
+	key = append(key, StorageStr...)
+
+	return db.storagePut(key, []byte(value))
+}
+
+// StorageList 存储列表
+func (db *DB) StorageList(key []byte, value string) error {
+	if db.storage == nil {
+		return nil
+	}
+	key = append(key, StorageList...)
+
+	return db.storagePut(key, []byte(value))
+}
+
+// StorageSet 存储集合
+func (db *DB) StorageSet(key []byte, value string) error {
+	if db.storage == nil {
+		return nil
+	}
+	key = append(key, StorageSet...)
+
+	return db.storagePut(key, []byte(value))
 }

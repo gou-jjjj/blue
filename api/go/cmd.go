@@ -2,7 +2,7 @@ package blue
 
 import (
 	"blue/bsp"
-	"strconv"
+	"blue/common/strbytes"
 )
 
 func (c *Client) Version() (string, error) {
@@ -18,9 +18,8 @@ func (c *Client) Del(key string) (string, error) {
 }
 
 func (c *Client) Nset(k, num string) (string, error) {
-	_, err := strconv.Atoi(num)
-	if err != nil {
-		return "", ErrDataType(num)
+	if !strbytes.CheckInt(num) {
+		return "", ErrArgu("num")
 	}
 
 	build := bsp.NewRequestBuilder(bsp.NSET).

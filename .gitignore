@@ -16,11 +16,11 @@
 
 # Go workspace file
 go.work
-
 .idea
-storage
 logs
+storage
 test
+.vscode
 .DS_Store
 blue-client/bin
 bin

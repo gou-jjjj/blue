@@ -1,6 +1,7 @@
 package number
 
 import (
+	"blue/common/strbytes"
 	"fmt"
 	"testing"
 )
@@ -16,4 +17,18 @@ func TestNumber(t *testing.T) {
 
 	fmt.Printf("%v\n", N.Add(24))
 	fmt.Printf("%v\n", N.Sub(24))
+}
+
+func TestNumber2(t *testing.T) {
+	fmt.Printf("%v\n", strbytes.CheckInt("123e31d"))
+	fmt.Printf("%v\n", strbytes.CheckInt("31309049189493147837887"))
+
+	by := strbytes.Str2Bytes("4182")
+
+	number, err := NewNumber(by)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Printf("%v\n", number.Value())
 }

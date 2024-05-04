@@ -31,6 +31,12 @@ func (db *DB) lset(cmd *bsp.BspProto) bsp.Reply {
 	db.data.Put(cmd.Key(), newlist)
 
 	db.dataCountIncr()
+
+	//err := db.StorageList(cmd.KeyBytes(), "")
+	//if err != nil {
+	//	return bsp.NewErr(bsp.ErrStorage)
+	//}
+
 	return bsp.NewInfo(bsp.OK)
 }
 
@@ -48,7 +54,7 @@ func (db *DB) lget(cmd *bsp.BspProto) bsp.Reply {
 		return bsp.NewInfo(bsp.NULL)
 	}
 
-	return bsp.NewStr(l.Value())
+	return bsp.NewStr(l.String())
 }
 
 func (db *DB) llen(cmd *bsp.BspProto) bsp.Reply {
@@ -77,6 +83,12 @@ func (db *DB) lpush(cmd *bsp.BspProto) bsp.Reply {
 	for i := range cmd.Values() {
 		l.Insert(0, string(cmd.Values()[i]))
 	}
+
+	err := db.StorageList(cmd.KeyBytes(), l.String())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
+	}
+
 	return bsp.NewInfo(bsp.OK)
 }
 
@@ -91,6 +103,11 @@ func (db *DB) lpop(cmd *bsp.BspProto) bsp.Reply {
 	}
 
 	v := l.Remove(0)
+
+	err := db.StorageList(cmd.KeyBytes(), l.String())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
+	}
 
 	return bsp.NewStr(v)
 }
@@ -108,6 +125,12 @@ func (db *DB) rpush(cmd *bsp.BspProto) bsp.Reply {
 	for i := range cmd.Values() {
 		l.Add(string(cmd.Values()[i]))
 	}
+
+	err := db.StorageList(cmd.KeyBytes(), l.String())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
+	}
+
 	return bsp.NewInfo(bsp.OK)
 }
 
@@ -122,6 +145,11 @@ func (db *DB) rpop(cmd *bsp.BspProto) bsp.Reply {
 	}
 
 	v := l.RemoveLast()
+
+	err := db.StorageList(cmd.KeyBytes(), l.String())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
+	}
 
 	return bsp.NewStr(v)
 }

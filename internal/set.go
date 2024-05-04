@@ -3,11 +3,6 @@ package internal
 import (
 	"blue/bsp"
 	"blue/datastruct/set"
-	"strings"
-)
-
-const (
-	space = ' '
 )
 
 func (db *DB) ExecChainSet(ctx *Context) {
@@ -42,6 +37,12 @@ func (db *DB) sadd(cmd *bsp.BspProto) bsp.Reply {
 	}
 
 	st.Add(cmd.ValueStr())
+
+	err := db.StorageSet(cmd.KeyBytes(), st.String())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
+	}
+
 	return bsp.NewInfo(bsp.OK)
 }
 
@@ -59,6 +60,11 @@ func (db *DB) spop(cmd *bsp.BspProto) bsp.Reply {
 	pop, ok := st.Pop()
 	if !ok {
 		return bsp.NewInfo(bsp.NULL)
+	}
+
+	err := db.StorageSet(cmd.KeyBytes(), st.String())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
 	}
 
 	return bsp.NewStr(pop)
@@ -94,6 +100,12 @@ func (db *DB) sdel(cmd *bsp.BspProto) bsp.Reply {
 	}
 
 	st.Remove(cmd.ValueStr())
+
+	err := db.StorageSet(cmd.KeyBytes(), st.String())
+	if err != nil {
+		return bsp.NewErr(bsp.ErrStorage)
+	}
+
 	return bsp.NewInfo(bsp.OK)
 }
 
@@ -108,12 +120,5 @@ func (db *DB) sget(cmd *bsp.BspProto) bsp.Reply {
 		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
 	}
 
-	res := strings.Builder{}
-	st.Each(func(v string) bool {
-		res.WriteString(v)
-		res.WriteByte(space)
-		return false
-	})
-	l := res.Len()
-	return bsp.NewStr(res.String()[:l-1])
+	return bsp.NewStr(st.String())
 }

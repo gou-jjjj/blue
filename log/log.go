@@ -92,11 +92,11 @@ func (s *Stdio) err(msg string) {
 	putMsg(m)
 }
 
-// InitLog 初始化日志系统
+// Init 初始化日志系统
 // output: 日志输出方式
 // level: 日志级别
 // outPath: 日志文件或目录路径
-func InitLog(output string, level string, outPath string) {
+func Init(output string, level string, outPath string) {
 	i := logLevel(level)
 	blog = NewBlueLog(output, outPath)
 

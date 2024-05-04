@@ -27,8 +27,14 @@ func NewNumber(number ...any) (*NorNum, error) {
 	if len(number) > 0 {
 		switch number[0].(type) {
 		case []byte:
-			parseInt := strbytes.Bytes2Uint64(number[0].([]byte))
-			n.Set(int64(parseInt))
+			parseStr := strbytes.Bytes2Str(number[0].([]byte))
+
+			parseInt, err := strconv.ParseInt(parseStr, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			n.Set(parseInt)
+
 		case string:
 			parseInt, err := strconv.ParseInt(number[0].(string), 10, 64)
 			if err != nil {

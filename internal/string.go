@@ -33,9 +33,9 @@ func (db *DB) len(cmd *bsp.BspProto) bsp.Reply {
 }
 
 func (db *DB) set(cmd *bsp.BspProto) bsp.Reply {
-
-	db.data.Put(cmd.Key(), str.NewString(cmd.ValueStr()))
-	err := db.StoragePut(cmd.KeyBytes(), cmd.ValueBytes())
+	newString := str.NewString(cmd.ValueStr())
+	db.data.Put(cmd.Key(), newString)
+	err := db.StorageStr(cmd.KeyBytes(), newString.Get())
 	if err != nil {
 		return bsp.NewErr(bsp.ErrStorage)
 	}

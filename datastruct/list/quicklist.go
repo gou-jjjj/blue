@@ -3,7 +3,6 @@ package list
 import (
 	iter "blue/datastruct"
 	"container/list"
-	"fmt"
 	"strings"
 )
 
@@ -398,14 +397,15 @@ func (ql *QuickList) Range(start int, stop int) []interface{} {
 	return slice
 }
 
-func (ql *QuickList) Value() string {
+func (ql *QuickList) String() string {
 	if ql.Len() == 0 {
 		return ""
 	}
 
 	builder := strings.Builder{}
 	ql.ForEach(func(i int, val interface{}) bool {
-		builder.WriteString(fmt.Sprintf("%v ", val))
+		builder.WriteString(val.(string))
+		builder.WriteRune(' ')
 		return true
 	})
 	res := builder.String()[:builder.Len()-1]
