@@ -106,8 +106,8 @@ func NewServer(fs ...ConfigFunc) *Server {
 func (s *Server) close() {
 	_ = s.listen.Close()
 	s.isClo = true
-	close(s.errClo)
 	log.Info("server start closing ...")
+	close(s.errClo)
 }
 
 // 启动服务器

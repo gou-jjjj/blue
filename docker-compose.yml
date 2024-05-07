@@ -1,1 +1,8 @@
+version: '3'
 
+services:
+  blue:
+      image: blue:1.0
+      ports:
+        - "13140:13140"
+        - "13141:13141"
