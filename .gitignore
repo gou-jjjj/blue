@@ -25,3 +25,4 @@ test
 blue-client/bin
 bin
 log/testlog
+/api/python/venv

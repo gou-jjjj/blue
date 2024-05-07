@@ -281,7 +281,7 @@ func (db *DB) kvs(ctx *bsp.BspProto) bsp.Reply {
 // dbsize 返回数据库中键值对的数量
 // ctx: 操作上下文
 func (db *DB) dbsize(ctx *bsp.BspProto) bsp.Reply {
-	count := db.dataCountLoad()
+	count := db.data.Len()
 	s := strconv.Itoa(count)
 	return bsp.NewStr(s)
 }
