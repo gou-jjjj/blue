@@ -4,7 +4,6 @@ go 1.21
 
 require (
 	github.com/deckarep/golang-set/v2 v2.6.0
-	github.com/panjf2000/ants/v2 v2.9.1
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/rosedblabs/rosedb/v2 v2.3.5
 )

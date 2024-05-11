@@ -18,7 +18,7 @@ type HeaderInter interface {
 const (
 	// TypeMask 用于掩码头部类型。
 	TypeMask Header = 0b11100000
-
+	OpMask   Header = 0b00011111
 	// TypeSystem 表示系统类型的头部。
 	TypeSystem Header = iota * (1 << 5)
 	// TypeDB 表示数据库类型的头部。
@@ -49,6 +49,11 @@ func NewHeader(handle Header) Header {
 // Type 返回头部的类型，通过与TypeMask进行与操作来获取。
 func (h Header) Type() Header {
 	return h & TypeMask
+}
+
+// Op 返回头部的操作类型，通过与OpMask进行与操作来获取。
+func (h Header) Op() Header {
+	return h & OpMask
 }
 
 // Handle 返回头部的句柄。

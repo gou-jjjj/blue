@@ -36,10 +36,7 @@ func (c *Client) Get(k string) (string, error) {
 }
 
 func (c *Client) Set(k, v string) (string, error) {
-	build := bsp.NewRequestBuilder(bsp.SET).
-		WithKey(k).
-		WithValueStr(v).
-		Build()
+	build := bsp.NewRequestBuilder(bsp.SET).WithKey(k).WithValueStr(v).Build()
 
 	return c.exec(build)
 }

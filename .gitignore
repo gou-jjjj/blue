@@ -19,7 +19,6 @@ go.work
 .idea
 logs
 storage
-test
 .vscode
 .DS_Store
 blue-client/bin
