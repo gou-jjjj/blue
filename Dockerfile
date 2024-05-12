@@ -15,10 +15,8 @@ RUN apk add --no-cache make
 COPY . .
 
 # 运行 go mod tidy 清理依赖
-RUN go mod tidy
-
 # 根据 Makefile 文件构建应用
-RUN  make bin
+RUN go mod tidy  && make bin
 
 # 使用 alpine 作为运行时镜像的基础
 FROM centos
