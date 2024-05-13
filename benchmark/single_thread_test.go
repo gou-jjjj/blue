@@ -3,35 +3,37 @@ package benchmark
 import (
 	blue "blue/api/go"
 	"context"
+	"fmt"
 	"github.com/redis/go-redis/v9"
 	"strconv"
 	"sync"
 	"testing"
+	"time"
 )
 
 var (
 	bluetest1 = func(b *testing.B) {
 		c, err := blue.NewClient(blue.WithDefaultOpt(), func(c *blue.Config) {
-			c.Addr = "39.101.169.250:7894"
+			c.Addr = "127.0.0.1:13140"
 		})
 		if err != nil {
 			b.Fatal(err)
 		}
 		defer c.Close()
 
-		for i := 0; i < 1e2; i++ {
-			_, err = c.Set("1", "1")
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-		for i := 0; i < 1e2; i++ {
-			res, err := c.Get("1")
-			if err != nil || res != "1" {
-				b.Fatal(err)
-			}
-		}
-
+		//for i := 0; i < 1e2; i++ {
+		//	_, err = c.Set("1", "1")
+		//	if err != nil {
+		//		b.Fatal(err)
+		//	}
+		//}
+		//for i := 0; i < 1e2; i++ {
+		//	res, err := c.Get("1")
+		//	if err != nil || res != "1" {
+		//		b.Fatal(err)
+		//	}
+		//}
+		//
 		for i := 0; i < 1e2; i++ {
 			_, err = c.Del("1")
 			if err != nil {
@@ -161,17 +163,14 @@ var (
 )
 
 func BenchmarkSingleThreadSingleKey(b *testing.B) {
-	b.Run("BenchmarkRedis", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			redistest1(b)
-		}
-	})
-
+	b.ReportAllocs()
+	n := time.Now()
 	b.Run("BenchmarkBlue", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			bluetest1(b)
 		}
 	})
+	fmt.Println(time.Now().Sub(n))
 }
 
 func BenchmarkMultiThreadSingleKey(b *testing.B) {

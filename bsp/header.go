@@ -19,8 +19,13 @@ const (
 	// TypeMask 用于掩码头部类型。
 	TypeMask Header = 0b11100000
 	OpMask   Header = 0b00011111
+)
+
+const (
+	_ Header = iota * (1 << 5)
+
 	// TypeSystem 表示系统类型的头部。
-	TypeSystem Header = iota * (1 << 5)
+	TypeSystem
 	// TypeDB 表示数据库类型的头部。
 	TypeDB
 	// TypeNumber 表示数字类型的头部。

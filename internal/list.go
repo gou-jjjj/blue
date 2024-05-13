@@ -3,6 +3,7 @@ package internal
 import (
 	"blue/bsp"
 	"blue/datastruct/list"
+	"strconv"
 )
 
 func (db *DB) ExecChainList(ctx *Context) {
@@ -67,7 +68,7 @@ func (db *DB) llen(cmd *bsp.BspProto) bsp.Reply {
 	if !ok {
 		return bsp.NewErr(bsp.ErrWrongType, cmd.Key())
 	}
-	return bsp.NewNum(l.Len())
+	return bsp.NewStr(strconv.Itoa(l.Len()))
 }
 
 func (db *DB) lpush(cmd *bsp.BspProto) bsp.Reply {
