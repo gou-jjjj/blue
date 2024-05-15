@@ -18,12 +18,12 @@ const cmdLen = 29
 
 // list -----------------------------
 const (
-	LGET Header = 1 + TypeList
-	LLEN Header = 2 + TypeList
-	LPOP Header = 3 + TypeList
+	LGET  Header = 1 + TypeList
+	LLEN  Header = 2 + TypeList
+	LPOP  Header = 3 + TypeList
 	LPUSH Header = 4 + TypeList
-	LSET Header = 5 + TypeList
-	RPOP Header = 6 + TypeList
+	LSET  Header = 5 + TypeList
+	RPOP  Header = 6 + TypeList
 	RPUSH Header = 7 + TypeList
 )
 
@@ -32,31 +32,30 @@ const (
 	SADD Header = 1 + TypeSet
 	SDEL Header = 2 + TypeSet
 	SGET Header = 3 + TypeSet
-	SIN Header = 4 + TypeSet
+	SIN  Header = 4 + TypeSet
 	SPOP Header = 5 + TypeSet
 )
 
 // json -----------------------------
-const (
-)
+const ()
 
 // system -----------------------------
 const (
-	AUTH Header = 1 + TypeSystem
-	EXIT Header = 2 + TypeSystem
-	HELP Header = 3 + TypeSystem
-	PING Header = 4 + TypeSystem
-	SELECT Header = 5 + TypeSystem
+	AUTH    Header = 1 + TypeSystem
+	EXIT    Header = 2 + TypeSystem
+	HELP    Header = 3 + TypeSystem
+	PING    Header = 4 + TypeSystem
+	SELECT  Header = 5 + TypeSystem
 	VERSION Header = 6 + TypeSystem
 )
 
 // db -----------------------------
 const (
 	DBSIZE Header = 1 + TypeDB
-	DEL Header = 2 + TypeDB
+	DEL    Header = 2 + TypeDB
 	EXPIRE Header = 3 + TypeDB
-	KVS Header = 4 + TypeDB
-	TYPE Header = 5 + TypeDB
+	KVS    Header = 4 + TypeDB
+	TYPE   Header = 5 + TypeDB
 )
 
 // number -----------------------------
@@ -74,98 +73,97 @@ const (
 )
 
 var HandleMap = [...]string{
-	AUTH: "AUTH",
-	DBSIZE: "DBSIZE",
-	DEL: "DEL",
-	EXIT: "EXIT",
-	EXPIRE: "EXPIRE",
-	GET: "GET",
-	HELP: "HELP",
-	INCR: "INCR",
-	KVS: "KVS",
-	LEN: "LEN",
-	LGET: "LGET",
-	LLEN: "LLEN",
-	LPOP: "LPOP",
-	LPUSH: "LPUSH",
-	LSET: "LSET",
-	NGET: "NGET",
-	NSET: "NSET",
-	PING: "PING",
-	RPOP: "RPOP",
-	RPUSH: "RPUSH",
-	SADD: "SADD",
-	SDEL: "SDEL",
-	SELECT: "SELECT",
-	SET: "SET",
-	SGET: "SGET",
-	SIN: "SIN",
-	SPOP: "SPOP",
-	TYPE: "TYPE",
+	AUTH:    "AUTH",
+	DBSIZE:  "DBSIZE",
+	DEL:     "DEL",
+	EXIT:    "EXIT",
+	EXPIRE:  "EXPIRE",
+	GET:     "GET",
+	HELP:    "HELP",
+	INCR:    "INCR",
+	KVS:     "KVS",
+	LEN:     "LEN",
+	LGET:    "LGET",
+	LLEN:    "LLEN",
+	LPOP:    "LPOP",
+	LPUSH:   "LPUSH",
+	LSET:    "LSET",
+	NGET:    "NGET",
+	NSET:    "NSET",
+	PING:    "PING",
+	RPOP:    "RPOP",
+	RPUSH:   "RPUSH",
+	SADD:    "SADD",
+	SDEL:    "SDEL",
+	SELECT:  "SELECT",
+	SET:     "SET",
+	SGET:    "SGET",
+	SIN:     "SIN",
+	SPOP:    "SPOP",
+	TYPE:    "TYPE",
 	VERSION: "VERSION",
 }
 
 var HandleMap2 = map[string]Header{
-	"AUTH": AUTH,
-	"DBSIZE": DBSIZE,
-	"DEL": DEL,
-	"EXIT": EXIT,
-	"EXPIRE": EXPIRE,
-	"GET": GET,
-	"HELP": HELP,
-	"INCR": INCR,
-	"KVS": KVS,
-	"LEN": LEN,
-	"LGET": LGET,
-	"LLEN": LLEN,
-	"LPOP": LPOP,
-	"LPUSH": LPUSH,
-	"LSET": LSET,
-	"NGET": NGET,
-	"NSET": NSET,
-	"PING": PING,
-	"RPOP": RPOP,
-	"RPUSH": RPUSH,
-	"SADD": SADD,
-	"SDEL": SDEL,
-	"SELECT": SELECT,
-	"SET": SET,
-	"SGET": SGET,
-	"SIN": SIN,
-	"SPOP": SPOP,
-	"TYPE": TYPE,
+	"AUTH":    AUTH,
+	"DBSIZE":  DBSIZE,
+	"DEL":     DEL,
+	"EXIT":    EXIT,
+	"EXPIRE":  EXPIRE,
+	"GET":     GET,
+	"HELP":    HELP,
+	"INCR":    INCR,
+	"KVS":     KVS,
+	"LEN":     LEN,
+	"LGET":    LGET,
+	"LLEN":    LLEN,
+	"LPOP":    LPOP,
+	"LPUSH":   LPUSH,
+	"LSET":    LSET,
+	"NGET":    NGET,
+	"NSET":    NSET,
+	"PING":    PING,
+	"RPOP":    RPOP,
+	"RPUSH":   RPUSH,
+	"SADD":    SADD,
+	"SDEL":    SDEL,
+	"SELECT":  SELECT,
+	"SET":     SET,
+	"SGET":    SGET,
+	"SIN":     SIN,
+	"SPOP":    SPOP,
+	"TYPE":    TYPE,
 	"VERSION": VERSION,
 }
 
 var CommandsMap = [...]Cmd{
-	AUTH: {Name:"AUTH",Summary: "add authentication to the application", Group: "system", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
-	DBSIZE: {Name:"DBSIZE",Summary: "Return the number of keys in the database", Group: "db", Arity: 0, Key: "string", Value: "", Arguments: []string{}},
-	DEL: {Name:"DEL",Summary: "Remove the specified keys", Group: "db", Arity: 1, Key: "list", Value: "", Arguments: []string{}},
-	EXIT: {Name:"EXIT",Summary: "Exit the blue", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
-	EXPIRE: {Name:"EXPIRE",Summary: "Set a key's time to live in seconds", Group: "db", Arity: 2, Key: "string", Value: "number", Arguments: []string{}},
-	GET: {Name:"GET",Summary: "Returns the string value of a key.", Group: "string", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
-	HELP: {Name:"HELP",Summary: "Returns the action of the given command", Group: "system", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
-	INCR: {Name:"INCR",Summary: "Increment the integer value of a key by the given amount", Group: "number", Arity: 1, Key: "string", Value: "number", Arguments: []string{}},
-	KVS: {Name:"KVS",Summary: "Returns all key-value pairs in the database", Group: "db", Arity: 0, Key: "", Value: "", Arguments: []string{}},
-	LEN: {Name:"LEN",Summary: "Returns the length of a string", Group: "string", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
-	LGET: {Name:"LGET",Summary: "Gets all values for the list of given key", Group: "list", Arity: 1, Key: "string", Value: "list", Arguments: []string{}},
-	LLEN: {Name:"LLEN",Summary: "Returns the length of the list stored at key.", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
-	LPOP: {Name:"LPOP",Summary: "Remove and get the first element in a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
-	LPUSH: {Name:"LPUSH",Summary: "Insert values at the head of the list stored at key.", Group: "list", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
-	LSET: {Name:"LSET",Summary: "Set the value of a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
-	NGET: {Name:"NGET",Summary: "Returns the number value of a key.", Group: "number", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
-	NSET: {Name:"NSET",Summary: "Set the value of a number", Group: "number", Arity: 2, Key: "string", Value: "number", Arguments: []string{"expire"}},
-	PING: {Name:"PING",Summary: "Pings the bot to check if it is online.", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
-	RPOP: {Name:"RPOP",Summary: "Remove and get the last element in a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
-	RPUSH: {Name:"RPUSH",Summary: "Add the value to the end of the list stored at key", Group: "list", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
-	SADD: {Name:"SADD",Summary: "Add the specified members to the set stored at key. Specified members that are already a member of this set are ignored. If key does not exist, a new set is created before adding the specified members.", Group: "set", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
-	SDEL: {Name:"SDEL",Summary: "Removes a given value from a set if it exists", Group: "set", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
-	SELECT: {Name:"SELECT",Summary: "Select a db.", Group: "system", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
-	SET: {Name:"SET",Summary: "Set the value of a key", Group: "string", Arity: 2, Key: "string", Value: "string", Arguments: []string{"expire"}},
-	SGET: {Name:"SGET",Summary: "Gets all the values in the set, if the set exists", Group: "set", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
-	SIN: {Name:"SIN",Summary: "Checks whether the given value is in the given set", Group: "set", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
-	SPOP: {Name:"SPOP",Summary: "Remove and return a random member from a set", Group: "set", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
-	TYPE: {Name:"TYPE",Summary: "return key type", Group: "db", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
-	VERSION: {Name:"VERSION",Summary: "Get the version of the system.", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
+	AUTH:    {Name: "AUTH", Summary: "add authentication to the application", Group: "system", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	DBSIZE:  {Name: "DBSIZE", Summary: "Return the number of keys in the database", Group: "db", Arity: 0, Key: "string", Value: "", Arguments: []string{}},
+	DEL:     {Name: "DEL", Summary: "Remove the specified keys", Group: "db", Arity: 1, Key: "list", Value: "", Arguments: []string{}},
+	EXIT:    {Name: "EXIT", Summary: "Exit the blue", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
+	EXPIRE:  {Name: "EXPIRE", Summary: "Set a key's time to live in seconds", Group: "db", Arity: 2, Key: "string", Value: "number", Arguments: []string{}},
+	GET:     {Name: "GET", Summary: "Returns the string value of a key.", Group: "string", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	HELP:    {Name: "HELP", Summary: "Returns the action of the given command", Group: "system", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	INCR:    {Name: "INCR", Summary: "Increment the integer value of a key by the given amount", Group: "number", Arity: 1, Key: "string", Value: "number", Arguments: []string{}},
+	KVS:     {Name: "KVS", Summary: "Returns all key-value pairs in the database", Group: "db", Arity: 0, Key: "", Value: "", Arguments: []string{}},
+	LEN:     {Name: "LEN", Summary: "Returns the length of a string", Group: "string", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	LGET:    {Name: "LGET", Summary: "Gets all values for the list of given key", Group: "list", Arity: 1, Key: "string", Value: "list", Arguments: []string{}},
+	LLEN:    {Name: "LLEN", Summary: "Returns the length of the list stored at key.", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
+	LPOP:    {Name: "LPOP", Summary: "Remove and get the first element in a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
+	LPUSH:   {Name: "LPUSH", Summary: "Insert values at the head of the list stored at key.", Group: "list", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
+	LSET:    {Name: "LSET", Summary: "Set the value of a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
+	NGET:    {Name: "NGET", Summary: "Returns the number value of a key.", Group: "number", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	NSET:    {Name: "NSET", Summary: "Set the value of a number", Group: "number", Arity: 2, Key: "string", Value: "number", Arguments: []string{"expire"}},
+	PING:    {Name: "PING", Summary: "Pings the bot to check if it is online.", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
+	RPOP:    {Name: "RPOP", Summary: "Remove and get the last element in a list", Group: "list", Arity: 1, Key: "string", Value: "string", Arguments: []string{}},
+	RPUSH:   {Name: "RPUSH", Summary: "Add the value to the end of the list stored at key", Group: "list", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
+	SADD:    {Name: "SADD", Summary: "Add the specified members to the set stored at key. Specified members that are already a member of this set are ignored. If key does not exist, a new set is created before adding the specified members.", Group: "set", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
+	SDEL:    {Name: "SDEL", Summary: "Removes a given value from a set if it exists", Group: "set", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
+	SELECT:  {Name: "SELECT", Summary: "Select a db.", Group: "system", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	SET:     {Name: "SET", Summary: "Set the value of a key", Group: "string", Arity: 2, Key: "string", Value: "string", Arguments: []string{"expire"}},
+	SGET:    {Name: "SGET", Summary: "Gets all the values in the set, if the set exists", Group: "set", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	SIN:     {Name: "SIN", Summary: "Checks whether the given value is in the given set", Group: "set", Arity: 2, Key: "string", Value: "string", Arguments: []string{}},
+	SPOP:    {Name: "SPOP", Summary: "Remove and return a random member from a set", Group: "set", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	TYPE:    {Name: "TYPE", Summary: "return key type", Group: "db", Arity: 1, Key: "string", Value: "", Arguments: []string{}},
+	VERSION: {Name: "VERSION", Summary: "Get the version of the system.", Group: "system", Arity: 0, Key: "", Value: "", Arguments: []string{}},
 }
-

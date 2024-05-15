@@ -1,6 +1,7 @@
 package internal
 
 import (
+	print2 "blue/common/print"
 	"context"
 	"errors"
 	"fmt"
@@ -134,6 +135,7 @@ func (s *Server) Start() {
 	}()
 
 	log.Info(fmt.Sprintf("server listen on %v ...", s.c.Addr()))
+	print2.ServerInitSuccess()
 	s.server()
 }
 

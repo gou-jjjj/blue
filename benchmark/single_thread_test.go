@@ -2,6 +2,7 @@ package benchmark
 
 import (
 	blue "blue/api/go"
+	"blue/common/rand"
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
@@ -174,24 +175,24 @@ func BenchmarkSingleThreadSingleKey(b *testing.B) {
 }
 
 func BenchmarkMultiThreadSingleKey(b *testing.B) {
-	bluetest := func() {
+	bluetest := func(m map[string]string) {
 		c, err := blue.NewClient(blue.WithDefaultOpt(), func(c *blue.Config) {
-			c.Addr = "39.101.169.250:7894"
+			c.Addr = "127.0.0.1:13140"
 		})
 		if err != nil {
 			b.Fatal(err)
 		}
 		defer c.Close()
 
-		for i := 0; i < 1e2; i++ {
-			_, err = c.Set("1", "1")
+		for k, v := range m {
+			_, err = c.Set(k, v)
 			if err != nil {
 				b.Fatal(err)
 			}
 		}
 
-		for i := 0; i < 1e2; i++ {
-			_, err = c.Del("1")
+		for k := range m {
+			_, err = c.Get(k)
 			if err != nil {
 				b.Fatal(err)
 			}
@@ -232,14 +233,27 @@ func BenchmarkMultiThreadSingleKey(b *testing.B) {
 		}
 	})
 
+	n := 40
+	ms := make([]map[string]string, 0, n)
+	for i := 0; i < n; i++ {
+		m := make(map[string]string)
+		for j := 0; j < 1e2; j++ {
+			m[rand.RandString(8)] = rand.RandString(8)
+		}
+		ms = append(ms, m)
+	}
+
+	b.ResetTimer()
+	b.ReportAllocs()
 	b.Run("BenchmarkBlue", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			wg := new(sync.WaitGroup)
-			for j := 0; j < 100; j++ {
+			for j := 0; j < n; j++ {
 				wg.Add(1)
+				j1 := j
 				go func() {
 					defer wg.Done()
-					bluetest()
+					bluetest(ms[j1])
 				}()
 			}
 			wg.Wait()

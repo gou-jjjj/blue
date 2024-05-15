@@ -59,7 +59,6 @@ func NewBlueServer(dbs ...*DB) *BlueServer {
 		b.initClu()
 	}
 
-	print2.ServerInitSuccess()
 	return b
 }
 
